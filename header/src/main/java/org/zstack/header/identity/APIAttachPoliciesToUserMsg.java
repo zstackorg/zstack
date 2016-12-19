@@ -9,7 +9,7 @@ import java.util.List;
 
 @Action(category = AccountConstant.ACTION_CATEGORY, accountOnly = true)
 @RestRequest(
-        path = "/accounts/users/{userUuid}/policies",
+        path = "/accounts/users/{userUuid}/policy-collection",
         method = HttpMethod.POST,
         responseClass = APIAttachPoliciesToUserEvent.class,
         parameterName = "params"

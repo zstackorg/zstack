@@ -10,6 +10,16 @@ public class ReloadLicenseAction extends AbstractAction {
     public static class Result {
         public ErrorCode error;
         public ReloadLicenseResult value;
+
+        public Result throwExceptionIfError() {
+            if (error != null) {
+                throw new ApiException(
+                    String.format("error[code: %s, description: %s, details: %s]", error.code, error.description, error.details)
+                );
+            }
+            
+            return this;
+        }
     }
 
     @Param(required = false, nonempty = true, nullElements = false, emptyString = true, noTrim = false)

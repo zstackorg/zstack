@@ -10,6 +10,16 @@ public class AttachL2NetworkToClusterAction extends AbstractAction {
     public static class Result {
         public ErrorCode error;
         public AttachL2NetworkToClusterResult value;
+
+        public Result throwExceptionIfError() {
+            if (error != null) {
+                throw new ApiException(
+                    String.format("error[code: %s, description: %s, details: %s]", error.code, error.description, error.details)
+                );
+            }
+            
+            return this;
+        }
     }
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)

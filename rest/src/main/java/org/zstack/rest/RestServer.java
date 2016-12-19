@@ -138,6 +138,11 @@ public class RestServer implements Component, CloudBusEventListener {
         List<String> optionalPaths = new ArrayList<>();
         String actionName;
 
+        @Override
+        public String toString() {
+            return String.format("%s-%s", requestAnnotation.method(), "null".equals(requestAnnotation.path()) ? apiClass.getName() : path);
+        }
+
         Api(Class clz, RestRequest at) {
             apiClass = clz;
             requestAnnotation = at;
@@ -680,6 +685,28 @@ public class RestServer implements Component, CloudBusEventListener {
             }
 
             responseAnnotationByClass.put(api.apiResponseClass, new RestResponseWrapper(api.responseAnnotation, api.apiResponseClass));
+        }
+
+        // below codes are checking if there
+        // are duplicated APIs
+        for (Object o : apis.values()) {
+            if (!(o instanceof List)) {
+                continue;
+            }
+
+            List<Api> as = (List<Api>) o;
+            List<Api> nonActions = as.stream().filter(a -> !a.requestAnnotation.isAction()).collect(Collectors.toList());
+
+            Map<String, Api> set = new HashMap<>();
+            for (Api a : nonActions) {
+                Api old = set.get(a.toString());
+                if (old != null) {
+                    throw new CloudRuntimeException(String.format("duplicate rest API[%s, %s], they both have the same" +
+                            " HTTP methods and paths, and both are not actions. %s", a.apiClass, old.apiClass, a.toString()));
+                }
+
+                set.put(a.toString(), a);
+            }
         }
     }
 

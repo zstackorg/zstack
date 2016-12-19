@@ -10,6 +10,16 @@ public class AttachPoliciesToUserAction extends AbstractAction {
     public static class Result {
         public ErrorCode error;
         public AttachPoliciesToUserResult value;
+
+        public Result throwExceptionIfError() {
+            if (error != null) {
+                throw new ApiException(
+                    String.format("error[code: %s, description: %s, details: %s]", error.code, error.description, error.details)
+                );
+            }
+            
+            return this;
+        }
     }
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
@@ -70,7 +80,7 @@ public class AttachPoliciesToUserAction extends AbstractAction {
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/accounts/users/{userUuid}/policies";
+        info.path = "/accounts/users/{userUuid}/policy-collection";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

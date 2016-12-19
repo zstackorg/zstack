@@ -10,6 +10,16 @@ public class QueryLoadBalancerAction extends QueryAction {
     public static class Result {
         public ErrorCode error;
         public QueryLoadBalancerResult value;
+
+        public Result throwExceptionIfError() {
+            if (error != null) {
+                throw new ApiException(
+                    String.format("error[code: %s, description: %s, details: %s]", error.code, error.description, error.details)
+                );
+            }
+            
+            return this;
+        }
     }
 
 

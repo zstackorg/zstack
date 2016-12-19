@@ -11,8 +11,7 @@ import org.zstack.header.rest.RestRequest;
 @RestRequest(
         path = "/images",
         optionalPaths = {"/images/{uuid}"},
-        method = HttpMethod.POST,
-        parameterName = "null",
+        method = HttpMethod.GET,
         responseClass = APIQueryImageReply.class
 )
 public class APIQueryImageMsg extends APIQueryMessage {

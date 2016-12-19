@@ -10,6 +10,16 @@ public class AddSftpBackupStorageAction extends AbstractAction {
     public static class Result {
         public ErrorCode error;
         public AddSftpBackupStorageResult value;
+
+        public Result throwExceptionIfError() {
+            if (error != null) {
+                throw new ApiException(
+                    String.format("error[code: %s, description: %s, details: %s]", error.code, error.description, error.details)
+                );
+            }
+            
+            return this;
+        }
     }
 
     @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = false, noTrim = false)

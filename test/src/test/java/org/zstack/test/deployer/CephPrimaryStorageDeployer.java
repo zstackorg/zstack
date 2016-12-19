@@ -3,14 +3,11 @@ package org.zstack.test.deployer;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.zstack.header.storage.primary.APIAddPrimaryStorageEvent;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.zone.ZoneInventory;
 import org.zstack.sdk.AddCephPrimaryStorageAction;
-import org.zstack.storage.ceph.primary.APIAddCephPrimaryStorageMsg;
 import org.zstack.storage.ceph.primary.CephPrimaryStorageSimulatorConfig;
 import org.zstack.test.Api;
-import org.zstack.test.ApiSender;
 import org.zstack.test.ApiSenderException;
 import org.zstack.test.deployer.schema.CephPrimaryStorageConfig;
 import org.zstack.test.deployer.schema.DeployerConfig;
@@ -21,11 +18,7 @@ import org.zstack.utils.gson.JSONObjectUtil;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.zstack.utils.CollectionDSL.list;
 
-/**
- * Created by frank on 7/29/2015.
- */
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class CephPrimaryStorageDeployer implements PrimaryStorageDeployer<CephPrimaryStorageConfig> {
     @Autowired
@@ -47,7 +40,7 @@ public class CephPrimaryStorageDeployer implements PrimaryStorageDeployer<CephPr
             action.sessionId = api.getAdminSession().getUuid();
             action.zoneUuid = zone.getUuid();
             action.monUrls = asList(c.getMonUrl().split(","));
-            AddCephPrimaryStorageAction.Result res = action.call();
+            AddCephPrimaryStorageAction.Result res = action.call().throwExceptionIfError();
             deployer.primaryStorages.put(action.name, JSONObjectUtil.rehashObject(res.value.getInventory(), PrimaryStorageInventory.class));
         }
     }

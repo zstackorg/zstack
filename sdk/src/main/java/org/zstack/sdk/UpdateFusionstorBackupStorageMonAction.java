@@ -10,6 +10,16 @@ public class UpdateFusionstorBackupStorageMonAction extends AbstractAction {
     public static class Result {
         public ErrorCode error;
         public UpdateMonToFusionstorBackupStorageResult value;
+
+        public Result throwExceptionIfError() {
+            if (error != null) {
+                throw new ApiException(
+                    String.format("error[code: %s, description: %s, details: %s]", error.code, error.description, error.details)
+                );
+            }
+            
+            return this;
+        }
     }
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = false, noTrim = false)

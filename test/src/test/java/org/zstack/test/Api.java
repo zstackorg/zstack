@@ -86,6 +86,9 @@ import org.zstack.network.service.portforwarding.*;
 import org.zstack.network.service.vip.*;
 import org.zstack.network.service.virtualrouter.*;
 import org.zstack.portal.managementnode.ManagementNodeManager;
+import org.zstack.sdk.CreatePortForwardingRuleAction;
+import org.zstack.sdk.CreateVipAction;
+import org.zstack.sdk.ErrorCode;
 import org.zstack.storage.backup.sftp.APIReconnectSftpBackupStorageEvent;
 import org.zstack.storage.backup.sftp.APIReconnectSftpBackupStorageMsg;
 import org.zstack.storage.backup.sftp.APIUpdateSftpBackupStorageMsg;
@@ -2647,17 +2650,21 @@ public class Api implements CloudBusEventListener {
         return acquireIp(l3NetworkUuid, requiredIp, null);
     }
 
+    private void throwExceptionIfNeed(ErrorCode err) throws ApiSenderException {
+        if (err != null) {
+            throw new ApiSenderException(new org.zstack.header.errorcode.ErrorCode(err.code, err.description, err.details));
+        }
+    }
+
     public VipInventory acquireIp(String l3NetworkUuid, String requiredIp, SessionInventory session) throws ApiSenderException {
-        APICreateVipMsg msg = new APICreateVipMsg();
-        msg.setName("vip");
-        msg.setL3NetworkUuid(l3NetworkUuid);
-        msg.setSession(session == null ? adminSession : session);
-        msg.setRequiredIp(requiredIp);
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICreateVipEvent evt = sender.send(msg, APICreateVipEvent.class);
-        return evt.getInventory();
+        CreateVipAction action = new CreateVipAction();
+        action.name = "vip";
+        action.l3NetworkUuid = l3NetworkUuid;
+        action.sessionId = session == null ? adminSession.getUuid() : session.getUuid();
+        action.requiredIp = requiredIp;
+        CreateVipAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), VipInventory.class);
     }
 
     public VipInventory acquireIp(String l3NetworkUuid) throws ApiSenderException {
@@ -2719,23 +2726,22 @@ public class Api implements CloudBusEventListener {
     }
 
     public PortForwardingRuleInventory createPortForwardingRuleByFullConfig(PortForwardingRuleInventory rule, SessionInventory session) throws ApiSenderException {
-        APICreatePortForwardingRuleMsg msg = new APICreatePortForwardingRuleMsg();
-        msg.setName(rule.getName());
-        msg.setDescription(rule.getDescription());
-        msg.setAllowedCidr(rule.getAllowedCidr());
-        msg.setPrivatePortEnd(rule.getPrivatePortEnd());
-        msg.setPrivatePortStart(rule.getPrivatePortStart());
-        msg.setVipUuid(rule.getVipUuid());
-        msg.setVipPortEnd(rule.getVipPortEnd());
-        msg.setVipPortStart(rule.getVipPortStart());
-        msg.setVmNicUuid(rule.getVmNicUuid());
-        msg.setProtocolType(rule.getProtocolType());
-        msg.setSession(session == null ? adminSession : session);
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICreatePortForwardingRuleEvent evt = sender.send(msg, APICreatePortForwardingRuleEvent.class);
-        return evt.getInventory();
+        CreatePortForwardingRuleAction action = new CreatePortForwardingRuleAction();
+        action.name = rule.getName();
+        action.description = rule.getDescription();
+        action.allowedCidr = rule.getAllowedCidr();
+        action.privatePortEnd = rule.getPrivatePortEnd();
+        action.privatePortStart = rule.getPrivatePortStart();
+        action.vipUuid = rule.getVipUuid();
+        action.vipPortEnd = rule.getVipPortEnd();
+        action.vipPortStart = rule.getVipPortStart();
+        action.vmNicUuid = rule.getVmNicUuid();
+        action.protocolType = rule.getProtocolType();
+        action.sessionId = session == null ? adminSession.getUuid() : session.getUuid();
+        CreatePortForwardingRuleAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), PortForwardingRuleInventory.class);
     }
 
     public void revokePortForwardingRule(String ruleUuid) throws ApiSenderException {

@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Action(category = VmInstanceConstant.ACTION_CATEGORY, names = {"read"})
 @RestRequest(
-        path = "/vm-instances/destination-candidates",
+        path = "/vm-instances/candidate-destinations",
         method = HttpMethod.GET,
         responseClass = APIGetCandidateZonesClustersHostsForCreatingVmReply.class,
         parameterName = "params"

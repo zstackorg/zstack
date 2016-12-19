@@ -1,5 +1,6 @@
 package scripts
 
+import org.apache.commons.lang.StringEscapeUtils
 import org.apache.commons.lang.StringUtils
 import org.zstack.header.exception.CloudRuntimeException
 import org.zstack.header.identity.SuppressCredentialCheck
@@ -88,7 +89,7 @@ class SdkApiTemplate implements JavaSdkTemplate {
                     }()))
                 }
                 if (!apiParam.validRegexValues().isEmpty()) {
-                    annotationFields.add(String.format("validRegexValues = %s", apiParam.validRegexValues()))
+                    annotationFields.add(String.format("validRegexValues = \"%s\"", StringEscapeUtils.escapeJava(apiParam.validRegexValues())))
                 }
                 if (apiParam.maxLength() != Integer.MIN_VALUE) {
                     annotationFields.add(String.format("maxLength = %s", apiParam.maxLength()))

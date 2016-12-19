@@ -34,7 +34,7 @@ import org.zstack.header.rest.RestRequest;
 @RestRequest(
         path = "/network-services/types",
         method = HttpMethod.GET,
-        responseClass = APIGetNetworkServiceProviderReply.class
+        responseClass = APIGetNetworkServiceTypesReply.class
 )
 public class APIGetNetworkServiceTypesMsg extends APISyncCallMessage {
 }

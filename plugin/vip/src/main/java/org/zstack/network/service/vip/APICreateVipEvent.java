@@ -31,11 +31,7 @@ import org.zstack.header.rest.RestResponse;
 }
 }
  */
-@RestRequest(
-        path = "/vips",
-        method = HttpMethod.POST,
-        responseClass = APICreateVipEvent.class
-)
+@RestResponse(allTo = "inventory")
 public class APICreateVipEvent extends APIEvent {
     /**
      * @desc see :ref:`VipInventory`

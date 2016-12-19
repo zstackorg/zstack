@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by frank on 11/22/2015.
  */
-@RestResponse(allTo = "orders")
+@RestResponse(fieldsTo = {"orders=order"})
 public class APIGetVmBootOrderReply extends APIReply {
     private List<String> order;
 

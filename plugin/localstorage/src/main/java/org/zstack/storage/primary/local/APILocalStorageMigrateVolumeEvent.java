@@ -6,7 +6,7 @@ import org.zstack.header.rest.RestResponse;
 /**
  * Created by frank on 11/16/2015.
  */
-@RestResponse(allTo = "inventories")
+@RestResponse(allTo = "inventory")
 public class APILocalStorageMigrateVolumeEvent extends APIEvent {
     private LocalStorageResourceRefInventory inventory;
 

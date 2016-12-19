@@ -7,7 +7,7 @@ import org.zstack.header.storage.backup.APIAddBackupStorageMsg;
 
 
 @RestRequest(
-        path = "/backup-storage/simulator",
+        path = "/backup-storage/simulators",
         method = HttpMethod.POST,
         parameterName = "params",
         responseClass = APIAddBackupStorageEvent.class

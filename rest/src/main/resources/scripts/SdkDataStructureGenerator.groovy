@@ -143,7 +143,7 @@ ${dstToSrc.join("\n")}
         if (!Enum.class.isAssignableFrom(clz)) {
             file.content = """package org.zstack.sdk;
 
-public class ${getTargetClassName(clz)} ${Object.class.isAssignableFrom(clz.superclass) ? "" : clz.superclass.simpleName} {
+public class ${getTargetClassName(clz)} ${Object.class == clz.superclass ? "" : "extends " + clz.superclass.simpleName} {
 
 ${output.join("\n")}
 }

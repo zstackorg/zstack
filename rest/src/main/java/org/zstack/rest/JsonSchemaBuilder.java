@@ -16,7 +16,7 @@ import java.util.*;
 public class JsonSchemaBuilder {
     Object object;
 
-    private Map<String, List<String>> schema = new HashMap<>();
+    private LinkedHashMap<String, String> schema = new LinkedHashMap<>();
 
     public JsonSchemaBuilder(Object object) {
         this.object = object;
@@ -73,13 +73,12 @@ public class JsonSchemaBuilder {
         }
 
         if (!paths.isEmpty()) {
-            List<String> all = schema.computeIfAbsent(o.getClass().getName(), k -> new ArrayList<>());
-            all.add(StringUtils.join(paths, "."));
+            schema.put(StringUtils.join(paths, "."), o.getClass().getName());
         }
     }
 
     // support Map and org.zstack.* objects
-    public Map<String, List<String>> build() {
+    public Map<String, String> build() {
         try {
             if (!object.getClass().getName().startsWith("org.zstack") && !(object instanceof Map)) {
                 throw new CloudRuntimeException(String.format("only a org.zstack.* object can be built schema, %s is not", object.getClass()));

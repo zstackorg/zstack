@@ -1,6 +1,6 @@
 package org.zstack.sdk;
 
-public class ApplianceVmInventory  {
+public class ApplianceVmInventory extends VmInstanceInventory {
 
     public java.lang.String applianceVmType;
     public void setApplianceVmType(java.lang.String applianceVmType) {

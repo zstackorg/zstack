@@ -1,6 +1,6 @@
 package org.zstack.sdk;
 
-public class UserTagInventory  {
+public class UserTagInventory extends TagInventory {
 
 
 }

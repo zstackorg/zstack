@@ -13,17 +13,17 @@ public class ApiResponse extends HashMap {
     private String location;
     private ErrorCode error;
     private Object result;
-    private Map<String, List<String>> schema;
+    private Map<String, String> schema;
 
     public String getLocation() {
         return location;
     }
 
-    public Map<String, List<String>> getSchema() {
+    public Map<String, String> getSchema() {
         return schema;
     }
 
-    public void setSchema(Map<String, List<String>> schema) {
+    public void setSchema(Map<String, String> schema) {
         this.schema = schema;
         put("schema", schema);
     }

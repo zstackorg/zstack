@@ -1,6 +1,6 @@
 package org.zstack.sdk;
 
-public class CephPrimaryStorageInventory  {
+public class CephPrimaryStorageInventory extends PrimaryStorageInventory {
 
     public java.util.List<CephPrimaryStorageMonInventory> mons;
     public void setMons(java.util.List<CephPrimaryStorageMonInventory> mons) {

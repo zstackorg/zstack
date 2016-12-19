@@ -29,6 +29,8 @@ import org.zstack.network.service.eip.EipInventory;
 import org.zstack.network.service.lb.LoadBalancerInventory;
 import org.zstack.network.service.lb.LoadBalancerListenerInventory;
 import org.zstack.network.service.portforwarding.PortForwardingRuleInventory;
+import org.zstack.sdk.ZSClient;
+import org.zstack.sdk.ZSConfig;
 import org.zstack.test.Api;
 import org.zstack.test.ApiSenderException;
 import org.zstack.test.BeanConstructor;
@@ -45,6 +47,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Deployer {
     private static final CLogger logger = Utils.getLogger(Deployer.class);
@@ -108,8 +111,18 @@ public class Deployer {
     public String SPRING_CONFIG_EIP_SERVICE = "eip.xml";
     public String SPRING_CONFIG_SNAPSHOT_SERVICE = "volumeSnapshot.xml";
     public String SPRING_CONFIG_TAG_MANAGER = "tag.xml";
+    public String SPRING_CONFIG_REST_MANAGER = "rest.xml";
 
     private void scanDeployer() {
+        ZSClient.configure(
+                new ZSConfig.Builder()
+                        .setHostname("127.0.0.1")
+                        .setPort(8989)
+                        .setDefaultPollingInterval(500, TimeUnit.MILLISECONDS)
+                        .setDefaultPollingTimeout(15, TimeUnit.SECONDS)
+                        .build()
+        );
+
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(true);
         scanner.addIncludeFilter(new AssignableTypeFilter(AbstractDeployer.class));
         scanner.addExcludeFilter(new AnnotationTypeFilter(Controller.class));
@@ -165,6 +178,7 @@ public class Deployer {
             addDefaultConfig(this.SPRING_CONFIG_EIP_SERVICE);
             addDefaultConfig(this.SPRING_CONFIG_SNAPSHOT_SERVICE);
             addDefaultConfig(this.SPRING_CONFIG_TAG_MANAGER);
+            addDefaultConfig(this.SPRING_CONFIG_REST_MANAGER);
 
             for (String xml : springConfigs) {
                 beanConstructor.addXml(xml);

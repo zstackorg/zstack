@@ -14,8 +14,8 @@ import java.util.List;
 @RestRequest(
         path = "/accounts/permissions/actions",
         method = HttpMethod.PUT,
-        parameterName = "params",
-        responseClass = APICheckApiPermissionReply.class
+        responseClass = APICheckApiPermissionReply.class,
+        isAction = true
 )
 public class APICheckApiPermissionMsg extends APISyncCallMessage {
     @APIParam(required = false, resourceType = UserVO.class)

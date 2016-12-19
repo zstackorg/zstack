@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.header.storage.primary.APIAddPrimaryStorageEvent;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.zone.ZoneInventory;
+import org.zstack.sdk.AddCephPrimaryStorageAction;
 import org.zstack.storage.ceph.primary.APIAddCephPrimaryStorageMsg;
 import org.zstack.storage.ceph.primary.CephPrimaryStorageSimulatorConfig;
 import org.zstack.test.Api;
@@ -15,9 +16,11 @@ import org.zstack.test.deployer.schema.CephPrimaryStorageConfig;
 import org.zstack.test.deployer.schema.DeployerConfig;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.SizeUtils;
+import org.zstack.utils.gson.JSONObjectUtil;
 
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.zstack.utils.CollectionDSL.list;
 
 /**
@@ -38,16 +41,14 @@ public class CephPrimaryStorageDeployer implements PrimaryStorageDeployer<CephPr
             sc.availCapacity = SizeUtils.sizeStringToBytes(c.getAvailableCapacity());
             sconfig.config.put(c.getName(), sc);
 
-            APIAddCephPrimaryStorageMsg msg = new APIAddCephPrimaryStorageMsg();
-            msg.setName(c.getName());
-            msg.setDescription(c.getDescription());
-            msg.setSession(api.getAdminSession());
-            msg.setZoneUuid(zone.getUuid());
-            msg.setMonUrls(list(c.getMonUrl().split(",")));
-            ApiSender sender = api.getApiSender();
-            APIAddPrimaryStorageEvent evt = sender.send(msg, APIAddPrimaryStorageEvent.class);
-            PrimaryStorageInventory inv = evt.getInventory();
-            deployer.primaryStorages.put(inv.getName(), inv);
+            AddCephPrimaryStorageAction action = new AddCephPrimaryStorageAction();
+            action.name = c.getName();
+            action.description = c.getDescription();
+            action.sessionId = api.getAdminSession().getUuid();
+            action.zoneUuid = zone.getUuid();
+            action.monUrls = asList(c.getMonUrl().split(","));
+            AddCephPrimaryStorageAction.Result res = action.call();
+            deployer.primaryStorages.put(action.name, JSONObjectUtil.rehashObject(res.value.getInventory(), PrimaryStorageInventory.class));
         }
     }
 

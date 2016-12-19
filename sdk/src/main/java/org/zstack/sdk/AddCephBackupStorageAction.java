@@ -18,7 +18,7 @@ public class AddCephBackupStorageAction extends AbstractAction {
     @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String poolName;
 
-    @Param(required = true, maxLength = 2048, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
+    @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String url;
 
     @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)

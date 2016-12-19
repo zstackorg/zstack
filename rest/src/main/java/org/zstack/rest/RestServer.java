@@ -167,7 +167,7 @@ public class RestServer implements Component, CloudBusEventListener {
                 actionName = StringUtils.uncapitalize(actionName);
             }
 
-            if (!at.isAction() && requestAnnotation.parameterName().isEmpty()) {
+            if (!at.isAction() && requestAnnotation.parameterName().isEmpty() && requestAnnotation.method() == HttpMethod.PUT) {
                 throw new CloudRuntimeException(String.format("Invalid @RestRequest of %s, either isAction must be set to true or" +
                         " parameterName is set to a non-empty string", apiClass.getName()));
             }
@@ -206,11 +206,14 @@ public class RestServer implements Component, CloudBusEventListener {
 
                 for (String mf : annotation.fieldsTo()) {
                     String[] kv = mf.split("=");
-                    if (kv.length != 2) {
+                    if (kv.length == 2) {
+                        responseMappingFields.put(kv[0].trim(), kv[1].trim());
+                    } else if (kv.length == 1) {
+                        responseMappingFields.put(kv[0].trim(), kv[0].trim());
+                    } else {
                         throw new CloudRuntimeException(String.format("bad mappingFields[%s] of %s", mf, apiResponseClass));
                     }
 
-                    responseMappingFields.put(kv[0].trim(), kv[1].trim());
                 }
             }
         }

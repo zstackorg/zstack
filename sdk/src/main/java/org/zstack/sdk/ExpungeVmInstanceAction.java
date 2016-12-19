@@ -70,7 +70,7 @@ public class ExpungeVmInstanceAction extends AbstractAction {
         info.path = "/vm-instances/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "null";
+        info.parameterName = "expungeVmInstance";
         return info;
     }
 

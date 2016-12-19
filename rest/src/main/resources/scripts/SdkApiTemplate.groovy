@@ -6,6 +6,8 @@ import org.zstack.header.exception.CloudRuntimeException
 import org.zstack.header.identity.SuppressCredentialCheck
 import org.zstack.header.message.APIParam
 import org.zstack.header.message.APISyncCallMessage
+import org.zstack.header.message.OverriddenApiParam
+import org.zstack.header.message.OverriddenApiParams
 import org.zstack.header.query.APIQueryMessage
 import org.zstack.header.rest.APINoSee
 import org.zstack.header.rest.RestRequest
@@ -69,12 +71,20 @@ class SdkApiTemplate implements JavaSdkTemplate {
 
         def output = []
 
+        OverriddenApiParams oap = apiMessageClass.getAnnotation(OverriddenApiParams.class)
+        Map<String, APIParam> overriden = [:]
+        if (oap != null) {
+            for (OverriddenApiParam op : oap.value()) {
+                overriden.put(op.field(), op.param())
+            }
+        }
+
         for (Field f : fields) {
             if (f.isAnnotationPresent(APINoSee.class)) {
                 continue
             }
 
-            APIParam apiParam = f.getAnnotation(APIParam.class)
+            APIParam apiParam = overriden.containsKey(f.name) ? overriden[f.name] : f.getAnnotation(APIParam.class)
 
             def annotationFields = []
             if (apiParam != null) {

@@ -13,7 +13,7 @@ import org.zstack.header.rest.RestRequest;
  */
 @Action(category = VirtualRouterConstant.ACTION_CATEGORY)
 @RestRequest(
-        path = "/virtual-routers/instance-offerings/{uuid}/actions",
+        path = "/instance-offerings/virtual-routers/{uuid}/actions",
         responseClass = APIUpdateInstanceOfferingEvent.class,
         method = HttpMethod.PUT,
         isAction = true,

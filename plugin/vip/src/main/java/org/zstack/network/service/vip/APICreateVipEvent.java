@@ -1,6 +1,10 @@
 package org.zstack.network.service.vip;
 
+import org.springframework.http.HttpMethod;
 import org.zstack.header.message.APIEvent;
+import org.zstack.header.rest.RestRequest;
+import org.zstack.header.rest.RestResponse;
+
 /**
  *@apiResult
  * api event for message :ref:`APICreateVipMsg`
@@ -27,6 +31,11 @@ import org.zstack.header.message.APIEvent;
 }
 }
  */
+@RestRequest(
+        path = "/vips",
+        method = HttpMethod.POST,
+        responseClass = APICreateVipEvent.class
+)
 public class APICreateVipEvent extends APIEvent {
     /**
      * @desc see :ref:`VipInventory`

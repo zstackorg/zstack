@@ -15,7 +15,7 @@ import org.zstack.header.zone.ZoneVO;
 @Action(category = VirtualRouterConstant.ACTION_CATEGORY)
 @TagResourceType(InstanceOfferingVO.class)
 @RestRequest(
-		path = "/virtual-routers/instance-offerings/",
+		path = "/instance-offerings/virtual-routers",
 		responseClass = APICreateInstanceOfferingEvent.class,
 		parameterName = "params",
 		method = HttpMethod.POST

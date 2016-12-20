@@ -32,7 +32,7 @@ import org.zstack.header.rest.RestResponse;
  * }
  * @since 0.1.0
  */
-@RestResponse
+@RestResponse(allTo = "inventory")
 public class APIDetachPrimaryStorageFromClusterEvent extends APIEvent {
     public APIDetachPrimaryStorageFromClusterEvent() {
         super(null);

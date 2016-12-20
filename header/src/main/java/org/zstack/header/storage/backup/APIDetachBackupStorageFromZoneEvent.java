@@ -25,7 +25,7 @@ import org.zstack.header.rest.RestResponse;
  * }
  * @since 0.1.0
  */
-@RestResponse
+@RestResponse(allTo = "inventory")
 public class APIDetachBackupStorageFromZoneEvent extends APIEvent {
     public APIDetachBackupStorageFromZoneEvent() {
         super(null);

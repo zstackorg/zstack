@@ -9,6 +9,7 @@ import org.zstack.appliancevm.APIListApplianceVmMsg;
 import org.zstack.appliancevm.APIListApplianceVmReply;
 import org.zstack.appliancevm.ApplianceVmInventory;
 import org.zstack.billing.*;
+import org.zstack.billing.PriceInventory;
 import org.zstack.core.MessageCommandRecorder;
 import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
@@ -33,24 +34,43 @@ import org.zstack.header.allocator.APIGetHostAllocatorStrategiesReply;
 import org.zstack.header.apimediator.APIIsReadyToGoMsg;
 import org.zstack.header.apimediator.ApiMediatorConstant;
 import org.zstack.header.cluster.*;
+import org.zstack.header.cluster.ClusterInventory;
 import org.zstack.header.configuration.*;
+import org.zstack.header.configuration.DiskOfferingInventory;
+import org.zstack.header.configuration.InstanceOfferingInventory;
 import org.zstack.header.console.APIRequestConsoleAccessEvent;
 import org.zstack.header.console.APIRequestConsoleAccessMsg;
 import org.zstack.header.console.ConsoleInventory;
 import org.zstack.header.core.scheduler.SchedulerInventory;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.*;
+import org.zstack.header.host.HostInventory;
 import org.zstack.header.identity.*;
+import org.zstack.header.identity.AccountInventory;
+import org.zstack.header.identity.AccountResourceRefInventory;
+import org.zstack.header.identity.PolicyInventory;
 import org.zstack.header.identity.PolicyInventory.Statement;
+import org.zstack.header.identity.QuotaInventory;
+import org.zstack.header.identity.SessionInventory;
+import org.zstack.header.identity.UserGroupInventory;
+import org.zstack.header.identity.UserInventory;
 import org.zstack.header.image.*;
+import org.zstack.header.image.ImageInventory;
 import org.zstack.header.managementnode.*;
+import org.zstack.header.managementnode.ManagementNodeInventory;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.message.APISyncCallMessage;
 import org.zstack.header.message.Event;
 import org.zstack.header.network.l2.*;
+import org.zstack.header.network.l2.L2NetworkInventory;
+import org.zstack.header.network.l2.L2VlanNetworkInventory;
 import org.zstack.header.network.l3.*;
+import org.zstack.header.network.l3.FreeIpInventory;
+import org.zstack.header.network.l3.IpRangeInventory;
+import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.network.service.*;
+import org.zstack.header.network.service.NetworkServiceProviderInventory;
 import org.zstack.header.query.*;
 import org.zstack.header.search.*;
 import org.zstack.header.simulator.APIAddSimulatorHostMsg;
@@ -64,38 +84,58 @@ import org.zstack.header.simulator.storage.primary.APIAddSimulatorPrimaryStorage
 import org.zstack.header.simulator.storage.primary.SimulatorPrimaryStorageConstant;
 import org.zstack.header.simulator.storage.primary.SimulatorPrimaryStorageDetails;
 import org.zstack.header.storage.backup.*;
+import org.zstack.header.storage.backup.BackupStorageInventory;
 import org.zstack.header.storage.primary.*;
+import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.storage.snapshot.*;
+import org.zstack.header.storage.snapshot.VolumeSnapshotInventory;
+import org.zstack.header.storage.snapshot.VolumeSnapshotTreeInventory;
 import org.zstack.header.tag.*;
+import org.zstack.header.tag.TagInventory;
 import org.zstack.header.vm.*;
+import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.header.vm.VmNicInventory;
 import org.zstack.header.volume.*;
 import org.zstack.header.volume.APIGetVolumeFormatReply.VolumeFormatReplyStruct;
+import org.zstack.header.volume.VolumeInventory;
 import org.zstack.header.zone.*;
+import org.zstack.header.zone.ZoneInventory;
 import org.zstack.ipsec.*;
+import org.zstack.ipsec.IPsecConnectionInventory;
 import org.zstack.kvm.APIAddKVMHostMsg;
 import org.zstack.kvm.APIUpdateKVMHostMsg;
 import org.zstack.kvm.KVMHostInventory;
 import org.zstack.license.*;
+import org.zstack.license.LicenseInventory;
 import org.zstack.logging.APIDeleteLogEvent;
 import org.zstack.logging.APIDeleteLogMsg;
 import org.zstack.network.securitygroup.*;
 import org.zstack.network.securitygroup.APIAddSecurityGroupRuleMsg.SecurityGroupRuleAO;
+import org.zstack.network.securitygroup.SecurityGroupInventory;
+import org.zstack.network.securitygroup.VmNicSecurityGroupRefInventory;
 import org.zstack.network.service.eip.*;
+import org.zstack.network.service.eip.EipInventory;
 import org.zstack.network.service.lb.*;
+import org.zstack.network.service.lb.LoadBalancerInventory;
+import org.zstack.network.service.lb.LoadBalancerListenerInventory;
 import org.zstack.network.service.portforwarding.*;
+import org.zstack.network.service.portforwarding.PortForwardingRuleInventory;
 import org.zstack.network.service.vip.*;
+import org.zstack.network.service.vip.VipInventory;
 import org.zstack.network.service.virtualrouter.*;
+import org.zstack.network.service.virtualrouter.VirtualRouterOfferingInventory;
 import org.zstack.portal.managementnode.ManagementNodeManager;
-import org.zstack.sdk.CreatePortForwardingRuleAction;
-import org.zstack.sdk.CreateVipAction;
-import org.zstack.sdk.ErrorCode;
+import org.zstack.sdk.*;
 import org.zstack.storage.backup.sftp.APIReconnectSftpBackupStorageEvent;
 import org.zstack.storage.backup.sftp.APIReconnectSftpBackupStorageMsg;
 import org.zstack.storage.backup.sftp.APIUpdateSftpBackupStorageMsg;
 import org.zstack.storage.backup.sftp.SftpBackupStorageInventory;
 import org.zstack.storage.ceph.backup.*;
+import org.zstack.storage.ceph.backup.CephBackupStorageInventory;
 import org.zstack.storage.ceph.primary.*;
+import org.zstack.storage.ceph.primary.CephPrimaryStorageInventory;
 import org.zstack.storage.primary.local.*;
+import org.zstack.storage.primary.local.LocalStorageResourceRefInventory;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.TimeUtils;
 import org.zstack.utils.Utils;
@@ -814,16 +854,19 @@ public class Api implements CloudBusEventListener {
     public InstanceOfferingInventory addInstanceOffering(InstanceOfferingInventory inv, SessionInventory session) throws ApiSenderException {
         ApiSender sender = new ApiSender();
         sender.setTimeout(timeout);
-        APICreateInstanceOfferingMsg msg = new APICreateInstanceOfferingMsg();
-        msg.setSession(session == null ? adminSession : session);
-        msg.setName(inv.getName());
-        msg.setCpuNum(inv.getCpuNum());
-        msg.setCpuSpeed(inv.getCpuSpeed());
-        msg.setMemorySize(inv.getMemorySize());
-        msg.setDescription(inv.getDescription());
-        msg.setAllocatorStrategy(inv.getAllocatorStrategy());
-        APICreateInstanceOfferingEvent e = sender.send(msg, APICreateInstanceOfferingEvent.class);
-        return e.getInventory();
+
+        CreateInstanceOfferingAction action = new CreateInstanceOfferingAction();
+        action.sessionId = session == null ? adminSession.getUuid() : session.getUuid();
+        action.name = inv.getName();
+        action.cpuNum = inv.getCpuNum();
+        action.cpuSpeed = inv.getCpuSpeed();
+        action.memorySize = inv.getMemorySize();
+        action.description = inv.getDescription();
+        action.allocatorStrategy = inv.getAllocatorStrategy();
+        CreateInstanceOfferingAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), InstanceOfferingInventory.class);
     }
 
     public List<InstanceOfferingInventory> listInstanceOffering(List<String> uuids) throws ApiSenderException {
@@ -1280,16 +1323,14 @@ public class Api implements CloudBusEventListener {
     }
 
     public ZoneInventory createZoneByFullConfig(ZoneInventory inv) throws ApiSenderException {
-        APICreateZoneMsg msg = new APICreateZoneMsg();
-        msg.setSession(adminSession);
-        msg.setName(inv.getName());
-        msg.setDescription(inv.getDescription());
-        msg.setType(inv.getType());
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICreateZoneEvent evt = sender.send(msg, APICreateZoneEvent.class);
-        return evt.getInventory();
+        CreateZoneAction action = new CreateZoneAction();
+        action.sessionId = adminSession.getUuid();
+        action.name = inv.getName();
+        action.description = inv.getDescription();
+        CreateZoneAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), ZoneInventory.class);
     }
 
     public ClusterInventory createClusterByFullConfig(ClusterInventory inv) throws ApiSenderException {
@@ -1308,19 +1349,17 @@ public class Api implements CloudBusEventListener {
     }
 
     public HostInventory addHostByFullConfig(HostInventory inv) throws ApiSenderException {
-        APIAddSimulatorHostMsg msg = new APIAddSimulatorHostMsg();
-        msg.setSession(adminSession);
-        msg.setClusterUuid(inv.getClusterUuid());
-        msg.setDescription(inv.getDescription());
-        msg.setName(inv.getName());
-        msg.setManagementIp(inv.getManagementIp());
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        msg.setMemoryCapacity(inv.getAvailableMemoryCapacity());
-        msg.setCpuCapacity(inv.getAvailableCpuCapacity());
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAddHostEvent evt = sender.send(msg, APIAddHostEvent.class);
-        return evt.getInventory();
+        AddSimulatorHostAction action = new AddSimulatorHostAction();
+        action.sessionId = adminSession.getUuid();
+        action.description = inv.getDescription();
+        action.name = inv.getName();
+        action.managementIp = inv.getManagementIp();
+        action.memoryCapacity = inv.getAvailableMemoryCapacity();
+        action.cpuCapacity = inv.getAvailableCpuCapacity();
+        AddSimulatorHostAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), HostInventory.class);
     }
 
     public APIGetPrimaryStorageCapacityReply getPrimaryStorageCapacityByAll() throws ApiSenderException {
@@ -1344,21 +1383,18 @@ public class Api implements CloudBusEventListener {
     }
 
     public PrimaryStorageInventory addPrimaryStorageByFullConfig(PrimaryStorageInventory inv) throws ApiSenderException {
-        APIAddSimulatorPrimaryStorageMsg msg = new APIAddSimulatorPrimaryStorageMsg();
-        msg.setSession(adminSession);
-        msg.setName(inv.getName());
-        msg.setDescription(inv.getDescription());
-        msg.setType(inv.getType());
-        msg.setUrl(inv.getUrl());
-        msg.setTotalCapacity(inv.getTotalCapacity());
-        msg.setAvailableCapacity(inv.getAvailableCapacity());
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        msg.setType(SimulatorPrimaryStorageConstant.SIMULATOR_PRIMARY_STORAGE_TYPE);
-        msg.setZoneUuid(inv.getZoneUuid());
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAddPrimaryStorageEvent evt = sender.send(msg, APIAddPrimaryStorageEvent.class);
-        return evt.getInventory();
+        AddSimulatorPrimaryStorageAction action = new AddSimulatorPrimaryStorageAction();
+        action.sessionId = adminSession.getUuid();
+        action.description = inv.getDescription();
+        action.type = SimulatorPrimaryStorageConstant.SIMULATOR_PRIMARY_STORAGE_TYPE;
+        action.url = inv.getUrl();
+        action.totalCapacity = inv.getTotalCapacity();
+        action.availableCapacity = inv.getAvailableCapacity();
+        action.zoneUuid = inv.getZoneUuid();
+        AddSimulatorPrimaryStorageAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), PrimaryStorageInventory.class);
     }
 
     public APIGetBackupStorageCapacityReply getBackupStorageCapacityByAll() throws ApiSenderException {
@@ -1381,19 +1417,18 @@ public class Api implements CloudBusEventListener {
     }
 
     public BackupStorageInventory addBackupStorageByFullConfig(BackupStorageInventory inv) throws ApiSenderException {
-        APIAddSimulatorBackupStorageMsg msg = new APIAddSimulatorBackupStorageMsg();
-        msg.setSession(adminSession);
-        msg.setName(inv.getName());
-        msg.setDescription(inv.getDescription());
-        msg.setTotalCapacity(inv.getTotalCapacity());
-        msg.setUrl(inv.getUrl());
-        msg.setAvailableCapacity(inv.getAvailableCapacity());
-        msg.setType(SimulatorBackupStorageConstant.SIMULATOR_BACKUP_STORAGE_TYPE);
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAddBackupStorageEvent evt = sender.send(msg, APIAddBackupStorageEvent.class);
-        return evt.getInventory();
+        AddSimulatorBackupStorageAction action = new AddSimulatorBackupStorageAction();
+        action.sessionId = adminSession.getUuid();
+        action.name = inv.getName();
+        action.description = inv.getDescription();
+        action.totalCapacity = inv.getTotalCapacity();
+        action.url = inv.getUrl();
+        action.availableCapacity = inv.getAvailableCapacity();
+        action.type = SimulatorBackupStorageConstant.SIMULATOR_BACKUP_STORAGE_TYPE;
+        AddSimulatorBackupStorageAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), BackupStorageInventory.class);
     }
 
     public ImageInventory addImageByFullConfig(ImageInventory inv, String bsUuid) throws ApiSenderException {
@@ -1420,34 +1455,32 @@ public class Api implements CloudBusEventListener {
     }
 
     public L2VlanNetworkInventory createL2VlanNetworkByFullConfig(L2VlanNetworkInventory inv) throws ApiSenderException {
-        APICreateL2VlanNetworkMsg msg = new APICreateL2VlanNetworkMsg();
-        msg.setSession(adminSession);
-        msg.setDescription(inv.getDescription());
-        msg.setName(inv.getName());
-        msg.setPhysicalInterface(inv.getPhysicalInterface());
-        msg.setType(inv.getType());
-        msg.setZoneUuid(inv.getZoneUuid());
-        msg.setVlan(inv.getVlan());
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICreateL2NetworkEvent evt = sender.send(msg, APICreateL2NetworkEvent.class);
-        return (L2VlanNetworkInventory) evt.getInventory();
+        CreateL2VlanNetworkAction action = new CreateL2VlanNetworkAction();
+        action.sessionId = adminSession.getUuid();
+        action.description = inv.getDescription();
+        action.name = inv.getName();
+        action.physicalInterface = inv.getPhysicalInterface();
+        action.type = inv.getType();
+        action.zoneUuid = inv.getZoneUuid();
+        action.vlan = inv.getVlan();
+        CreateL2VlanNetworkAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), L2VlanNetworkInventory.class);
     }
 
     public L2NetworkInventory createL2NetworkByFullConfig(L2NetworkInventory inv) throws ApiSenderException {
-        APICreateL2NoVlanNetworkMsg msg = new APICreateL2NoVlanNetworkMsg();
-        msg.setSession(adminSession);
-        msg.setDescription(inv.getDescription());
-        msg.setName(inv.getName());
-        msg.setPhysicalInterface(inv.getPhysicalInterface());
-        msg.setType(inv.getType());
-        msg.setZoneUuid(inv.getZoneUuid());
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICreateL2NetworkEvent evt = sender.send(msg, APICreateL2NetworkEvent.class);
-        return evt.getInventory();
+        CreateL2NoVlanNetworkAction action = new CreateL2NoVlanNetworkAction();
+        action.sessionId = adminSession.getUuid();
+        action.description = inv.getDescription();
+        action.name = inv.getName();
+        action.physicalInterface = inv.getPhysicalInterface();
+        action.type = inv.getType();
+        action.zoneUuid = inv.getZoneUuid();
+        CreateL2NoVlanNetworkAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), L2NetworkInventory.class);
     }
 
     public L3NetworkInventory createL3NetworkByFullConfig(L3NetworkInventory inv) throws ApiSenderException {
@@ -1455,34 +1488,31 @@ public class Api implements CloudBusEventListener {
     }
 
     public L3NetworkInventory createL3NetworkByFullConfig(L3NetworkInventory inv, SessionInventory session) throws ApiSenderException {
-        APICreateL3NetworkMsg msg = new APICreateL3NetworkMsg();
-        msg.setSession(session);
-        msg.setDescription(inv.getDescription());
-        msg.setL2NetworkUuid(inv.getL2NetworkUuid());
-        msg.setName(inv.getName());
-        msg.setDnsDomain(inv.getDnsDomain());
-        msg.setType(inv.getType());
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICreateL3NetworkEvent evt = sender.send(msg, APICreateL3NetworkEvent.class);
-        return evt.getInventory();
+        CreateL3NetworkAction action = new CreateL3NetworkAction();
+        action.sessionId = session.getUuid();
+        action.description = inv.getDescription();
+        action.l2NetworkUuid = inv.getL2NetworkUuid();
+        action.name = inv.getName();
+        action.dnsDomain = inv.getDnsDomain();
+        action.type = inv.getType();
+        CreateL3NetworkAction.Result res = action.call();
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), L3NetworkInventory.class);
     }
 
     public IpRangeInventory addIpRangeByFullConfig(IpRangeInventory inv, SessionInventory session) throws ApiSenderException {
-        APIAddIpRangeMsg msg = new APIAddIpRangeMsg();
-        msg.setSession(session);
-        msg.setL3NetworkUuid(inv.getL3NetworkUuid());
-        msg.setStartIp(inv.getStartIp());
-        msg.setEndIp(inv.getEndIp());
-        msg.setNetmask(inv.getNetmask());
-        msg.setGateway(inv.getGateway());
-        msg.setName(inv.getName());
-        msg.setDescription(inv.getDescription());
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAddIpRangeEvent e = sender.send(msg, APIAddIpRangeEvent.class);
-        return e.getInventory();
+        AddIpRangeAction action = new AddIpRangeAction();
+        action.sessionId = session.getUuid();
+        action.l3NetworkUuid = inv.getL3NetworkUuid();
+        action.startIp = inv.getStartIp();
+        action.endIp = inv.getEndIp();
+        action.netmask = inv.getNetmask();
+        action.gateway = inv.getGateway();
+        action.description = inv.getDescription();
+        AddIpRangeAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), IpRangeInventory.class);
     }
 
     public IpRangeInventory addIpRangeByFullConfig(IpRangeInventory inv) throws ApiSenderException {
@@ -2282,17 +2312,15 @@ public class Api implements CloudBusEventListener {
     }
 
     public L3NetworkInventory attachNetworkServiceToL3Network(String l3NetworkUuid, String providerUuid, List<String> types, SessionInventory session) throws ApiSenderException {
-        APIAttachNetworkServiceToL3NetworkMsg msg = new APIAttachNetworkServiceToL3NetworkMsg();
+        AttachNetworkServiceToL3NetworkAction action = new AttachNetworkServiceToL3NetworkAction();
         Map<String, List<String>> ntypes = new HashMap<String, List<String>>(1);
         ntypes.put(providerUuid, types);
-        msg.setL3NetworkUuid(l3NetworkUuid);
-        msg.setNetworkServices(ntypes);
-        msg.setSession(session == null ? adminSession : session);
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAttachNetworkServiceToL3NetworkEvent evt = sender.send(msg, APIAttachNetworkServiceToL3NetworkEvent.class);
-        return evt.getInventory();
+        action.l3NetworkUuid = l3NetworkUuid;
+        action.networkServices = ntypes;
+        action.sessionId = session == null ? adminSession.getUuid() : session.getUuid();
+        AttachNetworkServiceToL3NetworkAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), L3NetworkInventory.class);
     }
 
     public List<NetworkServiceProviderInventory> listNetworkServiceProvider(List<String> uuids) throws ApiSenderException {
@@ -2310,15 +2338,13 @@ public class Api implements CloudBusEventListener {
     }
 
     public L3NetworkInventory addDns(String l3NetworkUuid, String dns, SessionInventory session) throws ApiSenderException {
-        APIAddDnsToL3NetworkMsg msg = new APIAddDnsToL3NetworkMsg();
-        msg.setL3NetworkUuid(l3NetworkUuid);
-        msg.setDns(dns);
-        msg.setSession(session == null ? adminSession : session);
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAddDnsToL3NetworkEvent evt = sender.send(msg, APIAddDnsToL3NetworkEvent.class);
-        return evt.getInventory();
+        AddDnsToL3NetworkAction action = new AddDnsToL3NetworkAction();
+        action.l3NetworkUuid = l3NetworkUuid;
+        action.dns = dns;
+        action.sessionId = session == null ? adminSession.getUuid() : session.getUuid();
+        AddDnsToL3NetworkAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), L3NetworkInventory.class);
     }
 
     public String getInventory(APIGetMessage msg) throws ApiSenderException {
@@ -2382,15 +2408,14 @@ public class Api implements CloudBusEventListener {
     }
 
     public SecurityGroupInventory createSecurityGroupByFullConfig(SecurityGroupInventory inv, SessionInventory session) throws ApiSenderException {
-        APICreateSecurityGroupMsg msg = new APICreateSecurityGroupMsg();
-        msg.setName(inv.getName());
-        msg.setDescription(inv.getDescription());
-        msg.setSession(session);
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICreateSecurityGroupEvent evt = sender.send(msg, APICreateSecurityGroupEvent.class);
-        return evt.getInventory();
+        CreateSecurityGroupAction action = new CreateSecurityGroupAction();
+        action.name = inv.getName();
+        action.description = inv.getDescription();
+        action.sessionId = session.getUuid();
+        CreateSecurityGroupAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), SecurityGroupInventory.class);
     }
 
     public SecurityGroupInventory createSecurityGroupByFullConfig(SecurityGroupInventory inv) throws ApiSenderException {
@@ -2424,15 +2449,15 @@ public class Api implements CloudBusEventListener {
 
     public SecurityGroupInventory addSecurityGroupRuleByFullConfig(String securityGroupUuid, List<SecurityGroupRuleAO> aos, SessionInventory session)
             throws ApiSenderException {
-        APIAddSecurityGroupRuleMsg msg = new APIAddSecurityGroupRuleMsg();
-        msg.setRules(aos);
-        msg.setSecurityGroupUuid(securityGroupUuid);
-        msg.setSession(session);
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAddSecurityGroupRuleEvent evt = sender.send(msg, APIAddSecurityGroupRuleEvent.class);
-        return evt.getInventory();
+
+        AddSecurityGroupRuleAction action= new AddSecurityGroupRuleAction();
+        action.rules = aos;
+        action.securityGroupUuid = securityGroupUuid;
+        action.sessionId = session.getUuid();
+        AddSecurityGroupRuleAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), SecurityGroupInventory.class);
     }
 
     public SecurityGroupInventory removeSecurityGroupRule(String ruleUuid) throws ApiSenderException {
@@ -2497,15 +2522,14 @@ public class Api implements CloudBusEventListener {
     }
 
     public SecurityGroupInventory attachSecurityGroupToL3Network(String securityGroupUuid, String l3NetworkUuid, SessionInventory session) throws ApiSenderException {
-        APIAttachSecurityGroupToL3NetworkMsg msg = new APIAttachSecurityGroupToL3NetworkMsg();
-        msg.setL3NetworkUuid(l3NetworkUuid);
-        msg.setSecurityGroupUuid(securityGroupUuid);
-        msg.setSession(session == null ? adminSession : session);
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAttachSecurityGroupToL3NetworkEvent evt = sender.send(msg, APIAttachSecurityGroupToL3NetworkEvent.class);
-        return evt.getInventory();
+        AttachSecurityGroupToL3NetworkAction action = new AttachSecurityGroupToL3NetworkAction();
+        action.l3NetworkUuid = l3NetworkUuid;
+        action.securityGroupUuid = securityGroupUuid;
+        action.sessionId = session == null ? adminSession.getUuid() : session.getUuid();
+        AttachSecurityGroupToL3NetworkAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.getInventory(), SecurityGroupInventory.class);
     }
 
     public SecurityGroupInventory detachSecurityGroupFromL3Network(String securityGroupUuid, String l3NetworkUuid) throws ApiSenderException {
@@ -2650,7 +2674,7 @@ public class Api implements CloudBusEventListener {
         return acquireIp(l3NetworkUuid, requiredIp, null);
     }
 
-    private void throwExceptionIfNeed(ErrorCode err) throws ApiSenderException {
+    public void throwExceptionIfNeed(ErrorCode err) throws ApiSenderException {
         if (err != null) {
             throw new ApiSenderException(new org.zstack.header.errorcode.ErrorCode(err.code, err.description, err.details));
         }

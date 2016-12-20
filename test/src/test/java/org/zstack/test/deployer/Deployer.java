@@ -29,6 +29,7 @@ import org.zstack.network.service.eip.EipInventory;
 import org.zstack.network.service.lb.LoadBalancerInventory;
 import org.zstack.network.service.lb.LoadBalancerListenerInventory;
 import org.zstack.network.service.portforwarding.PortForwardingRuleInventory;
+import org.zstack.sdk.QueryNetworkServiceProviderAction;
 import org.zstack.sdk.ZSClient;
 import org.zstack.sdk.ZSConfig;
 import org.zstack.test.Api;
@@ -37,6 +38,7 @@ import org.zstack.test.BeanConstructor;
 import org.zstack.test.deployer.schema.*;
 import org.zstack.utils.Utils;
 import org.zstack.utils.data.SizeUnit;
+import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
 import javax.xml.bind.JAXBContext;
@@ -429,10 +431,15 @@ public class Deployer {
             return;
         }
 
-        APIQueryNetworkServiceProviderMsg msg = new APIQueryNetworkServiceProviderMsg();
-        msg.setConditions(new ArrayList<QueryCondition>());
-        APIQueryNetworkServiceProviderReply r = api.query(msg, APIQueryNetworkServiceProviderReply.class);
-        List<NetworkServiceProviderInventory> providers = r.getInventories();
+        QueryNetworkServiceProviderAction action = new QueryNetworkServiceProviderAction();
+        QueryNetworkServiceProviderAction.Result res = action.call().throwExceptionIfError();
+
+        List<NetworkServiceProviderInventory> providers = JSONObjectUtil.toCollection(
+                JSONObjectUtil.toJsonString(res.value.getInventories()),
+                ArrayList.class,
+                NetworkServiceProviderInventory.class
+        );
+
         for (NetworkServiceConfig nc : services) {
             String uuid = getNetworkServiceProviderUuid(providers, nc.getProvider());
             api.attachNetworkServiceToL3Network(l3.getUuid(), uuid, nc.getServiceType());

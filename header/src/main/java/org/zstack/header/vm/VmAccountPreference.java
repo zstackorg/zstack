@@ -5,17 +5,17 @@ import java.io.Serializable;
 /**
  * Created by mingjian.deng on 16/10/19.
  */
-public class VmAccountPerference implements Serializable, Cloneable {
+public class VmAccountPreference implements Serializable, Cloneable {
     private String userAccount;
     private String accountPassword;
     private String vmUuid;
 
 
-    public VmAccountPerference() {
+    public VmAccountPreference() {
 
     }
 
-    public VmAccountPerference(String vmUuid, String userAccount, String accountPassword) {
+    public VmAccountPreference(String vmUuid, String userAccount, String accountPassword) {
         this.userAccount = userAccount;
         this.accountPassword = accountPassword;
         this.vmUuid = vmUuid;

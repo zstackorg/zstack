@@ -44,14 +44,14 @@ public class TestChangeVmPassword {
 
         Assert.assertEquals(VmInstanceState.Running.toString(), inv.getState());
 
-        VmAccountPerference account = api.changeVmPassword(new VmAccountPerference(
+        VmAccountPreference account = api.changeVmPassword(new VmAccountPreference(
                 inv.getUuid(), "change", "test1234"));
         Assert.assertNotNull(account);
         Assert.assertEquals(inv.getUuid(), account.getVmUuid());
         Assert.assertEquals("change", account.getUserAccount());
         Assert.assertEquals("******", account.getAccountPassword());
 
-        account = api.changeVmPassword(new VmAccountPerference(
+        account = api.changeVmPassword(new VmAccountPreference(
                 inv.getUuid(), "change", "||||||"));
         Assert.assertNotNull(account);
         Assert.assertEquals(inv.getUuid(), account.getVmUuid());
@@ -64,7 +64,7 @@ public class TestChangeVmPassword {
         Assert.assertEquals(VmInstanceState.Stopped.toString(), vm.getState());
 
         try {
-            account = api.changeVmPassword(new VmAccountPerference(
+            account = api.changeVmPassword(new VmAccountPreference(
                     inv.getUuid(), "change", "test1234"));
             Assert.assertFalse(true);
         } catch (ApiSenderException e) {

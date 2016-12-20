@@ -23,10 +23,10 @@ public class AddSimulatorHostAction extends AbstractAction {
     }
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public long memoryCapacity;
+    public long memoryCapacity = 1000000000;
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public long cpuCapacity;
+    public long cpuCapacity = 1000000000;
 
     @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String name;

@@ -28,8 +28,8 @@ public class AddKVMHostAction extends AbstractAction {
     @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String password;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1,65535}, noTrim = false)
-    public int sshPort;
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,65535L}, noTrim = false)
+    public int sshPort = 22;
 
     @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String name;

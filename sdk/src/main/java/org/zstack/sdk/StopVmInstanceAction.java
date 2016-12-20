@@ -26,7 +26,7 @@ public class StopVmInstanceAction extends AbstractAction {
     public java.lang.String uuid;
 
     @Param(required = false, validValues = {"grace","cold"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String type;
+    public java.lang.String type = "grace)";
 
     @Param(required = false)
     public java.util.List systemTags;

@@ -120,7 +120,7 @@ public class Deployer {
                 new ZSConfig.Builder()
                         .setHostname("127.0.0.1")
                         .setPort(8989)
-                        .setDefaultPollingInterval(500, TimeUnit.MILLISECONDS)
+                        .setDefaultPollingInterval(100, TimeUnit.MILLISECONDS)
                         .setDefaultPollingTimeout(15, TimeUnit.SECONDS)
                         .build()
         );
@@ -432,6 +432,7 @@ public class Deployer {
         }
 
         QueryNetworkServiceProviderAction action = new QueryNetworkServiceProviderAction();
+        action.sessionId = getApi().getAdminSession().getUuid();
         QueryNetworkServiceProviderAction.Result res = action.call().throwExceptionIfError();
 
         List<NetworkServiceProviderInventory> providers = JSONObjectUtil.toCollection(

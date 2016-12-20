@@ -29,7 +29,7 @@ public class UpdateQuotaAction extends AbstractAction {
     public java.lang.String name;
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public long value;
+    public long value = 0;
 
     @Param(required = false)
     public java.util.List systemTags;

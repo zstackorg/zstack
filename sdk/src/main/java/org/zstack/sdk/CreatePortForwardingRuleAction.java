@@ -25,16 +25,16 @@ public class CreatePortForwardingRuleAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String vipUuid;
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {1,65535}, noTrim = false)
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,65535L}, noTrim = false)
     public java.lang.Integer vipPortStart;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1,65535}, noTrim = false)
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,65535L}, noTrim = false)
     public java.lang.Integer vipPortEnd;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1,65535}, noTrim = false)
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,65535L}, noTrim = false)
     public java.lang.Integer privatePortStart;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1,65535}, noTrim = false)
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,65535L}, noTrim = false)
     public java.lang.Integer privatePortEnd;
 
     @Param(required = true, validValues = {"TCP","UDP"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)

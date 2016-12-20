@@ -62,7 +62,7 @@ public class CreateVmInstanceAction extends AbstractAction {
     public java.lang.String defaultL3NetworkUuid;
 
     @Param(required = false, validValues = {"InstantStart","JustCreate"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String strategy;
+    public java.lang.String strategy = "InstantStart)";
 
     @Param(required = false)
     public java.lang.String resourceUuid;

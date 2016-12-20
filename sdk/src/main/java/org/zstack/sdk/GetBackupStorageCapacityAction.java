@@ -29,7 +29,7 @@ public class GetBackupStorageCapacityAction extends AbstractAction {
     public java.util.List backupStorageUuids;
 
     @Param(required = false)
-    public boolean all;
+    public boolean all = false;
 
     @Param(required = false)
     public java.util.List systemTags;

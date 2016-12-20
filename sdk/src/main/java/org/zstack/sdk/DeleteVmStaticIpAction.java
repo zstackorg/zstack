@@ -29,7 +29,7 @@ public class DeleteVmStaticIpAction extends AbstractAction {
     public java.lang.String l3NetworkUuid;
 
     @Param(required = false)
-    public java.lang.String deleteMode;
+    public java.lang.String deleteMode = "Permissive)";
 
     @Param(required = false)
     public java.util.List systemTags;

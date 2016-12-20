@@ -32,7 +32,7 @@ public class GetIpAddressCapacityAction extends AbstractAction {
     public java.util.List ipRangeUuids;
 
     @Param(required = false)
-    public boolean all;
+    public boolean all = false;
 
     @Param(required = false)
     public java.util.List systemTags;

@@ -23,12 +23,12 @@ public class PrometheusQueryPassThroughAction extends AbstractAction {
     }
 
     @Param(required = false)
-    public boolean instant;
+    public boolean instant = false;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0,-1}, noTrim = false)
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,9223372036854775807L}, noTrim = false)
     public java.lang.Long startTime;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0,-1}, noTrim = false)
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,9223372036854775807L}, noTrim = false)
     public java.lang.Long endTime;
 
     @Param(required = false)

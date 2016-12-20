@@ -38,7 +38,7 @@ public class AddImageAction extends AbstractAction {
     public java.lang.String guestOsType;
 
     @Param(required = false)
-    public boolean system;
+    public boolean system = false;
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String format;

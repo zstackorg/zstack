@@ -32,7 +32,7 @@ public class AddNfsPrimaryStorageAction extends AbstractAction {
     public java.lang.String description;
 
     @Param(required = false)
-    public java.lang.String type;
+    public java.lang.String type = "NFS)";
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String zoneUuid;

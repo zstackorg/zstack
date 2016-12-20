@@ -4,10 +4,7 @@ import org.apache.commons.lang.StringEscapeUtils
 import org.apache.commons.lang.StringUtils
 import org.zstack.header.exception.CloudRuntimeException
 import org.zstack.header.identity.SuppressCredentialCheck
-import org.zstack.header.message.APIParam
-import org.zstack.header.message.APISyncCallMessage
-import org.zstack.header.message.OverriddenApiParam
-import org.zstack.header.message.OverriddenApiParams
+import org.zstack.header.message.*
 import org.zstack.header.query.APIQueryMessage
 import org.zstack.header.rest.APINoSee
 import org.zstack.header.rest.RestRequest
@@ -69,6 +66,8 @@ class SdkApiTemplate implements JavaSdkTemplate {
 
         def fields = FieldUtils.getAllFields(apiMessageClass)
 
+        APIMessage msg = (APIMessage)apiMessageClass.newInstance()
+
         def output = []
 
         OverriddenApiParams oap = apiMessageClass.getAnnotation(OverriddenApiParams.class)
@@ -108,8 +107,11 @@ class SdkApiTemplate implements JavaSdkTemplate {
                 annotationFields.add(String.format("nullElements = %s", apiParam.nullElements()))
                 annotationFields.add(String.format("emptyString = %s", apiParam.emptyString()))
                 if (apiParam.numberRange().length > 0) {
-                    def nr = apiParam.numberRange() as Integer[]
-                    annotationFields.add(String.format("numberRange = {%s}", nr.join(",")))
+                    def nr = apiParam.numberRange() as List<Long>
+                    def ns = []
+                    nr.forEach({ n -> return ns.add("${n}L")})
+
+                    annotationFields.add(String.format("numberRange = {%s}", ns.join(",")))
                 }
                 annotationFields.add(String.format("noTrim = %s", apiParam.noTrim()))
             } else {
@@ -118,7 +120,20 @@ class SdkApiTemplate implements JavaSdkTemplate {
 
             def fs = """\
     @Param(${annotationFields.join(", ")})
-    public ${f.getType().getName()} ${f.getName()};
+    public ${f.getType().getName()} ${f.getName()}${{ ->
+                f.accessible = true
+                
+                Object val = f.get(msg)
+                if (val == null) {
+                    return ";"
+                }
+                
+                if (val instanceof String) {
+                    return " = \"${StringEscapeUtils.escapeJava(val.toString())})\";"
+                } else {
+                    return " = ${val.toString()};"
+                }
+            }()}
 """
             output.add(fs.toString())
         }
@@ -272,6 +287,11 @@ ${generateMethods(path)}
 
     @Override
     List<SdkFile> generate() {
-        return generateAction()
+        try {
+            return generateAction()
+        } catch (Exception e) {
+            logger.warn("failed to generate SDK for ${apiMessageClass.name}")
+            throw e
+        }
     }
 }

@@ -44,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -101,6 +102,10 @@ public class RestServer implements Component, CloudBusEventListener {
 
             List<SdkFile> allFiles = new ArrayList<>();
             for (Class apiClz : apiClasses) {
+                if (Modifier.isAbstract(apiClz.getModifiers())) {
+                    continue;
+                }
+
                 JavaSdkTemplate tmp = (JavaSdkTemplate) clz.getConstructor(Class.class).newInstance(apiClz);
                 allFiles.addAll(tmp.generate());
             }

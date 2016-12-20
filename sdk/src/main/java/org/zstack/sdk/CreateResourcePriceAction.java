@@ -31,13 +31,13 @@ public class CreateResourcePriceAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String timeUnit;
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {0,-1}, noTrim = false)
-    public double price;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,9223372036854775807L}, noTrim = false)
+    public double price = 0.0;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String accountUuid;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0,-1}, noTrim = false)
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,9223372036854775807L}, noTrim = false)
     public java.lang.Long dateInLong;
 
     @Param(required = false)

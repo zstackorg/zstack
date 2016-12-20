@@ -23,10 +23,10 @@ public class AddSimulatorBackupStorageAction extends AbstractAction {
     }
 
     @Param(required = false)
-    public long totalCapacity;
+    public long totalCapacity = 0;
 
     @Param(required = false)
-    public long availableCapacity;
+    public long availableCapacity = 0;
 
     @Param(required = true, maxLength = 2048, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
     public java.lang.String url;

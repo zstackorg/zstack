@@ -29,13 +29,13 @@ public class CreateL3NetworkAction extends AbstractAction {
     public java.lang.String description;
 
     @Param(required = false)
-    public java.lang.String type;
+    public java.lang.String type = "L3BasicNetwork)";
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String l2NetworkUuid;
 
     @Param(required = false)
-    public boolean system;
+    public boolean system = false;
 
     @Param(required = false)
     public java.lang.String dnsDomain;

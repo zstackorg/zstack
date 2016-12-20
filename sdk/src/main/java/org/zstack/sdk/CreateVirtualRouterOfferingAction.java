@@ -43,20 +43,20 @@ public class CreateVirtualRouterOfferingAction extends AbstractAction {
     @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String description;
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {1,1024}, noTrim = false)
-    public int cpuNum;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,1024L}, noTrim = false)
+    public int cpuNum = 0;
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {1,2147483647}, noTrim = false)
-    public int cpuSpeed;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,2147483647L}, noTrim = false)
+    public int cpuSpeed = 0;
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {1,-1}, noTrim = false)
-    public long memorySize;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,9223372036854775807L}, noTrim = false)
+    public long memorySize = 0;
 
     @Param(required = false)
     public java.lang.String allocatorStrategy;
 
     @Param(required = false)
-    public int sortKey;
+    public int sortKey = 0;
 
     @Param(required = false)
     public java.lang.String type;

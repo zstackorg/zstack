@@ -31,11 +31,11 @@ public class CreateLoadBalancerListenerAction extends AbstractAction {
     @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String description;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1,65535}, noTrim = false)
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,65535L}, noTrim = false)
     public java.lang.Integer instancePort;
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {1,65535}, noTrim = false)
-    public int loadBalancerPort;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,65535L}, noTrim = false)
+    public int loadBalancerPort = 0;
 
     @Param(required = false, validValues = {"tcp","http"}, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String protocol;

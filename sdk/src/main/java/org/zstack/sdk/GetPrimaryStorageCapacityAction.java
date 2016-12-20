@@ -32,7 +32,7 @@ public class GetPrimaryStorageCapacityAction extends AbstractAction {
     public java.util.List primaryStorageUuids;
 
     @Param(required = false)
-    public boolean all;
+    public boolean all = false;
 
     @Param(required = false)
     public java.util.List systemTags;

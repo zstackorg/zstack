@@ -29,10 +29,10 @@ public class GetFreeIpOfL3NetworkAction extends AbstractAction {
     public java.lang.String ipRangeUuid;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String start;
+    public java.lang.String start = "0.0.0.0)";
 
     @Param(required = false)
-    public int limit;
+    public int limit = 100;
 
     @Param(required = false)
     public java.util.List systemTags;

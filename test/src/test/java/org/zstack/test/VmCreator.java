@@ -71,7 +71,7 @@ public class VmCreator {
         action.userTags = userTags;
         action.description = description;
         action.primaryStorageUuidForRootVolume = primaryStorageUuidForRootVolume;
-        action.strategy = strategy.toString();
+        action.strategy = strategy == null ? null : strategy.toString();
         action.sessionId = session == null ? api.getAdminSession().getUuid() : session.getUuid();
         CreateVmInstanceAction.Result res = action.call().throwExceptionIfError();
 

@@ -1502,6 +1502,7 @@ public class Api implements CloudBusEventListener {
 
     public IpRangeInventory addIpRangeByFullConfig(IpRangeInventory inv, SessionInventory session) throws ApiSenderException {
         AddIpRangeAction action = new AddIpRangeAction();
+        action.name = "ip-range";
         action.sessionId = session.getUuid();
         action.l3NetworkUuid = inv.getL3NetworkUuid();
         action.startIp = inv.getStartIp();

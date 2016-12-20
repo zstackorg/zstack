@@ -26,13 +26,13 @@ public class RevokeResourceSharingAction extends AbstractAction {
     public java.util.List resourceUuids;
 
     @Param(required = false)
-    public boolean toPublic;
+    public boolean toPublic = false;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.util.List accountUuids;
 
     @Param(required = false)
-    public boolean all;
+    public boolean all = false;
 
     @Param(required = false)
     public java.util.List systemTags;

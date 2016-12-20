@@ -41,7 +41,7 @@ public class CreateRootVolumeTemplateFromVolumeSnapshotAction extends AbstractAc
     public java.lang.String platform;
 
     @Param(required = false)
-    public boolean system;
+    public boolean system = false;
 
     @Param(required = false)
     public java.lang.String resourceUuid;

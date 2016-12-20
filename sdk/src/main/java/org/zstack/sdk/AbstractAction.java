@@ -20,7 +20,8 @@ public abstract class AbstractAction {
 
     private synchronized void initializeParametersIfNot() {
         if (getParameterMap().isEmpty()) {
-            Field[] fields = getClass().getDeclaredFields();
+            List<Field> fields = getAllFields();
+
             for (Field f : fields) {
                 Param at = f.getAnnotation(Param.class);
                 if (at == null) {
@@ -35,6 +36,17 @@ public abstract class AbstractAction {
                 getParameterMap().put(f.getName(), p);
             }
         }
+    }
+
+    protected List<Field> getAllFields() {
+        Class c = getClass();
+        List<Field> fs = new ArrayList<>();
+        while (c != Object.class) {
+            Collections.addAll(fs, c.getDeclaredFields());
+            c = c.getSuperclass();
+        }
+
+        return fs;
     }
 
     Set<String> getAllParameterNames() {

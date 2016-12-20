@@ -22,7 +22,7 @@ public class CreateL2VlanNetworkAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {0,4094}, noTrim = false)
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,4094L}, noTrim = false)
     public java.lang.Integer vlan;
 
     @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)

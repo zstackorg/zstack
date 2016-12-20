@@ -29,7 +29,7 @@ public class ShareResourceAction extends AbstractAction {
     public java.util.List accountUuids;
 
     @Param(required = false)
-    public boolean toPublic;
+    public boolean toPublic = false;
 
     @Param(required = false)
     public java.util.List systemTags;

@@ -25,10 +25,10 @@ public class CalculateAccountSpendingAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String accountUuid;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0,-1}, noTrim = false)
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,9223372036854775807L}, noTrim = false)
     public java.lang.Long dateStart;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0,-1}, noTrim = false)
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,9223372036854775807L}, noTrim = false)
     public java.lang.Long dateEnd;
 
     @Param(required = false)

@@ -134,6 +134,7 @@ import org.zstack.storage.ceph.primary.*;
 import org.zstack.storage.ceph.primary.CephPrimaryStorageInventory;
 import org.zstack.storage.primary.local.*;
 import org.zstack.storage.primary.local.LocalStorageResourceRefInventory;
+import org.zstack.test.storage.volume.AddImage;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.TimeUtils;
 import org.zstack.utils.Utils;
@@ -947,17 +948,17 @@ public class Api implements CloudBusEventListener {
     }
 
     public L2NetworkInventory createNoVlanL2Network(String zoneUuid, String iface) throws ApiSenderException {
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICreateL2NoVlanNetworkMsg msg = new APICreateL2NoVlanNetworkMsg();
-        msg.setSession(adminSession);
-        msg.setName("TestL2Network");
-        msg.setDescription("test");
-        msg.setZoneUuid(zoneUuid);
-        msg.setPhysicalInterface(iface);
-        msg.setType(L2NetworkConstant.L2_NO_VLAN_NETWORK_TYPE);
-        APICreateL2NetworkEvent e = sender.send(msg, APICreateL2NetworkEvent.class);
-        return e.getInventory();
+        CreateL2NoVlanNetworkAction action = new CreateL2NoVlanNetworkAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.name = "test l2";
+        action.description = "test";
+        action.zoneUuid = zoneUuid;
+        action.physicalInterface = iface;
+        action.type = L2NetworkConstant.L2_NO_VLAN_NETWORK_TYPE;
+        CreateL2NoVlanNetworkAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.inventory, L2NetworkInventory.class);
     }
 
     public List<L2NetworkInventory> listL2Network(List<String> uuids) throws ApiSenderException {
@@ -979,31 +980,32 @@ public class Api implements CloudBusEventListener {
     public void deleteL2Network(String uuid) throws ApiSenderException {
         ApiSender sender = new ApiSender();
         sender.setTimeout(timeout);
-        APIDeleteL2NetworkMsg msg = new APIDeleteL2NetworkMsg();
-        msg.setSession(adminSession);
-        msg.setUuid(uuid);
-        sender.send(msg, APIDeleteL2NetworkEvent.class);
+
+        DeleteL2NetworkAction action = new DeleteL2NetworkAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.uuid = uuid;
+        DeleteL2NetworkAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
     }
 
     public L2NetworkInventory attachL2NetworkToCluster(String l2NetworkUuid, String clusterUuid) throws ApiSenderException {
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAttachL2NetworkToClusterMsg msg = new APIAttachL2NetworkToClusterMsg();
-        msg.setSession(adminSession);
-        msg.setL2NetworkUuid(l2NetworkUuid);
-        msg.setClusterUuid(clusterUuid);
-        APIAttachL2NetworkToClusterEvent evt = sender.send(msg, APIAttachL2NetworkToClusterEvent.class);
-        return evt.getInventory();
+        AttachL2NetworkToClusterAction action = new AttachL2NetworkToClusterAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.l2NetworkUuid = l2NetworkUuid;
+        action.clusterUuid = clusterUuid;
+        AttachL2NetworkToClusterAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.inventory, L2NetworkInventory.class);
     }
 
     public void detachL2NetworkFromCluster(String l2NetworkUuid, String clusterUuid) throws ApiSenderException {
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIDetachL2NetworkFromClusterMsg msg = new APIDetachL2NetworkFromClusterMsg();
-        msg.setSession(adminSession);
-        msg.setL2NetworkUuid(l2NetworkUuid);
-        msg.setClusterUuid(clusterUuid);
-        sender.send(msg, APIDetachL2NetworkFromClusterEvent.class);
+        DetachL2NetworkFromClusterAction action = new DetachL2NetworkFromClusterAction();
+        action.l2NetworkUuid = l2NetworkUuid;
+        action.clusterUuid = clusterUuid;
+        action.sessionId = getSessionUuid(adminSession);
+        DetachL2NetworkFromClusterAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
     }
 
     public L3NetworkInventory createL3BasicNetwork(String l2NetworkUuid) throws ApiSenderException {
@@ -1012,15 +1014,16 @@ public class Api implements CloudBusEventListener {
 
     public L3NetworkInventory createL3BasicNetwork(String l2NetworkUuid, SessionInventory session) throws ApiSenderException {
         APICreateL3NetworkMsg msg = new APICreateL3NetworkMsg();
-        msg.setSession(session == null ? adminSession : session);
-        msg.setL2NetworkUuid(l2NetworkUuid);
-        msg.setType(L3NetworkConstant.L3_BASIC_NETWORK_TYPE);
-        msg.setName("Test-L3Network");
-        msg.setDescription("Test");
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICreateL3NetworkEvent e = sender.send(msg, APICreateL3NetworkEvent.class);
-        return e.getInventory();
+
+        CreateL3NetworkAction action = new CreateL3NetworkAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.l2NetworkUuid = l2NetworkUuid;
+        action.type = L3NetworkConstant.L3_BASIC_NETWORK_TYPE;
+        action.name = "Test-L3Network";
+        action.description = "test";
+        CreateL3NetworkAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+        return JSONObjectUtil.rehashObject(res.value.inventory, L3NetworkInventory.class);
     }
 
     public L3NetworkInventory changeL3NetworkState(String uuid, L3NetworkStateEvent sevnt) throws ApiSenderException {
@@ -1028,14 +1031,13 @@ public class Api implements CloudBusEventListener {
     }
 
     public L3NetworkInventory changeL3NetworkState(String uuid, L3NetworkStateEvent sevnt, SessionInventory session) throws ApiSenderException {
-        APIChangeL3NetworkStateMsg msg = new APIChangeL3NetworkStateMsg();
-        msg.setUuid(uuid);
-        msg.setStateEvent(sevnt.toString());
-        msg.setSession(session == null ? adminSession : session);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIChangeL3NetworkStateEvent e = sender.send(msg, APIChangeL3NetworkStateEvent.class);
-        return e.getInventory();
+        ChangeL3NetworkStateAction action = new ChangeL3NetworkStateAction();
+        action.sessionId = getSessionUuid(session);
+        action.stateEvent = sevnt.toString();
+        action.uuid = uuid;
+        ChangeL3NetworkStateAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+        return JSONObjectUtil.rehashObject(res.value.inventory, L3NetworkInventory.class);
     }
 
     public void deleteL3Network(String uuid) throws ApiSenderException {
@@ -1043,11 +1045,11 @@ public class Api implements CloudBusEventListener {
     }
 
     public void deleteL3Network(String uuid, SessionInventory session) throws ApiSenderException {
-        APIDeleteL3NetworkMsg msg = new APIDeleteL3NetworkMsg(uuid);
-        msg.setSession(session == null ? adminSession : session);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        sender.send(msg, APIDeleteL3NetworkEvent.class);
+        DeleteL3NetworkAction action = new DeleteL3NetworkAction();
+        action.sessionId = getSessionUuid(session);
+        action.uuid = uuid;
+        DeleteL3NetworkAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
     }
 
     public List<L3NetworkInventory> listL3Network(List<String> uuids) throws ApiSenderException {
@@ -1067,14 +1069,18 @@ public class Api implements CloudBusEventListener {
     }
 
     public APIGetIpAddressCapacityReply getIpAddressCapacity(List<String> iprUuids, List<String> l3Uuids, List<String> zoneUuids) throws ApiSenderException {
-        APIGetIpAddressCapacityMsg msg = new APIGetIpAddressCapacityMsg();
-        msg.setSession(adminSession);
-        msg.setIpRangeUuids(iprUuids);
-        msg.setL3NetworkUuids(l3Uuids);
-        msg.setZoneUuids(zoneUuids);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        return sender.call(msg, APIGetIpAddressCapacityReply.class);
+        GetIpAddressCapacityAction action = new GetIpAddressCapacityAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.ipRangeUuids = iprUuids;
+        action.l3NetworkUuids = l3Uuids;
+        action.zoneUuids = zoneUuids;
+        GetIpAddressCapacityAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        APIGetIpAddressCapacityReply reply = new APIGetIpAddressCapacityReply();
+        reply.setTotalCapacity(res.value.totalCapacity);
+        reply.setAvailableCapacity(res.value.availableCapacity);
+        return reply;
     }
 
     public APIGetIpAddressCapacityReply getIpAddressCapacityByAll() throws ApiSenderException {
@@ -1082,12 +1088,16 @@ public class Api implements CloudBusEventListener {
     }
 
     public APIGetIpAddressCapacityReply getIpAddressCapacityByAll(SessionInventory session) throws ApiSenderException {
-        APIGetIpAddressCapacityMsg msg = new APIGetIpAddressCapacityMsg();
-        msg.setSession(session == null ? adminSession : session);
-        msg.setAll(true);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        return sender.call(msg, APIGetIpAddressCapacityReply.class);
+        GetIpAddressCapacityAction action = new GetIpAddressCapacityAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.all = true;
+        GetIpAddressCapacityAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        APIGetIpAddressCapacityReply reply = new APIGetIpAddressCapacityReply();
+        reply.setTotalCapacity(res.value.totalCapacity);
+        reply.setAvailableCapacity(res.value.availableCapacity);
+        return reply;
     }
 
     public IpRangeInventory addIpRangeByCidr(String l3NetworkUuid, String cidr) throws ApiSenderException {
@@ -1095,16 +1105,15 @@ public class Api implements CloudBusEventListener {
     }
 
     public IpRangeInventory addIpRangeByCidr(String l3NetworkUuid, String cidr, SessionInventory session) throws ApiSenderException {
-        APIAddIpRangeByNetworkCidrMsg msg = new APIAddIpRangeByNetworkCidrMsg();
-        msg.setSession(session == null ? adminSession : session);
-        msg.setL3NetworkUuid(l3NetworkUuid);
-        msg.setNetworkCidr(cidr);
-        msg.setName("TestIpRange");
-        msg.setDescription("test");
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAddIpRangeByNetworkCidrEvent e = sender.send(msg, APIAddIpRangeByNetworkCidrEvent.class);
-        return e.getInventory();
+        AddIpRangeByNetworkCidrAction action = new AddIpRangeByNetworkCidrAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.l3NetworkUuid = l3NetworkUuid;
+        action.networkCidr = cidr;
+        action.name = "TestIpRange";
+        action.description = "test";
+        AddIpRangeByNetworkCidrAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+        return JSONObjectUtil.rehashObject(res.value.inventory, IpRangeInventory.class);
     }
 
     public IpRangeInventory addIpRange(String l3NetworkUuid, String startIp, String endIp, String gateway, String netmask) throws ApiSenderException {
@@ -1112,19 +1121,18 @@ public class Api implements CloudBusEventListener {
     }
 
     public IpRangeInventory addIpRange(String l3NetworkUuid, String startIp, String endIp, String gateway, String netmask, SessionInventory session) throws ApiSenderException {
-        APIAddIpRangeMsg msg = new APIAddIpRangeMsg();
-        msg.setSession(session == null ? adminSession : session);
-        msg.setL3NetworkUuid(l3NetworkUuid);
-        msg.setStartIp(startIp);
-        msg.setEndIp(endIp);
-        msg.setNetmask(netmask);
-        msg.setGateway(gateway);
-        msg.setName("TestIpRange");
-        msg.setDescription("test");
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAddIpRangeEvent e = sender.send(msg, APIAddIpRangeEvent.class);
-        return e.getInventory();
+        AddIpRangeAction action = new AddIpRangeAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.l3NetworkUuid = l3NetworkUuid;
+        action.startIp = startIp;
+        action.endIp = endIp;
+        action.netmask = netmask;
+        action.gateway = gateway;
+        action.name = "TestIpRange";
+        action.description = "test";
+        AddIpRangeAction.Result res = action.call();
+
+        return JSONObjectUtil.rehashObject(res.value.inventory, IpRangeInventory.class);
     }
 
     public List<FreeIpInventory> getFreeIp(String l3Uuid, String ipRangeUuid) throws ApiSenderException {
@@ -1144,27 +1152,46 @@ public class Api implements CloudBusEventListener {
     }
 
     public boolean checkIpAvailability(String l3Uuid, String ip, SessionInventory session) throws ApiSenderException {
-        APICheckIpAvailabilityMsg msg = new APICheckIpAvailabilityMsg();
-        msg.setL3NetworkUuid(l3Uuid);
-        msg.setIp(ip);
-        msg.setSession(session == null ? adminSession : session);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICheckIpAvailabilityReply rely = sender.call(msg, APICheckIpAvailabilityReply.class);
-        return rely.isAvailable();
+        CheckIpAvailabilityAction action = new CheckIpAvailabilityAction();
+        action.ip = ip;
+        action.l3NetworkUuid = l3Uuid;
+        action.sessionId = getSessionUuid(session);
+        CheckIpAvailabilityAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return res.value.available;
     }
 
     public List<FreeIpInventory> getFreeIp(String l3Uuid, String ipRangeUuid, int limit, String start, SessionInventory session) throws ApiSenderException {
-        APIGetFreeIpMsg msg = new APIGetFreeIpMsg();
-        msg.setSession(session == null ? adminSession : session);
-        msg.setL3NetworkUuid(l3Uuid);
-        msg.setIpRangeUuid(ipRangeUuid);
-        msg.setLimit(limit);
-        msg.setStartIp(start);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIGetFreeIpReply reply = sender.call(msg, APIGetFreeIpReply.class);
-        return reply.getInventories();
+        if (l3Uuid != null) {
+            GetFreeIpOfL3NetworkAction action = new GetFreeIpOfL3NetworkAction();
+            action.sessionId = getSessionUuid(session);
+            action.l3NetworkUuid = l3Uuid;
+            action.limit = limit;
+            action.start = start;
+            GetFreeIpOfL3NetworkAction.Result res = action.call();
+            throwExceptionIfNeed(res.error);
+
+            return JSONObjectUtil.toCollection(
+                    JSONObjectUtil.toJsonString(res.value.inventories),
+                    ArrayList.class,
+                    FreeIpInventory.class
+            );
+        } else {
+            GetFreeIpOfIpRangeAction action = new GetFreeIpOfIpRangeAction();
+            action.sessionId = getSessionUuid(session);
+            action.ipRangeUuid = ipRangeUuid;
+            action.limit = limit;
+            action.start = start;
+            GetFreeIpOfIpRangeAction.Result res = action.call();
+            throwExceptionIfNeed(res.error);
+
+            return JSONObjectUtil.toCollection(
+                    JSONObjectUtil.toJsonString(res.value.inventories),
+                    ArrayList.class,
+                    FreeIpInventory.class
+            );
+        }
     }
 
     public List<IpRangeInventory> listIpRange(List<String> uuids) throws ApiSenderException {
@@ -1189,11 +1216,12 @@ public class Api implements CloudBusEventListener {
 
     public void deleteIpRange(String uuid, SessionInventory session) throws ApiSenderException {
         APIDeleteIpRangeMsg msg = new APIDeleteIpRangeMsg(uuid);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        msg.setSession(session == null ? adminSession : session);
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        sender.send(msg, APIDeleteIpRangeEvent.class);
+
+        DeleteIpRangeAction action = new DeleteIpRangeAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.uuid = uuid;
+        DeleteIpRangeAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
     }
 
 
@@ -1202,14 +1230,14 @@ public class Api implements CloudBusEventListener {
     }
 
     public L3NetworkInventory removeDnsFromL3Network(String dns, String l3NetworkUuid, SessionInventory session) throws ApiSenderException {
-        APIRemoveDnsFromL3NetworkMsg msg = new APIRemoveDnsFromL3NetworkMsg();
-        msg.setSession(session == null ? adminSession : session);
-        msg.setDns(dns);
-        msg.setL3NetworkUuid(l3NetworkUuid);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIRemoveDnsFromL3NetworkEvent evt = sender.send(msg, APIRemoveDnsFromL3NetworkEvent.class);
-        return evt.getInventory();
+        RemoveDnsFromL3NetworkAction action = new RemoveDnsFromL3NetworkAction();
+        action.dns = dns;
+        action.l3NetworkUuid = l3NetworkUuid;
+        action.sessionId = getSessionUuid(session);
+        RemoveDnsFromL3NetworkAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.inventory, L3NetworkInventory.class);
     }
 
     public ZoneInventory createZoneByFullConfig(ZoneInventory inv) throws ApiSenderException {
@@ -1224,18 +1252,17 @@ public class Api implements CloudBusEventListener {
     }
 
     public ClusterInventory createClusterByFullConfig(ClusterInventory inv) throws ApiSenderException {
-        APICreateClusterMsg msg = new APICreateClusterMsg();
-        msg.setSession(adminSession);
-        msg.setClusterName(inv.getName());
-        msg.setDescription(inv.getDescription());
-        msg.setHypervisorType(inv.getHypervisorType());
-        msg.setType(inv.getType());
-        msg.setZoneUuid(inv.getZoneUuid());
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APICreateClusterEvent evt = sender.send(msg, APICreateClusterEvent.class);
-        return evt.getInventory();
+        CreateClusterAction action = new CreateClusterAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.name = inv.getName();
+        action.description = inv.getDescription();
+        action.hypervisorType = inv.getHypervisorType();
+        action.type = inv.getType();
+        action.zoneUuid = inv.getZoneUuid();
+        CreateClusterAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.inventory, ClusterInventory.class);
     }
 
     public HostInventory addHostByFullConfig(HostInventory inv) throws ApiSenderException {
@@ -1253,27 +1280,39 @@ public class Api implements CloudBusEventListener {
     }
 
     public APIGetPrimaryStorageCapacityReply getPrimaryStorageCapacityByAll() throws ApiSenderException {
-        APIGetPrimaryStorageCapacityMsg msg = new APIGetPrimaryStorageCapacityMsg();
-        msg.setSession(adminSession);
-        msg.setAll(true);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        return sender.call(msg, APIGetPrimaryStorageCapacityReply.class);
+        GetPrimaryStorageCapacityAction action = new GetPrimaryStorageCapacityAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.all = true;
+        GetPrimaryStorageCapacityAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        APIGetPrimaryStorageCapacityReply reply = new APIGetPrimaryStorageCapacityReply();
+        reply.setAvailableCapacity(res.value.availableCapacity);
+        reply.setTotalCapacity(res.value.totalCapacity);
+
+        return reply;
     }
 
     public APIGetPrimaryStorageCapacityReply getPrimaryStorageCapacity(List<String> zoneUuids, List<String> clusterUuids, List<String> psUuids) throws ApiSenderException {
-        APIGetPrimaryStorageCapacityMsg msg = new APIGetPrimaryStorageCapacityMsg();
-        msg.setSession(adminSession);
-        msg.setZoneUuids(zoneUuids);
-        msg.setClusterUuids(clusterUuids);
-        msg.setPrimaryStorageUuids(psUuids);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        return sender.call(msg, APIGetPrimaryStorageCapacityReply.class);
+
+        GetPrimaryStorageCapacityAction action = new GetPrimaryStorageCapacityAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.zoneUuids = zoneUuids;
+        action.clusterUuids = clusterUuids;
+        action.primaryStorageUuids = psUuids;
+        GetPrimaryStorageCapacityAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        APIGetPrimaryStorageCapacityReply reply = new APIGetPrimaryStorageCapacityReply();
+        reply.setAvailableCapacity(res.value.availableCapacity);
+        reply.setTotalCapacity(res.value.totalCapacity);
+
+        return reply;
     }
 
     public PrimaryStorageInventory addPrimaryStorageByFullConfig(PrimaryStorageInventory inv) throws ApiSenderException {
         AddSimulatorPrimaryStorageAction action = new AddSimulatorPrimaryStorageAction();
+
         action.sessionId = adminSession.getUuid();
         action.description = inv.getDescription();
         action.type = SimulatorPrimaryStorageConstant.SIMULATOR_PRIMARY_STORAGE_TYPE;
@@ -1288,22 +1327,32 @@ public class Api implements CloudBusEventListener {
     }
 
     public APIGetBackupStorageCapacityReply getBackupStorageCapacityByAll() throws ApiSenderException {
-        APIGetBackupStorageCapacityMsg msg = new APIGetBackupStorageCapacityMsg();
-        msg.setSession(adminSession);
-        msg.setAll(true);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        return sender.call(msg, APIGetBackupStorageCapacityReply.class);
+        GetBackupStorageCapacityAction action = new GetBackupStorageCapacityAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.all = true;
+        GetBackupStorageCapacityAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        APIGetBackupStorageCapacityReply reply = new APIGetBackupStorageCapacityReply();
+        reply.setAvailableCapacity(res.value.availableCapacity);
+        reply.setTotalCapacity(res.value.totalCapacity);
+
+        return reply;
     }
 
     public APIGetBackupStorageCapacityReply getBackupStorageCapacity(List<String> zoneUuids, List<String> bsUuids) throws ApiSenderException {
-        APIGetBackupStorageCapacityMsg msg = new APIGetBackupStorageCapacityMsg();
-        msg.setSession(adminSession);
-        msg.setBackupStorageUuids(bsUuids);
-        msg.setZoneUuids(zoneUuids);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        return sender.call(msg, APIGetBackupStorageCapacityReply.class);
+        GetBackupStorageCapacityAction action = new GetBackupStorageCapacityAction();
+        action.sessionId = getSessionUuid(adminSession);
+        action.zoneUuids = zoneUuids;
+        action.backupStorageUuids = bsUuids;
+        GetBackupStorageCapacityAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
+
+        APIGetBackupStorageCapacityReply reply = new APIGetBackupStorageCapacityReply();
+        reply.setAvailableCapacity(res.value.availableCapacity);
+        reply.setTotalCapacity(res.value.totalCapacity);
+
+        return reply;
     }
 
     public BackupStorageInventory addBackupStorageByFullConfig(BackupStorageInventory inv) throws ApiSenderException {
@@ -1321,28 +1370,6 @@ public class Api implements CloudBusEventListener {
         return JSONObjectUtil.rehashObject(res.value.getInventory(), BackupStorageInventory.class);
     }
 
-    public ImageInventory addImageByFullConfig(ImageInventory inv, String bsUuid) throws ApiSenderException {
-        return addImageByFullConfig(inv, bsUuid, null);
-    }
-
-    public ImageInventory addImageByFullConfig(ImageInventory inv, String bsUuid, SessionInventory session) throws ApiSenderException {
-        APIAddImageMsg msg = new APIAddImageMsg();
-        msg.setSession(session == null ? adminSession : session);
-        msg.getBackupStorageUuids().add(bsUuid);
-        msg.setDescription(inv.getDescription());
-        msg.setMediaType(inv.getMediaType());
-        msg.setGuestOsType(inv.getGuestOsType());
-        msg.setFormat(inv.getFormat());
-        msg.setPlatform(inv.getPlatform());
-        msg.setType(inv.getType());
-        msg.setName(inv.getName());
-        msg.setServiceId(ApiMediatorConstant.SERVICE_ID);
-        msg.setUrl(inv.getUrl());
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIAddImageEvent evt = sender.send(msg, APIAddImageEvent.class);
-        return evt.getInventory();
-    }
 
     public L2VlanNetworkInventory createL2VlanNetworkByFullConfig(L2VlanNetworkInventory inv) throws ApiSenderException {
         CreateL2VlanNetworkAction action = new CreateL2VlanNetworkAction();

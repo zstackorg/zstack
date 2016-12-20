@@ -41,7 +41,7 @@ import org.zstack.header.rest.RestResponse;
  * }
  * @since 0.1.0
  */
-@RestResponse
+@RestResponse(allTo = "inventory")
 public class APIRemoveDnsFromL3NetworkEvent extends APIEvent {
     /**
      * @desc see :ref:`L3NetworkInventory`

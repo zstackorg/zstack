@@ -9,7 +9,7 @@ public class CreateAccountAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public CreateZoneResult value;
+        public CreateAccountResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -59,8 +59,8 @@ public class CreateAccountAction extends AbstractAction {
             return ret;
         }
         
-        CreateZoneResult value = res.getResult(CreateZoneResult.class);
-        ret.value = value == null ? new CreateZoneResult() : value;
+        CreateAccountResult value = res.getResult(CreateAccountResult.class);
+        ret.value = value == null ? new CreateAccountResult() : value;
         return ret;
     }
 
@@ -75,8 +75,8 @@ public class CreateAccountAction extends AbstractAction {
                     return;
                 }
                 
-                CreateZoneResult value = res.getResult(CreateZoneResult.class);
-                ret.value = value == null ? new CreateZoneResult() : value;
+                CreateAccountResult value = res.getResult(CreateAccountResult.class);
+                ret.value = value == null ? new CreateAccountResult() : value;
                 completion.complete(ret);
             }
         });

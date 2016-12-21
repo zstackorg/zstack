@@ -10,7 +10,7 @@ import org.zstack.header.zone.APICreateZoneEvent;
         path = "/accounts",
         method = HttpMethod.POST,
         parameterName = "params",
-        responseClass = APICreateZoneEvent.class
+        responseClass = APICreateAccountEvent.class
 )
 public class APICreateAccountMsg extends APICreateMessage {
     @APIParam(maxLength = 255)

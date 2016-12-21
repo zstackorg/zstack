@@ -110,7 +110,7 @@ public class RestServer implements Component, CloudBusEventListener {
                 allFiles.addAll(tmp.generate());
             }
 
-            JavaSdkTemplate tmp = GroovyUtils.loadClass("scripts/SdkDataStructureGenerator.groovy", RestServer.class.getClassLoader());
+            JavaSdkTemplate tmp = GroovyUtils.newInstance("scripts/SdkDataStructureGenerator.groovy", RestServer.class.getClassLoader());
             allFiles.addAll(tmp.generate());
 
             for (SdkFile f : allFiles) {
@@ -358,7 +358,11 @@ public class RestServer implements Component, CloudBusEventListener {
         // task is done
         APIEvent evt = ret.getResult();
         if (evt.isSuccess()) {
-            writeResponse(response, responseAnnotationByClass.get(evt.getClass()), ret.getResult());
+            RestResponseWrapper w = responseAnnotationByClass.get(evt.getClass());
+            if (w == null) {
+                throw new CloudRuntimeException(String.format("cannot find RestResponseWrapper for the class[%s]", evt.getClass()));
+            }
+            writeResponse(response, w, ret.getResult());
             sendResponse(HttpStatus.OK.value(), response, rsp);
         } else {
             response.setError(evt.getErrorCode());

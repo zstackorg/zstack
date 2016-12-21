@@ -53,6 +53,7 @@ public class TestCreateZoneRest1 {
         action.sessionId = api.getAdminSession().getUuid();
         action.name = "zone1";
         CreateZoneAction.Result res = action.call();
+
         if (res.error != null) {
             throw new CloudRuntimeException(JSONObjectUtil.toJsonString(res.error));
         }

@@ -1,7 +1,9 @@
 package scripts
 
+import groovy.json.JsonBuilder
 import org.zstack.rest.sdk.DocumentGenerator
 import org.zstack.utils.Utils
+import org.zstack.utils.gson.JSONObjectUtil
 import org.zstack.utils.logging.CLogger
 
 /**
@@ -18,11 +20,99 @@ class RestDocumentationGenerator implements DocumentGenerator {
         c(emc)
     }
 
+    class RequestParamColumn {
+        private String _name
+        private String _desc
+        private boolean _optional
+        private List _values
+
+        def name(String v) {
+            _name = v
+        }
+
+        def desc(String v) {
+            _desc = v
+        }
+
+        def optional(boolean v) {
+            _optional = v
+        }
+
+        def values(Object...args) {
+            _values = args as List
+        }
+    }
+
+    class RequestParam {
+        private List<RequestParamColumn> _cloumns = []
+
+        def column(Closure c) {
+            def rc = c.delegate = new RequestParamColumn()
+            c.resolveStrategy = Closure.DELEGATE_FIRST
+            c()
+
+            _cloumns.add(rc)
+        }
+    }
+
+    class Rest {
+        private Request _request
+
+        def request(Closure c) {
+            c.delegate = new Request()
+            c.resolveStrategy = Closure.DELEGATE_FIRST
+            c()
+
+            _request = c.delegate as Request
+        }
+    }
+
+    class Request {
+        private String _url
+        private Map _header
+        private String _desc
+        private RequestParam _params
+
+        def url(String v) {
+            _url = v
+        }
+
+        def header(Map v) {
+            _header = v
+        }
+
+        def desc(String v) {
+            _desc = v
+        }
+
+        def params(Closure c) {
+            c.delegate = new RequestParam()
+            c.resolveStrategy = Closure.DELEGATE_FIRST
+            c()
+
+            _params = c.delegate
+        }
+    }
+
     class Doc {
-        private String titleValue
+        private String _title
+        private String _desc
+        private Rest _rest
 
         def title(String v) {
-            titleValue = v
+            _title = v
+        }
+
+        def desc(String v) {
+            _desc = v
+        }
+
+        def rest(Closure c) {
+            c.delegate = new Rest()
+            c.resolveStrategy = Closure.DELEGATE_FIRST
+            c()
+
+            _rest = c.delegate
         }
     }
 
@@ -48,7 +138,8 @@ class RestDocumentationGenerator implements DocumentGenerator {
         script.setMetaClass(emc)
         docs.add(script.run() as Doc)
 
-        System.out.println("xxxxxxxxxxxxxxxx ${docs[0].titleValue}")
+        def json = new JsonBuilder(docs[0])
+        System.out.println("xxxxxxxxxxxxxxxx ${JSONObjectUtil.toJsonString(docs[0])}")
     }
 
     def generateDocMetaFiles() {

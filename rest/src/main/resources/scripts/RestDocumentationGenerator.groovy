@@ -12,10 +12,43 @@ class RestDocumentationGenerator implements DocumentGenerator {
 
     String rootPath
 
+    List<Doc> docs = []
+
+    def installClosuer(ExpandoMetaClass emc, Closure c) {
+        c(emc)
+    }
+
+    class Doc {
+        private String titleValue
+
+        def title(String v) {
+            titleValue = v
+        }
+    }
+
     void generate() {
         //generateDocMetaFiles()
 
+        Script script = new GroovyShell().parse(new File("/root/zstack/header/src/main/java/org/zstack/header/zone/APICreateZoneMsgDoc_.groovy"))
+        ExpandoMetaClass emc = new ExpandoMetaClass(script.getClass(), false)
 
+        installClosuer(emc, { ExpandoMetaClass e ->
+            e.doc = { Closure cDoc ->
+                cDoc.delegate = new Doc()
+                cDoc.resolveStrategy = DELEGATE_FIRST
+
+                cDoc()
+
+                return  cDoc.delegate
+            }
+        })
+
+        emc.initialize()
+
+        script.setMetaClass(emc)
+        docs.add(script.run() as Doc)
+
+        System.out.println("xxxxxxxxxxxxxxxx ${docs[0].titleValue}")
     }
 
     def generateDocMetaFiles() {

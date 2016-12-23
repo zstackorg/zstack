@@ -1,6 +1,4 @@
-import scripts.RestDoc
-
-RestDoc.make {
+doc {
     title "test"
 }
 

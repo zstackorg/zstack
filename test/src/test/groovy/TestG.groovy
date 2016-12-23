@@ -1,4 +1,5 @@
 import org.junit.Test
+import org.zstack.rest.RestServer
 import org.zstack.utils.GroovyUtils
 
 /**
@@ -7,10 +8,6 @@ import org.zstack.utils.GroovyUtils
 class TestG {
     @Test
     void test() {
-        def generator = GroovyUtils.newInstance("RestDocumentationGenerator1.class", "/root/zstack")
-        generator.generate()
-
-        //RestDocumentationGenerator1 r1 = new RestDocumentationGenerator1("/root/zstack")
-        //r1.generate()
+        RestServer.generateDoc()
     }
 }

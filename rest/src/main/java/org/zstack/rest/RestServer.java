@@ -1,5 +1,6 @@
 package org.zstack.rest;
 
+import groovy.lang.GroovyShell;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -28,6 +29,7 @@ import org.zstack.header.query.QueryCondition;
 import org.zstack.header.rest.RESTFacade;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.rest.RestResponse;
+import org.zstack.rest.sdk.DocumentGenerator;
 import org.zstack.rest.sdk.JavaSdkTemplate;
 import org.zstack.rest.sdk.SdkFile;
 import org.zstack.utils.DebugUtils;
@@ -88,6 +90,18 @@ public class RestServer implements Component, CloudBusEventListener {
     }
 
     private static final String ASYNC_JOB_PATH_PATTERN = String.format("%s/%s/{uuid}", RestConstants.API_VERSION, RestConstants.ASYNC_JOB_PATH);
+
+    public static void generateDoc() {
+        DocumentGenerator rg =  GroovyUtils.newInstance("scripts/RestDocumentationGenerator.groovy");
+        rg.generate("/root/zstack");
+
+        GroovyShell shell = new GroovyShell();
+        try {
+            shell.evaluate(new File("/root/zstack/header/src/main/java/org/zstack/header/zone/APICreateZoneMsgDoc_.groovy"));
+        } catch (IOException e) {
+            throw new CloudRuntimeException(e);
+        }
+    }
 
     public static void generateJavaSdk() {
         String path = PathUtil.join(System.getProperty("user.home"), "zstack-sdk/java");

@@ -67,11 +67,18 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
     }
 
+    class RequestBody {
+        def methodMissing(String name, args) {
+            System.out.println("============ ${name} ${args}")
+        }
+    }
+
     class Request {
         private String _url
         private Map _header
         private String _desc
         private RequestParam _params
+        private RequestBody _body
 
         def url(String v) {
             _url = v
@@ -91,6 +98,14 @@ class RestDocumentationGenerator implements DocumentGenerator {
             c()
 
             _params = c.delegate
+        }
+
+        def body(Closure c) {
+            c.delegate = new RequestBody()
+            c.resolveStrategy = Closure.DELEGATE_FIRST
+            c()
+
+            _body = c.delegate
         }
     }
 
@@ -156,5 +171,9 @@ class RestDocumentationGenerator implements DocumentGenerator {
     void generate(String scanPath) {
         rootPath = scanPath
         generate()
+    }
+
+    def methodMissing(String name, args) {
+        System.out.println("------------ ${name} ${args}")
     }
 }

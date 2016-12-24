@@ -11,6 +11,13 @@ doc {
                     xxx : 1
             )
 
+            body {
+                paramerters {
+                }
+
+                systemTags (1, 2, 3)
+            }
+
             desc ""
 
             params {

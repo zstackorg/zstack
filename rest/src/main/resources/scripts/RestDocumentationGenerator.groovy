@@ -191,79 +191,77 @@ class RestDocumentationGenerator implements DocumentGenerator {
         generateDocMetaTemplates()
     }
 
-    def generateDocMetaTemplates() {
-        Map<String, File> files = [:]
+    class DocTemplate {
+        Class apiClass
+        File sourceFile
+        RestRequest at
 
-        File root = new File(rootPath)
-        root.traverse { f ->
-            files[f.name] = f
+        DocTemplate(Class apiClass, File src) {
+            this.apiClass = apiClass
+            this.sourceFile = src
+            at = apiClass.getAnnotation(RestRequest.class)
         }
 
-        Set<Class> apiClasses = Platform.getReflections().getTypesAnnotatedWith(RestRequest.class)
-        apiClasses.each {
-            def filename = "${it.simpleName}.java"
-            File f = files[filename]
-            if (f == null) {
-                throw new CloudRuntimeException("cannot find the source file of the class ${it.name}")
+        String headers() {
+            if (apiClass.isAnnotationPresent(SuppressCredentialCheck.class)) {
+                return ""
             }
 
-            RestRequest at = it.getAnnotation(RestRequest.class)
+            return """header (${RestConstants.HEADER_OAUTH}: 'the-session-uuid')"""
+        }
 
-            def self = it
-            def headers = {
-                if (self.isAnnotationPresent(SuppressCredentialCheck.class)) {
-                    return ""
+        String params() {
+            def apiFields = []
+            FieldUtils.getAllFields(apiClass).each {
+                if (it.isAnnotationPresent(APINoSee.class)) {
+                    return
                 }
 
-                return """header (${RestConstants.HEADER_OAUTH}: 'the-session-uuid')"""
+                if (Modifier.isStatic(it.modifiers)) {
+                    return
+                }
+
+                apiFields.add(it)
             }
 
-            def params = {
-                def apiFields = []
-                FieldUtils.getAllFields(self).each {
-                    if (it.isAnnotationPresent(APINoSee.class)) {
-                        return
-                    }
-
-                    if (Modifier.isStatic(it.modifiers)) {
-                        return
-                    }
-
-                    apiFields.add(it)
-                }
-
-                if (apiFields.isEmpty()) {
-                    return ""
-                }
-
-                def cols = []
-                for (Field af : apiFields) {
-                    APIParam ap = af.getAnnotation(APIParam.class)
-
-                    def values = {
-                        if (ap == null || ap.validValues().length == 0) {
-                            return "()"
-                        }
-
-                        def l = []
-                        ap.validValues().each {
-                            l.add("\"${it}\"")
-                        }
-
-                        return l.join(",")
-                    }
-
-                    cols.add("""\t\t\t\tcolumn {
-\t\t\t\t\tname "${af.name}"
-\t\t\t\t\tdesc ""
-\t\t\t\t\toptional ${ap == null ? false : ap.required()}
-\t\t\t\t\tvalues ${values}
-}""")
-                }
+            if (apiFields.isEmpty()) {
+                return ""
             }
 
+            def cols = []
+            for (Field af : apiFields) {
+                APIParam ap = af.getAnnotation(APIParam.class)
 
-            String DOC_TEMPLATE = """${it.package.name}
+                String values = null
+                if (ap != null && ap.validValues().length != 0) {
+                    def l = []
+                    ap.validValues().each {
+                        l.add("\"${it}\"")
+                    }
+                    values = "values (${l.join(",")})"
+                }
+
+                cols.add("""\t\tcolumn {
+\t\t\tname "${af.name}"
+\t\t\tdesc ""
+\t\t\ttype "${af.type.simpleName}"
+\t\t\toptional ${ap == null ? false : ap.required()}
+\t\t\tsince "0.6"
+\t\t\t${values == null ? "" : values}
+\t\t}""")
+            }
+
+            if (cols.isEmpty()) {
+                return ""
+            }
+
+            return """params {
+${cols.join("\n")}
+\t   }"""
+        }
+
+        String generate() {
+            return """${apiClass.package.name}
 
 doc {
     title "在这里填写API标题"
@@ -276,16 +274,40 @@ doc {
 
             ${headers()}
 
-            clz ${it.simpleName}.class
+            clz ${apiClass.simpleName}.class
 
             desc ""
             
             ${params()}
-                    
-                }
+        }
+
+        response {
+            clz ${at.responseClass().simpleName}.class
         }
     }
+
 }"""
+        }
+    }
+
+    def generateDocMetaTemplates() {
+        Map<String, File> files = [:]
+
+        File root = new File(rootPath)
+        root.traverse { f ->
+            files[f.name] = f
+        }
+
+        Set<Class> apiClasses = Platform.getReflections().getTypesAnnotatedWith(RestRequest.class)
+        apiClasses.each {
+            String srcName = "${it.simpleName}.java"
+            File srcFile = files[srcName]
+            if (srcFile == null) {
+                throw new CloudRuntimeException("cannot find the source file for the class[${it.name}]")
+            }
+
+            def tmp = new DocTemplate(it, srcFile)
+            System.out.println(tmp.generate())
         }
     }
 

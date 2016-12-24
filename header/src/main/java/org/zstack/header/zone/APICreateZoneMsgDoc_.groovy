@@ -1,3 +1,5 @@
+package org.zstack.header.zone
+
 doc {
     title "test"
 
@@ -11,12 +13,7 @@ doc {
                     xxx : 1
             )
 
-            body {
-                paramerters {
-                }
-
-                systemTags (1, 2, 3)
-            }
+            clz APICreateZoneMsg.class
 
             desc ""
 
@@ -28,6 +25,14 @@ doc {
                     values ("xx","yyy","zzz")
                 }
             }
+        }
+
+        response {
+            body {
+
+            }
+
+            clz APICreateZoneEvent.class
         }
     }
 }

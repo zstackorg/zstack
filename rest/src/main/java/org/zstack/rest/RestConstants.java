@@ -9,4 +9,5 @@ public interface RestConstants {
     String ALL_PATH = "/v1/**";
 
     String HEADER_JSON_SCHEMA = "X-JSON-Schema";
+    String HEADER_OAUTH = "OAuth";
 }

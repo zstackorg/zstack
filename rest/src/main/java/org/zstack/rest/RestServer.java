@@ -461,8 +461,8 @@ public class RestServer implements Component, CloudBusEventListener {
             }
 
             auth = auth.trim();
-            if (!auth.startsWith("OAuth")) {
-                throw new RestException(HttpStatus.BAD_REQUEST.value(), "Authorization type must be 'OAuth'");
+            if (!auth.startsWith(RestConstants.HEADER_OAUTH)) {
+                throw new RestException(HttpStatus.BAD_REQUEST.value(), String.format("Authorization type must be '%s'", RestConstants.HEADER_OAUTH));
             }
 
             sessionId = auth.replaceFirst("OAuth", "").trim();

@@ -1,6 +1,7 @@
 package scripts
 
 import groovy.json.JsonBuilder
+import org.apache.commons.lang.StringUtils
 import org.zstack.header.exception.CloudRuntimeException
 import org.zstack.header.identity.SuppressCredentialCheck
 import org.zstack.header.message.APIParam
@@ -271,6 +272,22 @@ ${table.join("\n")}
             }
 
             Class clz = doc._rest._request._clz
+
+            RestRequest at = clz.getAnnotation(RestRequest.class)
+            if ((at.parameterName() == "" && !at.isAction()) || at.parameterName() == "null") {
+                // no body
+                return ""
+            }
+
+            String paramName
+            if (!at.isAction()) {
+                paramName = at.parameterName()
+            } else {
+                paramName = StringUtils.removeStart(clz.simpleName, "API")
+                paramName = StringUtils.removeEnd(paramName, "Msg")
+                paramName = StringUtils.uncapitalize(paramName)
+            }
+
             try {
                 Method m = clz.getMethod("__example__")
                 def example = m.invoke(null)
@@ -279,12 +296,18 @@ ${table.join("\n")}
                 def apiFieldNames = []
                 getApiFieldsOfClass(clz).each { apiFieldNames.add(it.name) }
 
-                LinkedHashMap apiMap = [:]
+                LinkedHashMap paramMap = [:]
                 map.each { k, v ->
                     if (apiFieldNames.contains(k)) {
-                        apiMap[k] = v
+                        paramMap[k] = v
                     }
                 }
+
+                def apiMap = [
+                        (paramName): paramMap,
+                        systemTags: [],
+                        userTags: []
+                ]
 
                 return """\
 **Body**
@@ -292,6 +315,9 @@ ${table.join("\n")}
 ```
 ${JSONObjectUtil.dumpPretty(apiMap)}
 ```
+
+> 上述示例中`systemTags`、`userTags`字段可以省略。列出是为了表示body中可以包含这两个字段。
+
 """
             } catch (NoSuchMethodException e) {
                 throw new CloudRuntimeException("class[${clz.name}] doesn't have static __example__ method", e)

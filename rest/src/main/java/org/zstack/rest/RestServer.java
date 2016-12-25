@@ -1,10 +1,5 @@
 package org.zstack.rest;
 
-import groovy.lang.Binding;
-import groovy.lang.ExpandoMetaClass;
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
-import groovy.util.GroovyScriptEngine;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -55,8 +50,6 @@ import java.net.URLDecoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
-
 /**
  * Created by xing5 on 2016/12/7.
  */
@@ -99,7 +92,7 @@ public class RestServer implements Component, CloudBusEventListener {
 
     public static void generateDoc() {
         DocumentGenerator rg =  GroovyUtils.newInstance("scripts/RestDocumentationGenerator.groovy");
-        rg.generate("/root/zstack");
+        rg.generateDocTemplates("/root/zstack");
 
         /*
         //GroovyShell shell = new GroovyShell();

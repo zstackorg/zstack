@@ -91,4 +91,11 @@ public class APIChangeZoneStateMsg extends APIMessage implements ZoneMessage {
     public String getZoneUuid() {
         return getUuid();
     }
+
+    public static APIChangeZoneStateMsg __example__() {
+        APIChangeZoneStateMsg msg = new APIChangeZoneStateMsg();
+        msg.setUuid(uuid());
+        msg.setStateEvent(ZoneStateEvent.enable.toString());
+        return msg;
+    }
 }

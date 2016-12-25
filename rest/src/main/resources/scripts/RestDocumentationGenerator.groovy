@@ -1,12 +1,12 @@
 package scripts
 
 import groovy.json.JsonBuilder
-import org.zstack.core.Platform
 import org.zstack.header.exception.CloudRuntimeException
 import org.zstack.header.identity.SuppressCredentialCheck
 import org.zstack.header.message.APIParam
 import org.zstack.header.rest.APINoSee
 import org.zstack.header.rest.RestRequest
+import org.zstack.header.zone.APIChangeZoneStateMsg
 import org.zstack.rest.RestConstants
 import org.zstack.rest.sdk.DocumentGenerator
 import org.zstack.utils.FieldUtils
@@ -15,6 +15,7 @@ import org.zstack.utils.gson.JSONObjectUtil
 import org.zstack.utils.logging.CLogger
 
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
 /**
@@ -36,6 +37,16 @@ class RestDocumentationGenerator implements DocumentGenerator {
         private String _desc
         private boolean _optional
         private List _values
+        private String _since
+        private String _type
+
+        def since(String v) {
+            _since = v
+        }
+
+        def type(String v) {
+            _type = v
+        }
 
         def name(String v) {
             _name = v
@@ -88,15 +99,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
     }
 
     class Response {
-        private LinkedHashMap _body
         private Class _clz
-
-        def body(Closure c) {
-            def j = new JsonBuilder()
-            j.call(c)
-
-            _body = JSONObjectUtil.toObject(j.toString(), LinkedHashMap.class)
-        }
 
         def clz(Class v)  {
             _clz = v
@@ -164,31 +167,121 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
     }
 
-    def loadDocTemplates() {
-        Script script = new GroovyShell().parse(new File("/root/zstack/header/src/main/java/org/zstack/header/zone/APICreateZoneMsgDoc_.groovy"))
-        ExpandoMetaClass emc = new ExpandoMetaClass(script.getClass(), false, true)
+    class MarkDown {
+        File docTemplate
+        Doc doc
 
-        installClosure(emc, { ExpandoMetaClass e ->
-            e.doc = { Closure cDoc ->
-                cDoc.delegate = new Doc()
-                cDoc.resolveStrategy = DELEGATE_FIRST
+        MarkDown(String docTemplatePath) {
+            docTemplate = new File(docTemplatePath)
 
-                cDoc()
+            Script script = new GroovyShell().parse(docTemplate)
+            ExpandoMetaClass emc = new ExpandoMetaClass(script.getClass(), false, true)
 
-                return  cDoc.delegate
+            installClosure(emc, { ExpandoMetaClass e ->
+                e.doc = { Closure cDoc ->
+                    cDoc.delegate = new Doc()
+                    cDoc.resolveStrategy = DELEGATE_FIRST
+
+                    cDoc()
+
+                    return cDoc.delegate
+                }
+            })
+
+            emc.initialize()
+
+            script.setMetaClass(emc)
+
+            doc = script.run() as Doc
+        }
+
+        String headers() {
+            if (doc._rest._request._header == null || doc._rest._request._header.isEmpty()) {
+                return ""
             }
-        })
 
-        emc.initialize()
+            def hs = []
+            doc._rest._request._header.each { k, v ->
+                hs.add("${k}: ${v}")
+            }
 
-        script.setMetaClass(emc)
-        docs.add(script.run() as Doc)
+            return hs.join("\n")
+        }
 
-        System.out.println("xxxxxxxxxxxxxxxx ${JSONObjectUtil.toJsonString(docs[0])}")
+        String requestExample() {
+            if (doc._rest._request._clz == null) {
+                return ""
+            }
+
+            Class clz = doc._rest._request._clz
+            try {
+                Method m = clz.getMethod("__example__")
+                def example = m.invoke(null)
+
+                LinkedHashMap map = JSONObjectUtil.rehashObject(example, LinkedHashMap.class)
+                def apiFieldNames = []
+                getApiFieldsOfClass(clz).each { apiFieldNames.add(it.name) }
+
+                LinkedHashMap apiMap = [:]
+                map.each { k, v ->
+                    if (apiFieldNames.contains(k)) {
+                        apiMap[k] = v
+                    }
+                }
+
+                return JSONObjectUtil.dumpPretty(apiMap)
+            } catch (NoSuchMethodException e) {
+                throw new CloudRuntimeException("class[${clz.name}] doesn't have static __example__ method", e)
+            }
+        }
+
+        void write() {
+            def template = """\
+## ${doc._title}
+
+${doc._desc}
+
+## API请求
+
+**URL和Header**
+```
+${doc._rest._request._url}
+${headers()}
+```
+
+**Body**
+```
+${requestExample()}
+```
+"""
+            System.out.println(template)
+        }
     }
 
-    void generate() {
-        generateDocMetaTemplates()
+    void generateDocTemplates() {
+        /*
+Map<String, File> files = [:]
+
+File root = new File(rootPath)
+root.traverse { f ->
+    files[f.name] = f
+}
+
+Set<Class> apiClasses = Platform.getReflections().getTypesAnnotatedWith(RestRequest.class)
+apiClasses.each {
+    String srcName = "${it.simpleName}.java"
+    File srcFile = files[srcName]
+    if (srcFile == null) {
+        throw new CloudRuntimeException("cannot find the source file for the class[${it.name}]")
+    }
+
+    def tmp = new DocTemplate(it, srcFile)
+    System.out.println(tmp.generate())
+}
+*/
+
+        def tmp = new DocTemplate(APIChangeZoneStateMsg.class, new File("/root/zstack/header/src/main/java/org/zstack/header/zone/APIChangeZoneStateMsg.java"))
+        tmp.generateDocFile()
     }
 
     class DocTemplate {
@@ -211,18 +304,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
 
         String params() {
-            def apiFields = []
-            FieldUtils.getAllFields(apiClass).each {
-                if (it.isAnnotationPresent(APINoSee.class)) {
-                    return
-                }
-
-                if (Modifier.isStatic(it.modifiers)) {
-                    return
-                }
-
-                apiFields.add(it)
-            }
+            def apiFields = getApiFieldsOfClass(apiClass)
 
             if (apiFields.isEmpty()) {
                 return ""
@@ -241,27 +323,27 @@ class RestDocumentationGenerator implements DocumentGenerator {
                     values = "values (${l.join(",")})"
                 }
 
-                cols.add("""\t\tcolumn {
-\t\t\tname "${af.name}"
-\t\t\tdesc ""
-\t\t\ttype "${af.type.simpleName}"
-\t\t\toptional ${ap == null ? false : ap.required()}
-\t\t\tsince "0.6"
-\t\t\t${values == null ? "" : values}
-\t\t}""")
+                cols.add("""\t\t\t\tcolumn {
+\t\t\t\t\tname "${af.name}"
+\t\t\t\t\tdesc ""
+\t\t\t\t\ttype "${af.type.simpleName}"
+\t\t\t\t\toptional ${ap == null ? false : ap.required()}
+\t\t\t\t\tsince "0.6"
+\t\t\t\t\t${values == null ? "" : values}
+\t\t\t\t}""")
             }
 
             if (cols.isEmpty()) {
                 return ""
             }
 
-            return """params {
+            return """\t\t\tparams {
 ${cols.join("\n")}
-\t   }"""
+\t\t\t}"""
         }
 
         String generate() {
-            return """${apiClass.package.name}
+            return """package ${apiClass.package.name}
 
 doc {
     title "在这里填写API标题"
@@ -278,42 +360,48 @@ doc {
 
             desc ""
             
-            ${params()}
+${params()}
         }
 
         response {
             clz ${at.responseClass().simpleName}.class
         }
     }
-
 }"""
+        }
+
+        void generateDocFile() {
+            def docFileName = "${apiClass.simpleName}Doc_.groovy"
+            def docFilePath = [sourceFile.parent, docFileName].join("/")
+            System.out.println(docFilePath)
+            new File(docFilePath).write generate()
         }
     }
 
-    def generateDocMetaTemplates() {
-        Map<String, File> files = [:]
+    def getApiFieldsOfClass(Class apiClass) {
+        def apiFields = []
 
-        File root = new File(rootPath)
-        root.traverse { f ->
-            files[f.name] = f
-        }
-
-        Set<Class> apiClasses = Platform.getReflections().getTypesAnnotatedWith(RestRequest.class)
-        apiClasses.each {
-            String srcName = "${it.simpleName}.java"
-            File srcFile = files[srcName]
-            if (srcFile == null) {
-                throw new CloudRuntimeException("cannot find the source file for the class[${it.name}]")
+        FieldUtils.getAllFields(apiClass).each {
+            if (it.isAnnotationPresent(APINoSee.class)) {
+                return
             }
 
-            def tmp = new DocTemplate(it, srcFile)
-            System.out.println(tmp.generate())
+            if (Modifier.isStatic(it.modifiers)) {
+                return
+            }
+
+            apiFields.add(it)
         }
+
+        return apiFields
     }
 
     @Override
-    void generate(String scanPath) {
+    void generateDocTemplates(String scanPath) {
         rootPath = scanPath
-        generate()
+        //generateDocTemplates()
+
+        def md = new MarkDown("/root/zstack/header/src/main/java/org/zstack/header/zone/APIChangeZoneStateMsgDoc_.groovy")
+        md.write()
     }
 }

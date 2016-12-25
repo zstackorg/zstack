@@ -9,7 +9,8 @@ doc {
         request {
             url "PUT /zones/{uuid}/actions"
 
-            header (OAuth: 'the-session-uuid')
+            header (OAuth: 'the-session-uuid', "这里session-uuid是通过Login API得到的，例如bfa67f956afb430890aa49db14b85153")
+			header (XOAuth: 'the-session-uuid')
 
             clz APIChangeZoneStateMsg.class
 
@@ -18,17 +19,17 @@ doc {
 			params {
 				column {
 					name "uuid"
-					desc ""
+					desc "zone UUID"
 					type "String"
-					optional true
+					optional false
 					since "0.6"
 					
 				}
 				column {
 					name "stateEvent"
-					desc ""
+					desc "状态事件"
 					type "String"
-					optional true
+					optional false
 					since "0.6"
 					values ("enable","disable")
 				}
@@ -36,7 +37,7 @@ doc {
 					name "systemTags"
 					desc ""
 					type "List"
-					optional false
+					optional true
 					since "0.6"
 					
 				}
@@ -44,7 +45,7 @@ doc {
 					name "userTags"
 					desc ""
 					type "List"
-					optional false
+					optional true
 					since "0.6"
 					
 				}

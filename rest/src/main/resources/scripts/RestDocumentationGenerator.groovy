@@ -106,9 +106,15 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
     }
 
+    class Header {
+        String key
+        String value
+        String comment
+    }
+
     class Request {
         private String _url
-        private Map _header
+        private List<Header> _headers = []
         private String _desc
         private RequestParam _params
         private LinkedHashMap _body
@@ -119,7 +125,16 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
 
         def header(Map v) {
-            _header = v
+            header(v, null)
+        }
+
+        def header(Map v, String comment) {
+            Map.Entry e = v.entrySet().iterator().next()
+            def h = new Header()
+            h.key = e.key;
+            h.value = e.value
+            h.comment = comment
+            _headers.add(h)
         }
 
         def desc(String v) {
@@ -196,16 +211,58 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
 
         String headers() {
-            if (doc._rest._request._header == null || doc._rest._request._header.isEmpty()) {
+            if (doc._rest._request._headers.isEmpty()) {
                 return ""
             }
 
             def hs = []
-            doc._rest._request._header.each { k, v ->
-                hs.add("${k}: ${v}")
+            doc._rest._request._headers.each { h ->
+                if (h.comment != null) {
+                    hs.add("${h.key}: ${h.value} #${h.comment}")
+                } else {
+                    hs.add("${h.key}: ${h.value}")
+                }
             }
 
-            return hs.join("\n")
+            return """\
+**Headers**
+```
+${hs.join("\n")}
+```
+"""
+        }
+
+        String params() {
+            def cols = doc._rest._request._params?._cloumns
+            if (cols == null || cols.isEmpty()) {
+                return ""
+            }
+
+            def table = ["|名字|类型|描述|默认可选值|起始版本|"]
+            table.add("|---|---|---|---|---|")
+            cols.each {
+                def col = []
+                col.add(it._optional ? "${it._name} (可选)" : "${it._name}")
+                col.add(it._type)
+                col.add(it._desc)
+                if (it._values == null || it._values.isEmpty()) {
+                    col.add("")
+                } else {
+                    def vals = it._values.collect { v ->
+                        return "<li>${v}</li>"
+                    }
+                    col.add("<ul>${vals.join("")}</ul>")
+                }
+                col.add(it._since)
+
+                table.add("|${col.join("|")}|")
+            }
+
+            return """\
+**参数列表**
+
+${table.join("\n")}
+"""
         }
 
         String requestExample() {
@@ -229,7 +286,13 @@ class RestDocumentationGenerator implements DocumentGenerator {
                     }
                 }
 
-                return JSONObjectUtil.dumpPretty(apiMap)
+                return """\
+**Body**
+
+```
+${JSONObjectUtil.dumpPretty(apiMap)}
+```
+"""
             } catch (NoSuchMethodException e) {
                 throw new CloudRuntimeException("class[${clz.name}] doesn't have static __example__ method", e)
             }
@@ -243,16 +306,17 @@ ${doc._desc}
 
 ## API请求
 
-**URL和Header**
+**URL**
+
 ```
 ${doc._rest._request._url}
-${headers()}
 ```
 
-**Body**
-```
+${headers()}
+
 ${requestExample()}
-```
+
+${params()}
 """
             System.out.println(template)
         }

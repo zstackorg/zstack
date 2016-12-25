@@ -7,7 +7,8 @@ doc {
 
     rest {
         request {
-            url "PUT /zones/{uuid}/actions"
+            url ("PUT /zones/{uuid}/actions", "创建一个新的zone")
+            url ("POST /zones", "例子")
 
             header (OAuth: 'the-session-uuid', "这里session-uuid是通过Login API得到的，例如bfa67f956afb430890aa49db14b85153")
 			header (XOAuth: 'the-session-uuid')

@@ -66,8 +66,13 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
     }
 
+    class RequestParamRef extends RequestParam {
+        String ref
+    }
+
     class RequestParam {
         private List<RequestParamColumn> _cloumns = []
+        private String _desc
 
         def column(Closure c) {
             def rc = c.delegate = new RequestParamColumn()
@@ -75,6 +80,10 @@ class RestDocumentationGenerator implements DocumentGenerator {
             c()
 
             _cloumns.add(rc)
+        }
+
+        def desc(String v) {
+            _desc = v
         }
     }
 
@@ -113,16 +122,28 @@ class RestDocumentationGenerator implements DocumentGenerator {
         String comment
     }
 
+    class Url {
+        String url
+        String comment
+    }
+
     class Request {
-        private String _url
+        private List<Url> _urls = []
         private List<Header> _headers = []
         private String _desc
         private RequestParam _params
         private LinkedHashMap _body
         private Class _clz
 
+        def url(String v, String comment) {
+            def u = new Url()
+            u.url = v
+            u.comment = comment
+            _urls.add(u)
+        }
+
         def url(String v) {
-            _url = v
+            url(v, null)
         }
 
         def header(Map v) {
@@ -132,7 +153,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
         def header(Map v, String comment) {
             Map.Entry e = v.entrySet().iterator().next()
             def h = new Header()
-            h.key = e.key;
+            h.key = e.key
             h.value = e.value
             h.comment = comment
             _headers.add(h)
@@ -140,6 +161,13 @@ class RestDocumentationGenerator implements DocumentGenerator {
 
         def desc(String v) {
             _desc = v
+        }
+
+        def params(String v) {
+            def p = new RequestParamRef()
+            p.ref = v
+
+            _params = p
         }
 
         def params(Closure c) {
@@ -209,6 +237,25 @@ class RestDocumentationGenerator implements DocumentGenerator {
             script.setMetaClass(emc)
 
             doc = script.run() as Doc
+        }
+
+        String url() {
+            def urls = doc._rest._request._urls
+            if (urls == null || urls.isEmpty()) {
+                throw new CloudRuntimeException("cannot find urls for the class[${doc._rest._request._clz.name}]")
+            }
+
+            def txts = urls.collect {
+                return it.comment == null ? it.url : "${it.url} #${it.comment}"
+            }
+
+            return """\
+**URLs**
+
+```
+${txts.join("\n")}
+```
+"""
         }
 
         String headers() {
@@ -332,11 +379,7 @@ ${doc._desc}
 
 ## API请求
 
-**URL**
-
-```
-${doc._rest._request._url}
-```
+${url()}
 
 ${headers()}
 

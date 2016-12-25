@@ -540,13 +540,13 @@ public class RestServer implements Component, CloudBusEventListener {
                 try {
                     msg.setLimit(Integer.valueOf(varvalue));
                 } catch (NumberFormatException ex) {
-                    throw new RestException(HttpStatus.BAD_REQUEST.value(), "Invalid query parameter. 'limit' must be an interger");
+                    throw new RestException(HttpStatus.BAD_REQUEST.value(), "Invalid query parameter. 'limit' must be an integer");
                 }
             } else if ("start".equals(varname)) {
                 try {
                     msg.setStart(Integer.valueOf(varvalue));
                 } catch (NumberFormatException ex) {
-                    throw new RestException(HttpStatus.BAD_REQUEST.value(), "Invalid query parameter. 'start' must be an interger");
+                    throw new RestException(HttpStatus.BAD_REQUEST.value(), "Invalid query parameter. 'start' must be an integer");
                 }
             } else if ("count".equals(varname)) {
                 msg.setCount(Boolean.valueOf(varvalue));

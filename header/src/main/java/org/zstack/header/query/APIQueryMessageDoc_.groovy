@@ -3,7 +3,8 @@ package org.zstack.header.query
 doc {
     rest {
         request {
-            desc """
+            params {
+                desc """
 #### <a name="query-conditions">查询条件</a>
 
 ZStack支持类似于MySQL数据库类似的查询条件，例如：
@@ -78,7 +79,6 @@ start=0 limit=100 replyWithCount=true
 则API返回将包含头100条记录，以及`total`字段等于1000，表示总共满足条件的记录为1000。
 """
 
-            params {
                 column {
                     name "conditions"
                     desc "见[查询条件](#query-conditions)。传入一个空List将返回所有记录，返回记录数的上限受限于`limit`字段"

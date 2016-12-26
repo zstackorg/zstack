@@ -16,7 +16,10 @@ doc {
             clz APIChangeZoneStateMsg.class
 
             desc ""
-            
+
+            params "APIQueryMessageDoc_.groovy"
+
+            /*
 			params {
 				column {
 					name "uuid"
@@ -51,6 +54,7 @@ doc {
 					
 				}
 			}
+			*/
         }
 
         response {

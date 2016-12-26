@@ -2,18 +2,23 @@ package scripts
 
 import groovy.json.JsonBuilder
 import org.apache.commons.lang.StringUtils
+import org.zstack.header.errorcode.ErrorCode
 import org.zstack.header.exception.CloudRuntimeException
 import org.zstack.header.identity.SuppressCredentialCheck
 import org.zstack.header.message.APIParam
 import org.zstack.header.rest.APINoSee
 import org.zstack.header.rest.RestRequest
+import org.zstack.header.rest.RestResponse
+import org.zstack.header.vm.APIStartVmInstanceEvent
 import org.zstack.header.zone.APIChangeZoneStateMsg
 import org.zstack.rest.RestConstants
 import org.zstack.rest.sdk.DocumentGenerator
 import org.zstack.utils.FieldUtils
+import org.zstack.utils.ShellUtils
 import org.zstack.utils.Utils
 import org.zstack.utils.gson.JSONObjectUtil
 import org.zstack.utils.logging.CLogger
+import org.zstack.utils.path.PathUtil
 
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -28,6 +33,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
     String rootPath
 
     List<Doc> docs = []
+    Map<String, File> sourceFiles = [:]
 
     def installClosure(ExpandoMetaClass emc, Closure c) {
         c(emc)
@@ -211,32 +217,33 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
     }
 
+    Doc createDoc(String docTemplatePath) {
+        Script script = new GroovyShell().parse(new File(docTemplatePath))
+        ExpandoMetaClass emc = new ExpandoMetaClass(script.getClass(), false, true)
+
+        installClosure(emc, { ExpandoMetaClass e ->
+            e.doc = { Closure cDoc ->
+                cDoc.delegate = new Doc()
+                cDoc.resolveStrategy = DELEGATE_FIRST
+
+                cDoc()
+
+                return cDoc.delegate
+            }
+        })
+
+        emc.initialize()
+
+        script.setMetaClass(emc)
+
+        return script.run() as Doc
+    }
+
     class MarkDown {
-        File docTemplate
         Doc doc
 
         MarkDown(String docTemplatePath) {
-            docTemplate = new File(docTemplatePath)
-
-            Script script = new GroovyShell().parse(docTemplate)
-            ExpandoMetaClass emc = new ExpandoMetaClass(script.getClass(), false, true)
-
-            installClosure(emc, { ExpandoMetaClass e ->
-                e.doc = { Closure cDoc ->
-                    cDoc.delegate = new Doc()
-                    cDoc.resolveStrategy = DELEGATE_FIRST
-
-                    cDoc()
-
-                    return cDoc.delegate
-                }
-            })
-
-            emc.initialize()
-
-            script.setMetaClass(emc)
-
-            doc = script.run() as Doc
+            doc = createDoc(docTemplatePath)
         }
 
         String url() {
@@ -281,7 +288,23 @@ ${hs.join("\n")}
         }
 
         String params() {
+            if (doc._rest._request._params == null) {
+                return ""
+            }
+
+            if (doc._rest._request._params instanceof RequestParamRef) {
+                String ref = (doc._rest._request._params as RequestParamRef).ref
+                String fname = ref - "Doc_.groovy"
+                File srcFile = getSourceFile(fname)
+
+                String docFilePath = PathUtil.join(srcFile.parent, ref)
+                Doc refDoc = createDoc(docFilePath)
+
+                doc._rest._request._params = refDoc._rest._request._params
+            }
+
             def cols = doc._rest._request._params?._cloumns
+
             if (cols == null || cols.isEmpty()) {
                 return ""
             }
@@ -308,6 +331,8 @@ ${hs.join("\n")}
 
             return """\
 **参数列表**
+
+${doc._rest._request._params._desc == null ? "" : doc._rest._request._params._desc}
 
 ${table.join("\n")}
 """
@@ -413,16 +438,138 @@ apiClasses.each {
 }
 */
 
-        def tmp = new DocTemplate(APIChangeZoneStateMsg.class, new File("/root/zstack/header/src/main/java/org/zstack/header/zone/APIChangeZoneStateMsg.java"))
+        def tmp = new ApiRequestDocTemplate(APIChangeZoneStateMsg.class, new File("/root/zstack/header/src/main/java/org/zstack/header/zone/APIChangeZoneStateMsg.java"))
         tmp.generateDocFile()
     }
 
-    class DocTemplate {
+    def PRIMITIVE_TYPES = [
+            int.class,
+            long.class,
+            float .class,
+            boolean .class,
+            double.class,
+            short.class,
+            char.class,
+            String.class
+    ]
+
+    class ApiResponseDocTemplate {
+        Set<Class> laterResolveClasses = []
+
+        Class responseClass
+        File sourceFile
+        RestResponse at
+
+        List<String> imports = []
+        Map<String, Field> fsToAdd = [:]
+        List<String> fieldStrings = []
+
+        ApiResponseDocTemplate(Class responseClass) {
+            this.responseClass = responseClass
+            sourceFile = getSourceFile(responseClass.simpleName)
+
+            at = responseClass.getAnnotation(RestResponse.class)
+            if (at != null) {
+                findFieldsForRestResponse()
+            } else {
+                findFieldsForNormalClass()
+            }
+        }
+
+        def findFieldsForNormalClass() {
+            List<Field> allFields = FieldUtils.getAllFields(responseClass)
+            allFields = allFields.findAll { !it.isAnnotationPresent(APINoSee.class) && !Modifier.isStatic(it.modifiers) }
+            allFields.each { fsToAdd[it.name] = it }
+        }
+
+        def findFieldsForRestResponse() {
+            if (at.allTo() == null && at.fieldsTo().length == 0) {
+                return ""
+            }
+
+            if (at.allTo() != "") {
+                fsToAdd[at.allTo()] = responseClass.getDeclaredField(at.allTo())
+            } else if (at.fieldsTo().length == 1 && at.fieldsTo()[0] == "all") {
+                findFieldsForNormalClass()
+            } else {
+                at.fieldsTo().each {
+                    def kv = it.split("=")
+                    def k = kv[0].trim()
+                    def v = kv[1].trim()
+                    fsToAdd[k] = FieldUtils.getField(v, responseClass)
+                }
+            }
+
+            fieldStrings.add(createRef("error", "错误码，如果不为null，则表示操作失败", ErrorCode.class))
+        }
+
+        String createField(String n, String desc, String type) {
+            return """\tfield {
+\t\tname "${n}"
+\t\tdesc "${desc == null ? "" : desc}"
+\t\ttype "${type}
+\t}"""
+        }
+
+        String createRef(String path, String desc, Class clz) {
+            laterResolveClasses.add(clz)
+            imports.add("import ${clz.package.name}.${clz.simpleName}")
+
+            desc = desc == null || desc == "" ? "结构字段，参考[这里](#${path})获取详细信息" : "${desc}。结构字段，参考[这里](#${path})获取详细信息"
+
+            return """\tref {
+\t\tpath "${path}"
+\t\tdesc "${desc}"
+\t\tclz ${clz.simpleName}.class
+\t}"""
+        }
+
+        String fields() {
+            fsToAdd.each { k, v ->
+                if (PRIMITIVE_TYPES.contains(v.type)) {
+                    fieldStrings.add(createField(k, "", v.type.simpleName))
+                } else if (v.type.name.startsWith("java.")) {
+                    if (Collection.class.isAssignableFrom(v.type) || Map.class.isAssignableFrom(v.type)) {
+                        Class gtype = FieldUtils.getGenericType(v)
+
+                        if (gtype == null) {
+                            fieldStrings.add(createField(k, "", v.type.simpleName))
+                        } else {
+                            fieldStrings.add(createRef("${responseClass.name}.${v.name}", null, v.type))
+                        }
+                    } else {
+                        // java time but not primitive, needs import
+                        imports.add("import ${v.type.name}")
+                        fieldStrings.add(createField(k, "", v.type.simpleName))
+                    }
+                } else {
+                    fieldStrings.add(createRef("${responseClass.name}.${v.name}", "", v.type))
+                }
+            }
+
+            return fieldStrings.join("\n")
+        }
+
+        String generate() {
+            String fieldStr = fields()
+
+            return """${responseClass.package}
+
+${imports.join("\n")}
+
+doc {
+${fieldStr}
+}
+"""
+        }
+    }
+
+    class ApiRequestDocTemplate {
         Class apiClass
         File sourceFile
         RestRequest at
 
-        DocTemplate(Class apiClass, File src) {
+        ApiRequestDocTemplate(Class apiClass, File src) {
             this.apiClass = apiClass
             this.sourceFile = src
             at = apiClass.getAnnotation(RestRequest.class)
@@ -471,6 +618,7 @@ apiClasses.each {
             }
 
             return """\t\t\tparams {
+
 ${cols.join("\n")}
 \t\t\t}"""
         }
@@ -529,12 +677,54 @@ ${params()}
         return apiFields
     }
 
+    void generateResponseDocTemplates() {
+        Set<Class> todo = []
+
+        def tmp = new ApiResponseDocTemplate(APIStartVmInstanceEvent.class)
+        System.out.println(tmp.generate())
+        todo.addAll(tmp.laterResolveClasses)
+
+        while (!todo.isEmpty()) {
+            Set<Class> set = []
+            todo.each {
+                def t = new ApiResponseDocTemplate(it)
+                System.out.println(t.generate())
+                set.addAll(t.laterResolveClasses)
+            }
+
+            todo = set
+        }
+    }
+
     @Override
     void generateDocTemplates(String scanPath) {
         rootPath = scanPath
+        scanJavaSourceFiles()
         //generateDocTemplates()
 
         def md = new MarkDown("/root/zstack/header/src/main/java/org/zstack/header/zone/APIChangeZoneStateMsgDoc_.groovy")
         md.write()
+
+        generateResponseDocTemplates()
+    }
+
+    File getSourceFile(String name) {
+        File f = sourceFiles[name]
+        if (f == null) {
+            throw new CloudRuntimeException("cannot find source file ${name}.java")
+        }
+
+        return f
+    }
+
+    def scanJavaSourceFiles() {
+        String output = ShellUtils.run("find ${rootPath} -name *.java")
+        List<String> paths = output.split("\n")
+        paths = paths.findAll { !(it - "\n" - "\r" - "\t").trim().isEmpty()}
+
+        paths.each {
+            def f = new File(it)
+            sourceFiles[f.name - ".java"] = f
+        }
     }
 }

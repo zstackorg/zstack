@@ -4,6 +4,8 @@ import org.zstack.header.volume.VolumeInventory
 import org.zstack.header.vm.VmInstanceInventory
 
 doc {
+    title "xxx"
+
     field {
         name "inventory"
         desc ""
@@ -11,8 +13,10 @@ doc {
     }
 
     ref {
+        name ""
         path "inventory.vmNics"
         desc ""
+        type ""
         clz VmNicInventory.class
     }
 }

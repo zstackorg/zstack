@@ -35,6 +35,38 @@ class RestDocumentationGenerator implements DocumentGenerator {
     List<Doc> docs = []
     Map<String, File> sourceFiles = [:]
 
+    def MUTUAL_FIELDS = [
+            "lastOpDate": "最后一次修改时间",
+            "createDate": "创建时间",
+            "uuid": "资源的UUID，唯一标示该资源",
+            "name": "资源名称",
+            "description": "资源的详细描述",
+            "primaryStorageUuid": "主存储UUID",
+            "vmInstanceUuid": "云主机UUID",
+            "imageUuid": "镜像UUID",
+            "backupStorageUuid": "镜像存储UUID",
+            "volumeUuid": "云盘UUID",
+            "zoneUuid": "区域UUID",
+            "clusterUuid": "集群UUID",
+            "hostUuid": "物理机UUID",
+            "l2NetworkUuid": "二层网络UUID",
+            "l3NetworkUuid": "三层网络UUID",
+            "accountUuid": "账户UUID",
+            "policyUuid": "权限策略UUID",
+            "userUuid": "用户UUID",
+            "diskOfferingUuid": "云盘规格UUID",
+            "volumeSnapshotUuid": "云盘快照UUID",
+            "ipRangeUuid": "IP段UUID",
+            "instanceOfferingUuid": "计算规格UUID",
+            "vipUuid": "VIP UUID",
+            "vmNicUuid": "云主机网卡UUID",
+            "networkServiceProviderUuid": "网络服务提供模块UUID",
+            "virtualRouterUuid": "云路由UUID",
+            "securityGroupUuid": "安全组UUID",
+            "eipUuid": "弹性IP UUID",
+            "loadBalancerUuid": "负载均衡器UUID"
+    ]
+
     def installClosure(ExpandoMetaClass emc, Closure c) {
         c(emc)
     }
@@ -116,9 +148,14 @@ class RestDocumentationGenerator implements DocumentGenerator {
 
     class Response {
         private Class _clz
+        private String _desc
 
         def clz(Class v)  {
             _clz = v
+        }
+
+        def desc(String v) {
+            _desc = v
         }
     }
 
@@ -195,10 +232,58 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
     }
 
+    class Field {
+        String _name
+        String _desc
+        String _type
+
+        def name(String v) {
+            _name = v
+        }
+
+        def desc(String v) {
+            _desc = v
+        }
+
+        def type(String v) {
+            _type = v
+        }
+    }
+
+    class FieldRef {
+        String _name
+        String _type
+        String _path
+        String _desc
+        Class _clz
+
+        def name(String v) {
+            _name = v
+        }
+
+        def type(String v) {
+            _type = v
+        }
+
+        def path(String v) {
+            _path = v
+        }
+
+        def desc(String v) {
+            _desc = v
+        }
+
+        def clz(Class v) {
+            _clz = v
+        }
+    }
+
     class Doc {
         private String _title
         private String _desc
         private Rest _rest
+        private List<Field> _fields = []
+        private List<FieldRef> _refs = []
 
         def title(String v) {
             _title = v
@@ -214,6 +299,22 @@ class RestDocumentationGenerator implements DocumentGenerator {
             c()
 
             _rest = c.delegate
+        }
+
+        def field(Closure c) {
+            c.delegate = new Field()
+            c.resolveStrategy = Closure.DELEGATE_FIRST
+            c()
+
+            _fields.add(c.delegate as Field)
+        }
+
+        def ref(Closure c) {
+            c.delegate = new FieldRef()
+            c.resolveStrategy = Closure.DELEGATE_FIRST
+            c()
+
+            _refs.add(c.delegate as FieldRef)
         }
     }
 
@@ -338,6 +439,24 @@ ${table.join("\n")}
 """
         }
 
+        LinkedHashMap getApiExampleOfTheClass(Class clz) {
+            Method m = clz.getMethod("__example__")
+            def example = m.invoke(null)
+
+            LinkedHashMap map = JSONObjectUtil.rehashObject(example, LinkedHashMap.class)
+            def apiFieldNames = []
+            getApiFieldsOfClass(clz).each { apiFieldNames.add(it.name) }
+
+            LinkedHashMap paramMap = [:]
+            map.each { k, v ->
+                if (apiFieldNames.contains(k)) {
+                    paramMap[k] = v
+                }
+            }
+
+            return paramMap
+        }
+
         String requestExample() {
             if (doc._rest._request._clz == null) {
                 return ""
@@ -361,22 +480,8 @@ ${table.join("\n")}
             }
 
             try {
-                Method m = clz.getMethod("__example__")
-                def example = m.invoke(null)
-
-                LinkedHashMap map = JSONObjectUtil.rehashObject(example, LinkedHashMap.class)
-                def apiFieldNames = []
-                getApiFieldsOfClass(clz).each { apiFieldNames.add(it.name) }
-
-                LinkedHashMap paramMap = [:]
-                map.each { k, v ->
-                    if (apiFieldNames.contains(k)) {
-                        paramMap[k] = v
-                    }
-                }
-
                 def apiMap = [
-                        (paramName): paramMap,
+                        (paramName): getApiExampleOfTheClass(clz),
                         systemTags: [],
                         userTags: []
                 ]
@@ -396,6 +501,53 @@ ${JSONObjectUtil.dumpPretty(apiMap)}
             }
         }
 
+        String responseDesc() {
+            return doc._rest._response._desc == null ? "" : doc._rest._response._desc
+        }
+
+        String responseExample() {
+            Class clz = doc._rest._response._clz
+            if (clz == null) {
+                throw new CloudRuntimeException("${doc._rest} doesn't have 'clz' specified in the response body")
+            }
+
+            File sourceFile = getSourceFile(clz.simpleName - ".java")
+            String docFilePath = PathUtil.join(sourceFile.parent, classToDocFileName(clz))
+            Doc doc = createDoc(docFilePath)
+
+            LinkedHashMap map = getApiFieldsOfClass(clz)
+
+            def cols = []
+            if (map.isEmpty()) {
+                cols.add("""\
+该API成功时返回一个空的JSON结构`{}`，出错时返回的JSON结构包含一个error字段，例如：
+
+```
+{
+\t"error": {
+\t\t"code": "SYS.1001",
+\t\t"description": "A message or a operation timeout",
+\t\t"details": "Create VM on KVM timeout after 300s"
+\t}
+}
+```
+
+
+""")
+            } else {
+                cols.add("""\
+### 返回示例
+
+```
+${JSONObjectUtil.dumpPretty(map)}
+```
+
+""")
+            }
+
+
+        }
+
         void write() {
             def template = """\
 ## ${doc._title}
@@ -411,9 +563,75 @@ ${headers()}
 ${requestExample()}
 
 ${params()}
+
+## APIf返回
+
+${responseDesc()}
 """
             System.out.println(template)
         }
+    }
+
+    class DataStructMarkDown {
+        Doc doc
+
+        DataStructMarkDown(Doc doc) {
+            this.doc = doc
+        }
+
+        String generate() {
+            def tables = []
+
+            def rows = []
+            def table = ["|名字|类型|描述|起始版本|"]
+            table.add("|---|---|---|---|")
+
+            doc._fields.each {
+                def row = []
+                row.add(it._name)
+                row.add(it._type)
+                row.add(it._desc)
+
+                rows.add("|${row.join("|")}|")
+            }
+
+            doc._refs.each {
+                def row = []
+                row.add(it._name)
+                row.add(it._type)
+                row.add("${it._desc}, 详情参考[这里](#${it._path})")
+
+                rows.add("|${row.join("|")}|")
+            }
+
+            tables.add(rows.join("\n"))
+
+            // generate dependent tables
+
+            doc._refs.each {
+                String path = getDocTemplatePathFromClass(it._clz)
+                Doc refDoc = createDoc(path)
+
+                tables.add("""\
+
+
+<a name="#${it._path}">**${doc._title} #${it._name}**<a/>
+${new DataStructMarkDown(refDoc).generate()}
+""")
+            }
+
+            return tables.join("\n")
+        }
+    }
+
+    String getDocTemplatePathFromClass(Class clz) {
+        File srcFile = getSourceFile(clz.simpleName - ".java")
+        String docName = classToDocFileName(clz)
+        return PathUtil.join(srcFile.parent, docName)
+    }
+
+    String classToDocFileName(Class clz) {
+        return "${clz.simpleName}Doc_.groovy"
     }
 
     void generateDocTemplates() {
@@ -504,10 +722,14 @@ apiClasses.each {
         }
 
         String createField(String n, String desc, String type) {
+            if (MUTUAL_FIELDS.containsKey(n)) {
+                desc = "${desc == null || desc.isEmpty() ? MUTUAL_FIELDS[n] : MUTUAL_FIELDS[n] + "," + desc}"
+            }
+
             return """\tfield {
 \t\tname "${n}"
 \t\tdesc "${desc == null ? "" : desc}"
-\t\ttype "${type}
+\t\ttype "${type}"
 \t}"""
         }
 
@@ -535,7 +757,7 @@ apiClasses.each {
                         if (gtype == null) {
                             fieldStrings.add(createField(k, "", v.type.simpleName))
                         } else {
-                            fieldStrings.add(createRef("${responseClass.name}.${v.name}", null, v.type))
+                            fieldStrings.add(createRef("${responseClass.name}.${v.name}", null, gtype))
                         }
                     } else {
                         // java time but not primitive, needs import
@@ -679,6 +901,7 @@ ${params()}
 
     void generateResponseDocTemplates() {
         Set<Class> todo = []
+        Set<Class> resolved = []
 
         def tmp = new ApiResponseDocTemplate(APIStartVmInstanceEvent.class)
         System.out.println(tmp.generate())
@@ -689,10 +912,11 @@ ${params()}
             todo.each {
                 def t = new ApiResponseDocTemplate(it)
                 System.out.println(t.generate())
+                resolved.add(it)
                 set.addAll(t.laterResolveClasses)
             }
 
-            todo = set
+            todo = set - resolved
         }
     }
 

@@ -81,4 +81,10 @@ public class APIStartVmInstanceMsg extends APIMessage implements VmInstanceMessa
         return getUuid();
     }
 
+    public static APIStartVmInstanceMsg __example__() {
+        APIStartVmInstanceMsg msg = new APIStartVmInstanceMsg();
+        msg.uuid = uuid();
+        return msg;
+    }
+
 }

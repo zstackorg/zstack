@@ -10,7 +10,7 @@ import org.zstack.header.rest.APINoSee
 import org.zstack.header.rest.RestRequest
 import org.zstack.header.rest.RestResponse
 import org.zstack.header.vm.APIStartVmInstanceEvent
-import org.zstack.header.zone.APIChangeZoneStateMsg
+import org.zstack.header.vm.APIStartVmInstanceMsg
 import org.zstack.rest.RestConstants
 import org.zstack.rest.sdk.DocumentGenerator
 import org.zstack.utils.FieldUtils
@@ -232,7 +232,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
     }
 
-    class Field {
+    class DocField {
         String _name
         String _desc
         String _type
@@ -250,7 +250,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
     }
 
-    class FieldRef {
+    class DocFieldRef {
         String _name
         String _type
         String _path
@@ -282,8 +282,8 @@ class RestDocumentationGenerator implements DocumentGenerator {
         private String _title
         private String _desc
         private Rest _rest
-        private List<Field> _fields = []
-        private List<FieldRef> _refs = []
+        private List<DocField> _fields = []
+        private List<DocFieldRef> _refs = []
 
         def title(String v) {
             _title = v
@@ -302,19 +302,19 @@ class RestDocumentationGenerator implements DocumentGenerator {
         }
 
         def field(Closure c) {
-            c.delegate = new Field()
+            c.delegate = new DocField()
             c.resolveStrategy = Closure.DELEGATE_FIRST
             c()
 
-            _fields.add(c.delegate as Field)
+            _fields.add(c.delegate as DocField)
         }
 
         def ref(Closure c) {
-            c.delegate = new FieldRef()
+            c.delegate = new DocFieldRef()
             c.resolveStrategy = Closure.DELEGATE_FIRST
             c()
 
-            _refs.add(c.delegate as FieldRef)
+            _refs.add(c.delegate as DocFieldRef)
         }
     }
 
@@ -410,6 +410,11 @@ ${hs.join("\n")}
                 return ""
             }
 
+            cols = cols.findAll {
+                // tags are specially handled
+                return it._name != "systemTags" && it._name != "userTags"
+            }
+
             def table = ["|名字|类型|描述|默认可选值|起始版本|"]
             table.add("|---|---|---|---|---|")
             cols.each {
@@ -444,8 +449,10 @@ ${table.join("\n")}
             def example = m.invoke(null)
 
             LinkedHashMap map = JSONObjectUtil.rehashObject(example, LinkedHashMap.class)
-            def apiFieldNames = []
-            getApiFieldsOfClass(clz).each { apiFieldNames.add(it.name) }
+
+            def apiFieldNames = getApiFieldsOfClass(clz).collect {
+                return it.name
+            }
 
             LinkedHashMap paramMap = [:]
             map.each { k, v ->
@@ -514,8 +521,9 @@ ${JSONObjectUtil.dumpPretty(apiMap)}
             File sourceFile = getSourceFile(clz.simpleName - ".java")
             String docFilePath = PathUtil.join(sourceFile.parent, classToDocFileName(clz))
             Doc doc = createDoc(docFilePath)
+            DataStructMarkDown dmd = new DataStructMarkDown(clz, doc)
 
-            LinkedHashMap map = getApiFieldsOfClass(clz)
+            LinkedHashMap map = getApiExampleOfTheClass(clz)
 
             def cols = []
             if (map.isEmpty()) {
@@ -542,10 +550,12 @@ ${JSONObjectUtil.dumpPretty(apiMap)}
 ${JSONObjectUtil.dumpPretty(map)}
 ```
 
+${dmd.generate()}
+
 """)
             }
 
-
+            return cols.join("\n")
         }
 
         void write() {
@@ -564,9 +574,11 @@ ${requestExample()}
 
 ${params()}
 
-## APIf返回
+## API返回
 
 ${responseDesc()}
+
+${responseExample()}
 """
             System.out.println(template)
         }
@@ -574,17 +586,19 @@ ${responseDesc()}
 
     class DataStructMarkDown {
         Doc doc
+        Class clz
+        Map<Class, String> resolvedRefs = [:]
 
-        DataStructMarkDown(Doc doc) {
+        DataStructMarkDown(Class clz, Doc doc) {
+            this.clz = clz
             this.doc = doc
         }
 
         String generate() {
             def tables = []
 
-            def rows = []
-            def table = ["|名字|类型|描述|起始版本|"]
-            table.add("|---|---|---|---|")
+            def rows = ["|名字|类型|描述|起始版本|"]
+            rows.add("|---|---|---|---|")
 
             doc._fields.each {
                 def row = []
@@ -599,24 +613,34 @@ ${responseDesc()}
                 def row = []
                 row.add(it._name)
                 row.add(it._type)
-                row.add("${it._desc}, 详情参考[这里](#${it._path})")
+                row.add("详情参考[${it._name}](#${it._path})")
 
                 rows.add("|${row.join("|")}|")
             }
 
             tables.add(rows.join("\n"))
 
+            def refs = doc._refs.findAll { clz != it._clz }
+
             // generate dependent tables
 
-            doc._refs.each {
-                String path = getDocTemplatePathFromClass(it._clz)
-                Doc refDoc = createDoc(path)
+            refs.each {
+                String txt = resolvedRefs[it._clz]
+
+                if (txt == null) {
+                    String path = getDocTemplatePathFromClass(it._clz)
+                    Doc refDoc = createDoc(path)
+                    def dmd = new DataStructMarkDown(it._clz, refDoc)
+                    dmd.resolvedRefs = resolvedRefs
+                    txt = dmd.generate()
+                    resolvedRefs[it._clz] = txt
+                }
 
                 tables.add("""\
 
+<a name="${it._path}"> **#${it._name}**<a/>
 
-<a name="#${it._path}">**${doc._title} #${it._name}**<a/>
-${new DataStructMarkDown(refDoc).generate()}
+${txt}
 """)
             }
 
@@ -656,7 +680,7 @@ apiClasses.each {
 }
 */
 
-        def tmp = new ApiRequestDocTemplate(APIChangeZoneStateMsg.class, new File("/root/zstack/header/src/main/java/org/zstack/header/zone/APIChangeZoneStateMsg.java"))
+        def tmp = new ApiRequestDocTemplate(APIStartVmInstanceMsg.class)
         tmp.generateDocFile()
     }
 
@@ -679,7 +703,7 @@ apiClasses.each {
         RestResponse at
 
         List<String> imports = []
-        Map<String, Field> fsToAdd = [:]
+        Map<String, DocField> fsToAdd = [:]
         List<String> fieldStrings = []
 
         ApiResponseDocTemplate(Class responseClass) {
@@ -718,7 +742,7 @@ apiClasses.each {
                 }
             }
 
-            fieldStrings.add(createRef("error", "错误码，如果不为null，则表示操作失败", ErrorCode.class))
+            fieldStrings.add(createRef("error", "${responseClass.name}.error", "错误码，如果不为null，则表示操作失败", ErrorCode.class.simpleName, ErrorCode.class))
         }
 
         String createField(String n, String desc, String type) {
@@ -733,15 +757,17 @@ apiClasses.each {
 \t}"""
         }
 
-        String createRef(String path, String desc, Class clz) {
+        String createRef(String n, String path, String desc, String type, Class clz) {
             laterResolveClasses.add(clz)
             imports.add("import ${clz.package.name}.${clz.simpleName}")
 
             desc = desc == null || desc == "" ? "结构字段，参考[这里](#${path})获取详细信息" : "${desc}。结构字段，参考[这里](#${path})获取详细信息"
 
             return """\tref {
+\t\tname "${n}"
 \t\tpath "${path}"
 \t\tdesc "${desc}"
+\t\ttype "${type}"
 \t\tclz ${clz.simpleName}.class
 \t}"""
         }
@@ -757,7 +783,7 @@ apiClasses.each {
                         if (gtype == null) {
                             fieldStrings.add(createField(k, "", v.type.simpleName))
                         } else {
-                            fieldStrings.add(createRef("${responseClass.name}.${v.name}", null, gtype))
+                            fieldStrings.add(createRef(k, "${responseClass.name}.${v.name}", null, v.type.simpleName, gtype))
                         }
                     } else {
                         // java time but not primitive, needs import
@@ -765,7 +791,7 @@ apiClasses.each {
                         fieldStrings.add(createField(k, "", v.type.simpleName))
                     }
                 } else {
-                    fieldStrings.add(createRef("${responseClass.name}.${v.name}", "", v.type))
+                    fieldStrings.add(createRef("${k}", "${responseClass.name}.${v.name}", "", v.type.simpleName, v.type))
                 }
             }
 
@@ -780,6 +806,9 @@ apiClasses.each {
 ${imports.join("\n")}
 
 doc {
+
+\ttitle "在这里输入结构的名称"
+
 ${fieldStr}
 }
 """
@@ -791,9 +820,9 @@ ${fieldStr}
         File sourceFile
         RestRequest at
 
-        ApiRequestDocTemplate(Class apiClass, File src) {
+        ApiRequestDocTemplate(Class apiClass) {
             this.apiClass = apiClass
-            this.sourceFile = src
+            this.sourceFile = getSourceFile(apiClass.simpleName - ".java")
             at = apiClass.getAnnotation(RestRequest.class)
         }
 
@@ -829,7 +858,7 @@ ${fieldStr}
 \t\t\t\t\tname "${af.name}"
 \t\t\t\t\tdesc ""
 \t\t\t\t\ttype "${af.type.simpleName}"
-\t\t\t\t\toptional ${ap == null ? false : ap.required()}
+\t\t\t\t\toptional ${ap == null ? true : !ap.required()}
 \t\t\t\t\tsince "0.6"
 \t\t\t\t\t${values == null ? "" : values}
 \t\t\t\t}""")
@@ -881,7 +910,7 @@ ${params()}
         }
     }
 
-    def getApiFieldsOfClass(Class apiClass) {
+    List<Field> getApiFieldsOfClass(Class apiClass) {
         def apiFields = []
 
         FieldUtils.getAllFields(apiClass).each {
@@ -902,34 +931,47 @@ ${params()}
     void generateResponseDocTemplates() {
         Set<Class> todo = []
         Set<Class> resolved = []
+        Map<String, String> docFiles = [:]
 
         def tmp = new ApiResponseDocTemplate(APIStartVmInstanceEvent.class)
-        System.out.println(tmp.generate())
+        String path = getDocTemplatePathFromClass(APIStartVmInstanceEvent.class)
+        docFiles[path] = tmp.generate()
+        //System.out.println(tmp.generate())
         todo.addAll(tmp.laterResolveClasses)
 
         while (!todo.isEmpty()) {
             Set<Class> set = []
             todo.each {
                 def t = new ApiResponseDocTemplate(it)
-                System.out.println(t.generate())
+                //System.out.println(t.generate())
+                path = getDocTemplatePathFromClass(it)
+                docFiles[path] = t.generate()
+
                 resolved.add(it)
                 set.addAll(t.laterResolveClasses)
             }
 
             todo = set - resolved
         }
+
+        docFiles.each { k, v ->
+            def f = new File(k)
+            f.write(v)
+            System.out.println("written doc template ${k}")
+        }
+
     }
 
     @Override
     void generateDocTemplates(String scanPath) {
         rootPath = scanPath
         scanJavaSourceFiles()
-        //generateDocTemplates()
+        generateDocTemplates()
+        generateResponseDocTemplates()
 
-        def md = new MarkDown("/root/zstack/header/src/main/java/org/zstack/header/zone/APIChangeZoneStateMsgDoc_.groovy")
+        def md = new MarkDown(getDocTemplatePathFromClass(APIStartVmInstanceMsg.class))
         md.write()
 
-        generateResponseDocTemplates()
     }
 
     File getSourceFile(String name) {
@@ -942,7 +984,7 @@ ${params()}
     }
 
     def scanJavaSourceFiles() {
-        String output = ShellUtils.run("find ${rootPath} -name *.java")
+        String output = ShellUtils.run("find ${rootPath} -name '*.java' -not -path '${rootPath}/sdk/*'")
         List<String> paths = output.split("\n")
         paths = paths.findAll { !(it - "\n" - "\r" - "\t").trim().isEmpty()}
 

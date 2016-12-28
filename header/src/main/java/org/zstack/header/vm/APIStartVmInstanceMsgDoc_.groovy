@@ -7,7 +7,7 @@ doc {
 
     rest {
         request {
-            url "PUT /vm-instances/{uuid}/actions"
+            url "PUT /v1/vm-instances/{uuid}/actions"
 
             header (OAuth: 'the-session-uuid')
 
@@ -19,7 +19,8 @@ doc {
 
 				column {
 					name "uuid"
-					desc ""
+					desc "资源的UUID，唯一标示该资源"
+					inUrl true
 					type "String"
 					optional false
 					since "0.6"
@@ -27,7 +28,8 @@ doc {
 				}
 				column {
 					name "clusterUuid"
-					desc ""
+					desc "集群UUID"
+					inUrl false
 					type "String"
 					optional true
 					since "0.6"
@@ -35,7 +37,8 @@ doc {
 				}
 				column {
 					name "hostUuid"
-					desc ""
+					desc "物理机UUID"
+					inUrl false
 					type "String"
 					optional true
 					since "0.6"
@@ -44,6 +47,7 @@ doc {
 				column {
 					name "systemTags"
 					desc ""
+					inUrl false
 					type "List"
 					optional true
 					since "0.6"
@@ -52,6 +56,7 @@ doc {
 				column {
 					name "userTags"
 					desc ""
+					inUrl false
 					type "List"
 					optional true
 					since "0.6"

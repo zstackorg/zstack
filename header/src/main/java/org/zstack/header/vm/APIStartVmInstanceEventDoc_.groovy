@@ -10,15 +10,17 @@ doc {
 	ref {
 		name "error"
 		path "org.zstack.header.vm.APIStartVmInstanceEvent.error"
-		desc "错误码，如果不为null，则表示操作失败。结构字段，参考[这里](#org.zstack.header.vm.APIStartVmInstanceEvent.error)获取详细信息"
+		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
+		since "0.6"
 		clz ErrorCode.class
 	}
 	ref {
 		name "inventory"
 		path "org.zstack.header.vm.APIStartVmInstanceEvent.inventory"
-		desc "结构字段，参考[这里](#org.zstack.header.vm.APIStartVmInstanceEvent.inventory)获取详细信息"
+		desc "null"
 		type "VmInstanceInventory"
+		since "0.6"
 		clz VmInstanceInventory.class
 	}
 }

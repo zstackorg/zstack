@@ -183,7 +183,7 @@ public class APIStartVmInstanceEvent extends APIEvent {
         vol.setState(VolumeState.Enabled.toString());
         vol.setFormat("qcow2");
         vol.setDiskOfferingUuid(uuid());
-        vol.setInstallPath(String.format("/zstack_ps//rootVolumes/acct-36c27e8ff05c4780bf6d2fa65700f22e/vol-%s/%s.qcow2", rootVolumeUuid, rootVolumeUuid));
+        vol.setInstallPath(String.format("/zstack_ps/rootVolumes/acct-36c27e8ff05c4780bf6d2fa65700f22e/vol-%s/%s.qcow2", rootVolumeUuid, rootVolumeUuid));
         vol.setStatus(VolumeStatus.Ready.toString());
         vol.setPrimaryStorageUuid(uuid());
         vol.setVmInstanceUuid(vm.getUuid());

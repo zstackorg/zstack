@@ -14,7 +14,6 @@ import java.util.List;
         path = "/consoles/agents",
         isAction = true,
         parameterName = "params",
-        mappingFields = {"uuids=agentUuids"},
         responseClass = APIReconnectConsoleProxyAgentEvent.class,
         method = HttpMethod.PUT
 )

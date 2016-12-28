@@ -185,6 +185,7 @@ public class RestServer implements Component, CloudBusEventListener {
                     requestMappingFields.put(kv[0].trim(), kv[1].trim());
                 }
             }
+
             responseAnnotation = (RestResponse) apiResponseClass.getAnnotation(RestResponse.class);
             DebugUtils.Assert(responseAnnotation != null, String.format("%s must be annotated with @RestResponse", apiResponseClass));
             Collections.addAll(optionalPaths, at.optionalPaths());

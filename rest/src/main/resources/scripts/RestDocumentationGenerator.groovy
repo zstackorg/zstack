@@ -2,6 +2,7 @@ package scripts
 
 import groovy.json.JsonBuilder
 import org.apache.commons.lang.StringUtils
+import org.zstack.core.Platform
 import org.zstack.header.errorcode.ErrorCode
 import org.zstack.header.exception.CloudRuntimeException
 import org.zstack.header.identity.SuppressCredentialCheck
@@ -23,6 +24,8 @@ import org.zstack.utils.path.PathUtil
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 /**
  * Created by xing5 on 2016/12/21.
@@ -64,7 +67,8 @@ class RestDocumentationGenerator implements DocumentGenerator {
             "virtualRouterUuid": "云路由UUID",
             "securityGroupUuid": "安全组UUID",
             "eipUuid": "弹性IP UUID",
-            "loadBalancerUuid": "负载均衡器UUID"
+            "loadBalancerUuid": "负载均衡器UUID",
+            "rootVolumeUuid": "根云盘UUID"
     ]
 
     def installClosure(ExpandoMetaClass emc, Closure c) {
@@ -78,6 +82,11 @@ class RestDocumentationGenerator implements DocumentGenerator {
         private List _values
         private String _since
         private String _type
+        private boolean _inUrl
+
+        def inUrl(boolean v) {
+            _inUrl = v
+        }
 
         def since(String v) {
             _since = v
@@ -236,6 +245,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
         String _name
         String _desc
         String _type
+        String _since
 
         def name(String v) {
             _name = v
@@ -248,6 +258,10 @@ class RestDocumentationGenerator implements DocumentGenerator {
         def type(String v) {
             _type = v
         }
+
+        def since(String v) {
+            _since = v
+        }
     }
 
     class DocFieldRef {
@@ -256,6 +270,12 @@ class RestDocumentationGenerator implements DocumentGenerator {
         String _path
         String _desc
         Class _clz
+        String _since
+        Boolean _overrideDesc
+
+        def since(String v) {
+            _since = v
+        }
 
         def name(String v) {
             _name = v
@@ -269,8 +289,13 @@ class RestDocumentationGenerator implements DocumentGenerator {
             _path = v
         }
 
-        def desc(String v) {
+        def desc(String v, Boolean o) {
             _desc = v
+            _overrideDesc = o
+        }
+
+        def desc(String v) {
+            desc(v, null)
         }
 
         def clz(Class v) {
@@ -358,7 +383,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
             }
 
             return """\
-**URLs**
+### URLs
 
 ```
 ${txts.join("\n")}
@@ -381,7 +406,7 @@ ${txts.join("\n")}
             }
 
             return """\
-**Headers**
+### Headers
 ```
 ${hs.join("\n")}
 ```
@@ -415,12 +440,13 @@ ${hs.join("\n")}
                 return it._name != "systemTags" && it._name != "userTags"
             }
 
-            def table = ["|名字|类型|描述|默认可选值|起始版本|"]
-            table.add("|---|---|---|---|---|")
+            def table = ["|名字|类型|位置|描述|默认可选值|起始版本|"]
+            table.add("|---|---|---|---|---|---|")
             cols.each {
                 def col = []
                 col.add(it._optional ? "${it._name} (可选)" : "${it._name}")
                 col.add(it._type)
+                col.add(it._inUrl ? "url" : "body")
                 col.add(it._desc)
                 if (it._values == null || it._values.isEmpty()) {
                     col.add("")
@@ -436,7 +462,7 @@ ${hs.join("\n")}
             }
 
             return """\
-**参数列表**
+### 参数列表
 
 ${doc._rest._request._params._desc == null ? "" : doc._rest._request._params._desc}
 
@@ -445,23 +471,84 @@ ${table.join("\n")}
         }
 
         LinkedHashMap getApiExampleOfTheClass(Class clz) {
-            Method m = clz.getMethod("__example__")
-            def example = m.invoke(null)
+            try {
+                Method m = clz.getMethod("__example__")
+                def example = m.invoke(null)
 
-            LinkedHashMap map = JSONObjectUtil.rehashObject(example, LinkedHashMap.class)
+                LinkedHashMap map = JSONObjectUtil.rehashObject(example, LinkedHashMap.class)
 
-            def apiFieldNames = getApiFieldsOfClass(clz).collect {
-                return it.name
-            }
-
-            LinkedHashMap paramMap = [:]
-            map.each { k, v ->
-                if (apiFieldNames.contains(k)) {
-                    paramMap[k] = v
+                def apiFieldNames = getApiFieldsOfClass(clz).collect {
+                    return it.name
                 }
+
+                LinkedHashMap paramMap = [:]
+                map.each { k, v ->
+                    if (apiFieldNames.contains(k)) {
+                        paramMap[k] = v
+                    }
+                }
+
+                return paramMap
+            } catch (NoSuchMethodException e) {
+                throw new CloudRuntimeException("class[${clz.name}] doesn't have static __example__ method", e)
+            }
+        }
+
+        String curlExample() {
+            if (doc._rest._request._clz == null) {
+                return ""
             }
 
-            return paramMap
+            Class clz = doc._rest._request._clz
+            RestRequest at = clz.getAnnotation(RestRequest.class)
+
+            def curl = ["curl -H \"Content-Type: application/json\""]
+            if (!clz.isAnnotationPresent(SuppressCredentialCheck.class)) {
+                curl.add("-H \"${RestConstants.HEADER_OAUTH}: ${Platform.getUuid()}\"")
+            }
+
+            curl.add("-X ${at.method()}")
+            def apiFields = getRequestBody()
+            if (apiFields != null) {
+                curl.add("-d '${JSONObjectUtil.toJsonString(apiFields)}'")
+            }
+
+            Map allFields = getApiExampleOfTheClass(clz)
+            String urlPath = substituteUrl("${RestConstants.API_VERSION}${at.path()}", allFields)
+            curl.add("http://localhost:8080${urlPath}")
+
+            return """\
+### Curl示例
+
+```
+${curl.join(" ")}
+```
+"""
+        }
+
+        Map getRequestBody() {
+            Class clz = doc._rest._request._clz
+            RestRequest at = clz.getAnnotation(RestRequest.class)
+
+            String paramName = null
+            if (at.parameterName() != "" && at.parameterName() != "null") {
+                paramName = at.parameterName()
+            } else if (at.isAction()) {
+                paramName = StringUtils.removeStart(clz.simpleName, "API")
+                paramName = StringUtils.removeEnd(paramName, "Msg")
+                paramName = StringUtils.uncapitalize(paramName)
+            }
+
+            if (paramName == null) {
+                // no body
+                return null
+            }
+
+            // the API has a body
+            Map apiFields = getApiExampleOfTheClass(clz)
+            List<String> urlVars = getVarNamesFromUrl(at.path())
+            apiFields = apiFields.findAll { k, v -> !urlVars.contains(k) }
+            return [(paramName): apiFields]
         }
 
         String requestExample() {
@@ -469,43 +556,23 @@ ${table.join("\n")}
                 return ""
             }
 
-            Class clz = doc._rest._request._clz
-
-            RestRequest at = clz.getAnnotation(RestRequest.class)
-            if ((at.parameterName() == "" && !at.isAction()) || at.parameterName() == "null") {
-                // no body
+            def apiFields = getRequestBody()
+            if (apiFields == null) {
                 return ""
             }
 
-            String paramName
-            if (!at.isAction()) {
-                paramName = at.parameterName()
-            } else {
-                paramName = StringUtils.removeStart(clz.simpleName, "API")
-                paramName = StringUtils.removeEnd(paramName, "Msg")
-                paramName = StringUtils.uncapitalize(paramName)
-            }
+            apiFields["systemTags"] = []
+            apiFields["userTags"] = []
 
-            try {
-                def apiMap = [
-                        (paramName): getApiExampleOfTheClass(clz),
-                        systemTags: [],
-                        userTags: []
-                ]
-
-                return """\
-**Body**
+            return """\
+### Body
 
 ```
-${JSONObjectUtil.dumpPretty(apiMap)}
+${JSONObjectUtil.dumpPretty(apiFields)}
 ```
 
 > 上述示例中`systemTags`、`userTags`字段可以省略。列出是为了表示body中可以包含这两个字段。
-
 """
-            } catch (NoSuchMethodException e) {
-                throw new CloudRuntimeException("class[${clz.name}] doesn't have static __example__ method", e)
-            }
         }
 
         String responseDesc() {
@@ -524,6 +591,8 @@ ${JSONObjectUtil.dumpPretty(apiMap)}
             DataStructMarkDown dmd = new DataStructMarkDown(clz, doc)
 
             LinkedHashMap map = getApiExampleOfTheClass(clz)
+            // the success field is not exposed to Restful APIs
+            map.remove("success")
 
             def cols = []
             if (map.isEmpty()) {
@@ -558,6 +627,85 @@ ${dmd.generate()}
             return cols.join("\n")
         }
 
+        String getSdkActionName() {
+            Class clz = doc._rest._request._clz
+            String aname = StringUtils.removeStart(clz.simpleName, "API")
+            aname = (aname - "Msg") + "Action"
+            return aname
+        }
+
+        String pythonSdk() {
+            Class clz = doc._rest._request._clz
+
+            String actionName = getSdkActionName()
+
+            def apiFields = getApiExampleOfTheClass(doc._rest._request._clz)
+            def e = apiFields.find { k, v ->
+                return !v.class.name.startsWith("java.")
+            }
+
+            if (e != null) {
+                return "Python SDK未能自动生成"
+            }
+
+            def cols = ["${actionName} action = ${actionName}()"]
+            cols.addAll(apiFields.collect { k, v ->
+                if (v instanceof String) {
+                    return """action.${k} = "${v}\""""
+                } else {
+                    return "action.${k} = ${v}"
+                }
+            })
+
+            if (!clz.isAnnotationPresent(SuppressCredentialCheck.class)) {
+                cols.add("""action.sessionUuid = "${Platform.getUuid()}\"""")
+            }
+
+            cols.add("${actionName}.Result res = action.call()")
+
+            return """\
+```
+${cols.join("\n")}
+```
+"""
+        }
+
+        String javaSdk() {
+            Class clz = doc._rest._request._clz
+
+            String actionName = getSdkActionName()
+
+            def apiFields = getApiExampleOfTheClass(doc._rest._request._clz)
+            def e = apiFields.find { k, v ->
+                return !v.class.name.startsWith("java.")
+            }
+
+            if (e != null) {
+                return "Java SDK未能自动生成"
+            }
+
+            def cols = ["${actionName} action = new ${actionName}();"]
+            cols.addAll(apiFields.collect { k, v ->
+                if (v instanceof String) {
+                    return """action.${k} = "${v}";"""
+                } else {
+                    return "action.${k} = ${v};"
+                }
+            })
+
+            if (!clz.isAnnotationPresent(SuppressCredentialCheck.class)) {
+                cols.add("""action.sessionUuid = "${Platform.getUuid()}";""")
+            }
+
+            cols.add("${actionName}.Result res = action.call();")
+
+            return """\
+```
+${cols.join("\n")}
+```
+"""
+        }
+
         void write() {
             def template = """\
 ## ${doc._title}
@@ -572,6 +720,8 @@ ${headers()}
 
 ${requestExample()}
 
+${curlExample()}
+
 ${params()}
 
 ## API返回
@@ -579,6 +729,16 @@ ${params()}
 ${responseDesc()}
 
 ${responseExample()}
+
+## SDK示例
+
+### Java SDK
+
+${javaSdk()}
+
+### Python SDK
+
+${pythonSdk()}
 """
             System.out.println(template)
         }
@@ -605,6 +765,7 @@ ${responseExample()}
                 row.add(it._name)
                 row.add(it._type)
                 row.add(it._desc)
+                row.add(it._since)
 
                 rows.add("|${row.join("|")}|")
             }
@@ -613,7 +774,14 @@ ${responseExample()}
                 def row = []
                 row.add(it._name)
                 row.add(it._type)
-                row.add("详情参考[${it._name}](#${it._path})")
+                if (it._overrideDesc == null) {
+                    row.add("详情参考[${it._name}](#${it._path})")
+                } else if (it._overrideDesc) {
+                    row.add(it._desc)
+                } else {
+                    row.add("${it._desc}。 详情参考[${it._name}](#${it._path})")
+                }
+                row.add(it._since)
 
                 rows.add("|${row.join("|")}|")
             }
@@ -742,7 +910,7 @@ apiClasses.each {
                 }
             }
 
-            fieldStrings.add(createRef("error", "${responseClass.name}.error", "错误码，如果不为null，则表示操作失败", ErrorCode.class.simpleName, ErrorCode.class))
+            fieldStrings.add(createRef("error", "${responseClass.name}.error", "错误码，若不为null，则表示操作失败, 操作成功时该字段为null", ErrorCode.class.simpleName, ErrorCode.class, false))
         }
 
         String createField(String n, String desc, String type) {
@@ -754,20 +922,20 @@ apiClasses.each {
 \t\tname "${n}"
 \t\tdesc "${desc == null ? "" : desc}"
 \t\ttype "${type}"
+\t\tsince "0.6"
 \t}"""
         }
 
-        String createRef(String n, String path, String desc, String type, Class clz) {
+        String createRef(String n, String path, String desc, String type, Class clz, Boolean overrideDesc=null) {
             laterResolveClasses.add(clz)
             imports.add("import ${clz.package.name}.${clz.simpleName}")
-
-            desc = desc == null || desc == "" ? "结构字段，参考[这里](#${path})获取详细信息" : "${desc}。结构字段，参考[这里](#${path})获取详细信息"
 
             return """\tref {
 \t\tname "${n}"
 \t\tpath "${path}"
-\t\tdesc "${desc}"
+\t\tdesc "${desc}"${overrideDesc != null ? ",${overrideDesc}" : ""}
 \t\ttype "${type}"
+\t\tsince "0.6"
 \t\tclz ${clz.simpleName}.class
 \t}"""
         }
@@ -791,7 +959,7 @@ apiClasses.each {
                         fieldStrings.add(createField(k, "", v.type.simpleName))
                     }
                 } else {
-                    fieldStrings.add(createRef("${k}", "${responseClass.name}.${v.name}", "", v.type.simpleName, v.type))
+                    fieldStrings.add(createRef("${k}", "${responseClass.name}.${v.name}", null, v.type.simpleName, v.type))
                 }
             }
 
@@ -841,6 +1009,7 @@ ${fieldStr}
                 return ""
             }
 
+            List<String> urlVars = getVarNamesFromUrl(at.path())
             def cols = []
             for (Field af : apiFields) {
                 APIParam ap = af.getAnnotation(APIParam.class)
@@ -854,9 +1023,12 @@ ${fieldStr}
                     values = "values (${l.join(",")})"
                 }
 
+                String desc = MUTUAL_FIELDS.get(af.name)
+
                 cols.add("""\t\t\t\tcolumn {
 \t\t\t\t\tname "${af.name}"
-\t\t\t\t\tdesc ""
+\t\t\t\t\tdesc "${desc == null  ? "" : desc}"
+\t\t\t\t\tinUrl ${urlVars.contains(af.name)}
 \t\t\t\t\ttype "${af.type.simpleName}"
 \t\t\t\t\toptional ${ap == null ? true : !ap.required()}
 \t\t\t\t\tsince "0.6"
@@ -884,7 +1056,7 @@ doc {
 
     rest {
         request {
-            url "${at.method().toString()} ${at.path()}"
+            url "${at.method().toString()} ${RestConstants.API_VERSION}${at.path()}"
 
             ${headers()}
 
@@ -954,6 +1126,15 @@ ${params()}
             todo = set - resolved
         }
 
+        docFiles = docFiles.findAll { p, _ ->
+            def fname = new File(p).name
+
+            // for pre-defined doct templates, won't generate them
+            return [ErrorCode.class].find {
+                return fname.startsWith(it.simpleName)
+            } == null
+        }
+
         docFiles.each { k, v ->
             def f = new File(k)
             f.write(v)
@@ -981,6 +1162,37 @@ ${params()}
         }
 
         return f
+    }
+
+    List<String> getVarNamesFromUrl(String url) {
+        Pattern pattern = Pattern.compile("\\{(.+?)\\}")
+        Matcher matcher = pattern.matcher(url)
+
+        List<String> urlVars = []
+        while (matcher.find()) {
+            urlVars.add(matcher.group(1))
+        }
+
+        return urlVars
+    }
+
+    String substituteUrl(String url, Map<String, Object> tokens) {
+        Pattern pattern = Pattern.compile("\\{(.+?)\\}")
+        Matcher matcher = pattern.matcher(url)
+        StringBuffer buffer = new StringBuffer()
+        while (matcher.find()) {
+            String varName = matcher.group(1)
+            Object replacement = tokens.get(varName)
+            if (replacement == null) {
+                throw new CloudRuntimeException(String.format("cannot find value for URL variable[%s]", varName))
+            }
+
+            matcher.appendReplacement(buffer, "")
+            buffer.append(replacement.toString())
+        }
+
+        matcher.appendTail(buffer)
+        return buffer.toString()
     }
 
     def scanJavaSourceFiles() {

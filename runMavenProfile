@@ -1,7 +1,13 @@
 #!/bin/sh
 
 usage() {
-    echo "usage:$0 [deploydb|deploy|xml-java-schema|premium|sdk]"
+    echo "usage:$0 [deploydb|deploy|xml-java-schema|premium|sdk|doc]"
+}
+
+doc() {
+    cd test
+    mvn test -Dtest=TestGenerateDocTemplate
+    cd - > /dev/null
 }
 
 sdk() {
@@ -27,6 +33,8 @@ run_profile() {
         mvn -Dmaven.test.skip=true -P premium clean install
     elif test x$1 = x'sdk'; then
         sdk
+    elif test x$1 = x'doc'; then
+	doc
     else
         mvn -pl build -P $1 exec:exec -D$1
     fi

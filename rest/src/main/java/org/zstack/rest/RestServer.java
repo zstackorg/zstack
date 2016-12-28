@@ -90,22 +90,9 @@ public class RestServer implements Component, CloudBusEventListener {
 
     private static final String ASYNC_JOB_PATH_PATTERN = String.format("%s/%s/{uuid}", RestConstants.API_VERSION, RestConstants.ASYNC_JOB_PATH);
 
-    public static void generateDoc() {
+    public static void generateDoc(String path, DocumentGenerator.DocMode mode) {
         DocumentGenerator rg =  GroovyUtils.newInstance("scripts/RestDocumentationGenerator.groovy");
-        rg.generateDocTemplates("/root/zstack");
-
-        /*
-        //GroovyShell shell = new GroovyShell();
-        try {
-            GroovyScriptEngine engine = new GroovyScriptEngine(new String[] {"/root/zstack/header/src/main/java/org/zstack/header/zone/APICreateZoneMsgDoc_.groovy",
-                    "/root/zstack/utils/src/main/resources/scripts/"});
-            //engine.run("APICreateZoneMsgDoc_.groovy", new Binding());
-            engine.run("RestDoc.groovy", new Binding());
-            //shell.evaluate(new File("/root/zstack/header/src/main/java/org/zstack/header/zone/APICreateZoneMsgDoc_.groovy"));
-        } catch (Exception e) {
-            throw new CloudRuntimeException(e);
-        }
-        */
+        rg.generateDocTemplates(path, mode);
     }
 
     public static void generateJavaSdk() {

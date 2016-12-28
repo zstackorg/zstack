@@ -1,6 +1,7 @@
 package scripts
 
 import groovy.json.JsonBuilder
+import org.apache.commons.lang.StringEscapeUtils
 import org.apache.commons.lang.StringUtils
 import org.zstack.core.Platform
 import org.zstack.header.errorcode.ErrorCode
@@ -16,6 +17,7 @@ import org.zstack.header.vm.APIStartVmInstanceMsg
 import org.zstack.rest.RestConstants
 import org.zstack.rest.sdk.DocumentGenerator
 import org.zstack.rest.sdk.DocumentGenerator.DocMode
+import org.zstack.utils.DebugUtils
 import org.zstack.utils.FieldUtils
 import org.zstack.utils.ShellUtils
 import org.zstack.utils.Utils
@@ -76,7 +78,15 @@ class RestDocumentationGenerator implements DocumentGenerator {
     String ENGLISH_CN = "en_us"
 
     String makeFileNameForChinese(Class clz) {
-        return "${clz.simpleName}" - ".java" + "Doc_${CHINESE_CN}.groovy"
+        boolean inner = clz.getEnclosingClass() != null
+        String fname
+        if (inner) {
+            fname = clz.getEnclosingClass().simpleName - ".java" + "-${clz.simpleName}" + "Doc_${CHINESE_CN}.groovy"
+        } else {
+            fname = clz.simpleName - ".java" + "Doc_${CHINESE_CN}.groovy"
+        }
+
+        return fname
     }
 
     String getSimpleClassNameFromDocTemplateName(String templateName) {
@@ -98,6 +108,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
             tmp.generateDocFile(mode)
         }
 
+        apiClasses = Platform.getReflections().getTypesAnnotatedWith(RestResponse.class)
         generateResponseDocTemplate(apiClasses as List, mode)
     }
 
@@ -844,7 +855,10 @@ ${txt}
     }
 
     String getDocTemplatePathFromClass(Class clz) {
-        File srcFile = getSourceFile(clz.simpleName - ".java")
+        boolean inner = clz.getEnclosingClass() != null
+        String srcFileName = (inner ? clz.getEnclosingClass().simpleName : clz.simpleName) - ".java"
+
+        File srcFile = getSourceFile(srcFileName)
         String docName = makeFileNameForChinese(clz)
         return PathUtil.join(srcFile.parent, docName)
     }
@@ -857,23 +871,22 @@ ${txt}
             double.class,
             short.class,
             char.class,
-            String.class
+            String.class,
+            Enum.class,
     ]
 
     class ApiResponseDocTemplate {
         Set<Class> laterResolveClasses = []
 
         Class responseClass
-        File sourceFile
         RestResponse at
 
         List<String> imports = []
-        Map<String, DocField> fsToAdd = [:]
+        Map<String, Field> fsToAdd = [:]
         List<String> fieldStrings = []
 
         ApiResponseDocTemplate(Class responseClass) {
             this.responseClass = responseClass
-            sourceFile = getSourceFile(responseClass.simpleName)
 
             at = responseClass.getAnnotation(RestResponse.class)
             if (at != null) {
@@ -901,13 +914,18 @@ ${txt}
             } else {
                 at.fieldsTo().each {
                     def kv = it.split("=")
-                    def k = kv[0].trim()
-                    def v = kv[1].trim()
-                    fsToAdd[k] = FieldUtils.getField(v, responseClass)
+
+                    if (kv.length == 1) {
+                        fsToAdd[kv[0]] = FieldUtils.getField(kv[0], responseClass)
+                    } else {
+                        def k = kv[0].trim()
+                        def v = kv[1].trim()
+                        fsToAdd[k] = FieldUtils.getField(v, responseClass)
+                    }
                 }
             }
 
-            fieldStrings.add(createRef("error", "${responseClass.name}.error", "错误码，若不为null，则表示操作失败, 操作成功时该字段为null", ErrorCode.class.simpleName, ErrorCode.class, false))
+            fieldStrings.add(createRef("error", "${responseClass.canonicalName}.error", "错误码，若不为null，则表示操作失败, 操作成功时该字段为null", ErrorCode.class.simpleName, ErrorCode.class, false))
         }
 
         String createField(String n, String desc, String type) {
@@ -924,8 +942,10 @@ ${txt}
         }
 
         String createRef(String n, String path, String desc, String type, Class clz, Boolean overrideDesc=null) {
+            DebugUtils.Assert(!PRIMITIVE_TYPES.contains(clz), "${clz.name} is a primitive class!!!")
+
             laterResolveClasses.add(clz)
-            imports.add("import ${clz.package.name}.${clz.simpleName}")
+            imports.add("import ${clz.canonicalName}")
 
             return """\tref {
 \t\tname "${n}"
@@ -939,16 +959,18 @@ ${txt}
 
         String fields() {
             fsToAdd.each { k, v ->
+                System.out.println("generating field ${responseClass.name}.${k} ${v.type.name}")
+
                 if (PRIMITIVE_TYPES.contains(v.type)) {
                     fieldStrings.add(createField(k, "", v.type.simpleName))
                 } else if (v.type.name.startsWith("java.")) {
                     if (Collection.class.isAssignableFrom(v.type) || Map.class.isAssignableFrom(v.type)) {
                         Class gtype = FieldUtils.getGenericType(v)
 
-                        if (gtype == null) {
+                        if (gtype == null || gtype.name.startsWith("java.")) {
                             fieldStrings.add(createField(k, "", v.type.simpleName))
                         } else {
-                            fieldStrings.add(createRef(k, "${responseClass.name}.${v.name}", null, v.type.simpleName, gtype))
+                            fieldStrings.add(createRef(k, "${responseClass.canonicalName}.${v.name}", null, v.type.simpleName, gtype))
                         }
                     } else {
                         // java time but not primitive, needs import
@@ -956,7 +978,7 @@ ${txt}
                         fieldStrings.add(createField(k, "", v.type.simpleName))
                     }
                 } else {
-                    fieldStrings.add(createRef("${k}", "${responseClass.name}.${v.name}", null, v.type.simpleName, v.type))
+                    fieldStrings.add(createRef("${k}", "${responseClass.canonicalName}.${v.name}", null, v.type.simpleName, v.type))
                 }
             }
 
@@ -1136,6 +1158,7 @@ ${params()}
         Set<Class> resolved = []
 
         aClasses.each {
+            System.out.println("generating response doc template for class[${it.name}]")
             String path = getDocTemplatePathFromClass(it)
             if (new File(path).exists() && mode == DocMode.CREATE_MISSING) {
                 System.out.println("${path} exists, skip it")

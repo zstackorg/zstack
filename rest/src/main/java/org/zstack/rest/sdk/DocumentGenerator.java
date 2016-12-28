@@ -10,4 +10,6 @@ public interface DocumentGenerator {
     }
 
     void generateDocTemplates(String scanPath, DocMode mode);
+
+    void generateMarkDown(String scanPath, String resultDir);
 }

@@ -12,9 +12,9 @@ class TestGenerateDocTemplate {
     @Test
     void test() {
         if (System.getProperty("re") != null) {
-            RestServer.generateDoc(Paths.get("../").toAbsolutePath().normalize().toString(), DocumentGenerator.DocMode.RECREATE_ALL)
+            RestServer.generateDocTemplate(Paths.get("../").toAbsolutePath().normalize().toString(), DocumentGenerator.DocMode.RECREATE_ALL)
         } else {
-            RestServer.generateDoc(Paths.get("../").toAbsolutePath().normalize().toString(), DocumentGenerator.DocMode.CREATE_MISSING)
+            RestServer.generateDocTemplate(Paths.get("../").toAbsolutePath().normalize().toString(), DocumentGenerator.DocMode.CREATE_MISSING)
         }
     }
 }

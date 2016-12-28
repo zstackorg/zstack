@@ -90,9 +90,14 @@ public class RestServer implements Component, CloudBusEventListener {
 
     private static final String ASYNC_JOB_PATH_PATTERN = String.format("%s/%s/{uuid}", RestConstants.API_VERSION, RestConstants.ASYNC_JOB_PATH);
 
-    public static void generateDoc(String path, DocumentGenerator.DocMode mode) {
+    public static void generateDocTemplate(String path, DocumentGenerator.DocMode mode) {
         DocumentGenerator rg =  GroovyUtils.newInstance("scripts/RestDocumentationGenerator.groovy");
         rg.generateDocTemplates(path, mode);
+    }
+
+    public static void generateMarkdownDoc(String path) {
+        DocumentGenerator rg =  GroovyUtils.newInstance("scripts/RestDocumentationGenerator.groovy");
+        rg.generateMarkDown(path, PathUtil.join(System.getProperty("user.home"), "zstack-markdown"));
     }
 
     public static void generateJavaSdk() {

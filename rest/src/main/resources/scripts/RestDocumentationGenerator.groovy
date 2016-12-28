@@ -1,7 +1,6 @@
 package scripts
 
 import groovy.json.JsonBuilder
-import org.apache.commons.lang.StringEscapeUtils
 import org.apache.commons.lang.StringUtils
 import org.zstack.core.Platform
 import org.zstack.header.errorcode.ErrorCode
@@ -12,13 +11,12 @@ import org.zstack.header.query.APIQueryMessage
 import org.zstack.header.rest.APINoSee
 import org.zstack.header.rest.RestRequest
 import org.zstack.header.rest.RestResponse
-import org.zstack.header.vm.APIStartVmInstanceEvent
-import org.zstack.header.vm.APIStartVmInstanceMsg
 import org.zstack.rest.RestConstants
 import org.zstack.rest.sdk.DocumentGenerator
 import org.zstack.rest.sdk.DocumentGenerator.DocMode
 import org.zstack.utils.DebugUtils
 import org.zstack.utils.FieldUtils
+import org.zstack.utils.ShellResult
 import org.zstack.utils.ShellUtils
 import org.zstack.utils.Utils
 import org.zstack.utils.gson.JSONObjectUtil
@@ -110,6 +108,36 @@ class RestDocumentationGenerator implements DocumentGenerator {
 
         apiClasses = Platform.getReflections().getTypesAnnotatedWith(RestResponse.class)
         generateResponseDocTemplate(apiClasses as List, mode)
+    }
+
+    @Override
+    void generateMarkDown(String scanPath, String resultDir) {
+        rootPath = scanPath
+
+        scanJavaSourceFiles()
+
+        File dir = new File(resultDir)
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+
+        Set<Class> apiClasses = Platform.getReflections().getTypesAnnotatedWith(RestRequest.class)
+        apiClasses.each {
+            def docPath = getDocTemplatePathFromClass(it)
+            System.out.println("processing ${docPath}")
+            try {
+                def md = new MarkDown(docPath)
+                File f  =new File(PathUtil.join(resultDir, "${it.canonicalName.replaceAll("\\.", "_")}.md"))
+                f.write(md.generate())
+                System.out.println("written ${f.absolutePath}")
+            } catch (Exception e) {
+                if (ignoreError()) {
+                    System.out.println("failed to process ${docPath}, ${e.message}")
+                } else {
+                    throw e
+                }
+            }
+        }
     }
 
     class RequestParamColumn {
@@ -449,6 +477,7 @@ ${txts.join("\n")}
 
             return """\
 ### Headers
+
 ```
 ${hs.join("\n")}
 ```
@@ -744,8 +773,8 @@ ${cols.join("\n")}
 """
         }
 
-        void write() {
-            def template = """\
+        String generate() {
+            return  """\
 ## ${doc._title}
 
 ${doc._desc}
@@ -778,7 +807,6 @@ ${javaSdk()}
 
 ${pythonSdk()}
 """
-            System.out.println(template)
         }
     }
 
@@ -1007,6 +1035,8 @@ ${fieldStr}
         File sourceFile
         RestRequest at
 
+        List<String> imports = []
+
         ApiRequestDocTemplate(Class apiClass) {
             this.apiClass = apiClass
             this.sourceFile = getSourceFile(apiClass.simpleName - ".java")
@@ -1033,7 +1063,9 @@ ${fieldStr}
 
         String params() {
             if (APIQueryMessage.class.isAssignableFrom(apiClass)) {
-                return """\t\tparams ${APIQueryMessage.class.simpleName}.class"""
+                imports.add("import ${APIQueryMessage.class.canonicalName}")
+
+                return """\t\t\tparams ${APIQueryMessage.class.simpleName}.class"""
             }
 
             def apiFields = getApiFieldsOfClass(apiClass)
@@ -1089,8 +1121,16 @@ ${cols.join("\n")}
 \t\t\t}"""
         }
 
+        String imports() {
+            return imports.isEmpty() ? "" : imports.join("\n")
+        }
+
         String generate() {
+            String paramString = params()
+
             return """package ${apiClass.package.name}
+
+${imports()}
 
 doc {
     title "在这里填写API标题"
@@ -1107,7 +1147,7 @@ doc {
 
             desc ""
             
-${params()}
+${paramString}
         }
 
         response {
@@ -1202,10 +1242,10 @@ ${params()}
         }
     }
 
-    File getSourceFile(String name) {
-        File f = sourceFiles[name]
+    File getSourceFile(String n) {
+        File f = sourceFiles[n]
         if (f == null) {
-            throw new CloudRuntimeException("cannot find source file ${name}.java")
+            throw new CloudRuntimeException("cannot find source file ${n}.java")
         }
 
         return f
@@ -1249,14 +1289,25 @@ ${params()}
         return paramName
     }
 
+    def scanDocTemplateFiles() {
+        ShellResult res = ShellUtils.runAndReturn("find ${rootPath} -name '*Doc_*.groovy' -not -path '${rootPath}/sdk/*'")
+        List<String> paths = res.stdout.split("\n")
+        paths = paths.findAll { !(it - "\n" - "\r" - "\t").trim().isEmpty() }
+        return paths
+    }
+
     def scanJavaSourceFiles() {
-        String output = ShellUtils.run("find ${rootPath} -name '*.java' -not -path '${rootPath}/sdk/*'")
-        List<String> paths = output.split("\n")
+        ShellResult res = ShellUtils.runAndReturn("find ${rootPath} -name '*.java' -not -path '${rootPath}/sdk/*'")
+        List<String> paths = res.stdout.split("\n")
         paths = paths.findAll { !(it - "\n" - "\r" - "\t").trim().isEmpty()}
 
         paths.each {
             def f = new File(it)
             sourceFiles[f.name - ".java"] = f
         }
+    }
+
+    boolean ignoreError() {
+        return System.getProperty("ignoreError") != null
     }
 }

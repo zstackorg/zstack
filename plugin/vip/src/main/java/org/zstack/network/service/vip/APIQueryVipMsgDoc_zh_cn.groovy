@@ -1,5 +1,7 @@
 package org.zstack.network.service.vip
 
+import org.zstack.header.query.APIQueryMessage
+
 doc {
     title "在这里填写API标题"
 
@@ -15,7 +17,7 @@ doc {
 
             desc ""
             
-		params APIQueryMessage.class
+			params APIQueryMessage.class
         }
 
         response {

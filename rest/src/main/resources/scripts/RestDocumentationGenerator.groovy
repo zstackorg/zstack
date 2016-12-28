@@ -7,6 +7,7 @@ import org.zstack.header.errorcode.ErrorCode
 import org.zstack.header.exception.CloudRuntimeException
 import org.zstack.header.identity.SuppressCredentialCheck
 import org.zstack.header.message.APIParam
+import org.zstack.header.query.APIQueryMessage
 import org.zstack.header.rest.APINoSee
 import org.zstack.header.rest.RestRequest
 import org.zstack.header.rest.RestResponse
@@ -14,6 +15,7 @@ import org.zstack.header.vm.APIStartVmInstanceEvent
 import org.zstack.header.vm.APIStartVmInstanceMsg
 import org.zstack.rest.RestConstants
 import org.zstack.rest.sdk.DocumentGenerator
+import org.zstack.rest.sdk.DocumentGenerator.DocMode
 import org.zstack.utils.FieldUtils
 import org.zstack.utils.ShellUtils
 import org.zstack.utils.Utils
@@ -35,7 +37,6 @@ class RestDocumentationGenerator implements DocumentGenerator {
 
     String rootPath
 
-    List<Doc> docs = []
     Map<String, File> sourceFiles = [:]
 
     def MUTUAL_FIELDS = [
@@ -71,8 +72,33 @@ class RestDocumentationGenerator implements DocumentGenerator {
             "rootVolumeUuid": "根云盘UUID"
     ]
 
+    String CHINESE_CN = "zh_cn"
+    String ENGLISH_CN = "en_us"
+
+    String makeFileNameForChinese(Class clz) {
+        return "${clz.simpleName}" - ".java" + "Doc_${CHINESE_CN}.groovy"
+    }
+
+    String getSimpleClassNameFromDocTemplateName(String templateName) {
+        return templateName - CHINESE_CN - ENGLISH_CN
+    }
+
     def installClosure(ExpandoMetaClass emc, Closure c) {
         c(emc)
+    }
+
+    @Override
+    void generateDocTemplates(String scanPath, DocMode mode) {
+        rootPath = scanPath
+        scanJavaSourceFiles()
+
+        Set<Class> apiClasses = Platform.getReflections().getTypesAnnotatedWith(RestRequest.class)
+        apiClasses.each {
+            def tmp = new ApiRequestDocTemplate(it)
+            tmp.generateDocFile(mode)
+        }
+
+        generateResponseDocTemplate(apiClasses as List, mode)
     }
 
     class RequestParamColumn {
@@ -119,7 +145,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
     }
 
     class RequestParamRef extends RequestParam {
-        String ref
+        Class refClass
     }
 
     class RequestParam {
@@ -220,9 +246,9 @@ class RestDocumentationGenerator implements DocumentGenerator {
             _desc = v
         }
 
-        def params(String v) {
+        def params(Class v) {
             def p = new RequestParamRef()
-            p.ref = v
+            p.refClass = v
 
             _params = p
         }
@@ -424,11 +450,8 @@ ${hs.join("\n")}
             }
 
             if (doc._rest._request._params instanceof RequestParamRef) {
-                String ref = (doc._rest._request._params as RequestParamRef).ref
-                String fname = ref - "Doc_.groovy"
-                File srcFile = getSourceFile(fname)
-
-                String docFilePath = PathUtil.join(srcFile.parent, ref)
+                Class refClass = (doc._rest._request._params as RequestParamRef).refClass
+                String docFilePath = getDocTemplatePathFromClass(refClass)
                 Doc refDoc = createDoc(docFilePath)
 
                 doc._rest._request._params = refDoc._rest._request._params
@@ -590,8 +613,7 @@ ${JSONObjectUtil.dumpPretty(apiFields)}
                 throw new CloudRuntimeException("${doc._rest} doesn't have 'clz' specified in the response body")
             }
 
-            File sourceFile = getSourceFile(clz.simpleName - ".java")
-            String docFilePath = PathUtil.join(sourceFile.parent, classToDocFileName(clz))
+            String docFilePath = getDocTemplatePathFromClass(clz)
             Doc doc = createDoc(docFilePath)
             DataStructMarkDown dmd = new DataStructMarkDown(clz, doc)
 
@@ -823,38 +845,8 @@ ${txt}
 
     String getDocTemplatePathFromClass(Class clz) {
         File srcFile = getSourceFile(clz.simpleName - ".java")
-        String docName = classToDocFileName(clz)
+        String docName = makeFileNameForChinese(clz)
         return PathUtil.join(srcFile.parent, docName)
-    }
-
-    String classToDocFileName(Class clz) {
-        return "${clz.simpleName}Doc_.groovy"
-    }
-
-    void generateDocTemplates() {
-        /*
-Map<String, File> files = [:]
-
-File root = new File(rootPath)
-root.traverse { f ->
-    files[f.name] = f
-}
-
-Set<Class> apiClasses = Platform.getReflections().getTypesAnnotatedWith(RestRequest.class)
-apiClasses.each {
-    String srcName = "${it.simpleName}.java"
-    File srcFile = files[srcName]
-    if (srcFile == null) {
-        throw new CloudRuntimeException("cannot find the source file for the class[${it.name}]")
-    }
-
-    def tmp = new DocTemplate(it, srcFile)
-    System.out.println(tmp.generate())
-}
-*/
-
-        def tmp = new ApiRequestDocTemplate(APIStartVmInstanceMsg.class)
-        tmp.generateDocFile()
     }
 
     def PRIMITIVE_TYPES = [
@@ -1018,6 +1010,10 @@ ${fieldStr}
         }
 
         String params() {
+            if (APIQueryMessage.class.isAssignableFrom(apiClass)) {
+                return """\t\tparams ${APIQueryMessage.class.simpleName}.class"""
+            }
+
             def apiFields = getApiFieldsOfClass(apiClass)
 
             if (apiFields.isEmpty()) {
@@ -1099,11 +1095,22 @@ ${params()}
 }"""
         }
 
-        void generateDocFile() {
-            def docFileName = "${apiClass.simpleName}Doc_.groovy"
-            def docFilePath = [sourceFile.parent, docFileName].join("/")
-            System.out.println(docFilePath)
-            new File(docFilePath).write generate()
+        void generateDocFile(DocMode mode) {
+            def docFilePath = getDocTemplatePathFromClass(apiClass)
+
+            if (mode == DocMode.RECREATE_ALL) {
+                new File(docFilePath).write generate()
+                System.out.println("written a request doc template ${docFilePath}")
+            } else if (mode == DocMode.CREATE_MISSING) {
+                if (!new File(docFilePath).exists()) {
+                    new File(docFilePath).write generate()
+                    System.out.println("written a request doc template ${docFilePath}")
+                } else {
+                    System.out.println("${docFilePath} exists, skip it")
+                }
+            } else {
+                throw new CloudRuntimeException("unknown doc mode ${mode}")
+            }
         }
     }
 
@@ -1125,59 +1132,51 @@ ${params()}
         return apiFields
     }
 
-    void generateResponseDocTemplates() {
-        Set<Class> todo = []
+    void generateResponseDocTemplate(List<Class> aClasses, DocMode mode) {
         Set<Class> resolved = []
-        Map<String, String> docFiles = [:]
 
-        def tmp = new ApiResponseDocTemplate(APIStartVmInstanceEvent.class)
-        String path = getDocTemplatePathFromClass(APIStartVmInstanceEvent.class)
-        docFiles[path] = tmp.generate()
-        //System.out.println(tmp.generate())
-        todo.addAll(tmp.laterResolveClasses)
-
-        while (!todo.isEmpty()) {
-            Set<Class> set = []
-            todo.each {
-                def t = new ApiResponseDocTemplate(it)
-                //System.out.println(t.generate())
-                path = getDocTemplatePathFromClass(it)
-                docFiles[path] = t.generate()
-
-                resolved.add(it)
-                set.addAll(t.laterResolveClasses)
+        aClasses.each {
+            String path = getDocTemplatePathFromClass(it)
+            if (new File(path).exists() && mode == DocMode.CREATE_MISSING) {
+                System.out.println("${path} exists, skip it")
+                return
             }
 
-            todo = set - resolved
+            Set<Class> todo = []
+            Map<String, String> docFiles = [:]
+            def tmp = new ApiResponseDocTemplate(it)
+            docFiles[path] = tmp.generate()
+            todo.addAll(tmp.laterResolveClasses)
+
+            while (!todo.isEmpty()) {
+                Set<Class> set = []
+                todo.each {
+                    def t = new ApiResponseDocTemplate(it)
+                    path = getDocTemplatePathFromClass(it)
+                    docFiles[path] = t.generate()
+
+                    resolved.add(it)
+                    set.addAll(t.laterResolveClasses)
+                }
+
+                todo = set - resolved
+            }
+
+            docFiles = docFiles.findAll { p, _ ->
+                def fname = new File(p).name
+
+                // for pre-defined doc templates, won't generate them
+                return [ErrorCode.class].find {
+                    return fname.startsWith(it.simpleName)
+                } == null
+            }
+
+            docFiles.each { k, v ->
+                def f = new File(k)
+                f.write(v)
+                System.out.println("written doc template ${k}")
+            }
         }
-
-        docFiles = docFiles.findAll { p, _ ->
-            def fname = new File(p).name
-
-            // for pre-defined doct templates, won't generate them
-            return [ErrorCode.class].find {
-                return fname.startsWith(it.simpleName)
-            } == null
-        }
-
-        docFiles.each { k, v ->
-            def f = new File(k)
-            f.write(v)
-            System.out.println("written doc template ${k}")
-        }
-
-    }
-
-    @Override
-    void generateDocTemplates(String scanPath) {
-        rootPath = scanPath
-        scanJavaSourceFiles()
-        generateDocTemplates()
-        generateResponseDocTemplates()
-
-        def md = new MarkDown(getDocTemplatePathFromClass(APIStartVmInstanceMsg.class))
-        md.write()
-
     }
 
     File getSourceFile(String name) {

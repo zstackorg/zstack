@@ -83,6 +83,11 @@ class RestDocumentationGenerator implements DocumentGenerator {
         private String _since
         private String _type
         private boolean _inUrl
+        private String _enclosedIn
+
+        def enclosedIn(String v) {
+            _enclosedIn = v
+        }
 
         def inUrl(boolean v) {
             _inUrl = v
@@ -435,19 +440,21 @@ ${hs.join("\n")}
                 return ""
             }
 
-            cols = cols.findAll {
-                // tags are specially handled
-                return it._name != "systemTags" && it._name != "userTags"
-            }
 
-            def table = ["|名字|类型|位置|描述|默认可选值|起始版本|"]
+            def table = ["|名字|类型|位置|描述|可选值|起始版本|"]
             table.add("|---|---|---|---|---|---|")
             cols.each {
                 def col = []
+
+                String enclosed = null
+                if (it._enclosedIn != "" && !it._inUrl) {
+                    enclosed = "包含在`${it._enclosedIn}`结构中"
+                }
+
                 col.add(it._optional ? "${it._name} (可选)" : "${it._name}")
                 col.add(it._type)
-                col.add(it._inUrl ? "url" : "body")
-                col.add(it._desc)
+                col.add(it._inUrl ? "url" : "body${enclosed == null ? "" : "(${enclosed})"}")
+                col.add("${it._desc}")
                 if (it._values == null || it._values.isEmpty()) {
                     col.add("")
                 } else {
@@ -534,9 +541,7 @@ ${curl.join(" ")}
             if (at.parameterName() != "" && at.parameterName() != "null") {
                 paramName = at.parameterName()
             } else if (at.isAction()) {
-                paramName = StringUtils.removeStart(clz.simpleName, "API")
-                paramName = StringUtils.removeEnd(paramName, "Msg")
-                paramName = StringUtils.uncapitalize(paramName)
+                paramName = paramNameFromClass(clz)
             }
 
             if (paramName == null) {
@@ -1002,12 +1007,24 @@ ${fieldStr}
             return """header (${RestConstants.HEADER_OAUTH}: 'the-session-uuid')"""
         }
 
+        String getParamName() {
+            if (at.parameterName() != "" && at.parameterName() != "null") {
+                return at.parameterName()
+            } else if (at.isAction()) {
+                return paramNameFromClass(apiClass)
+            } else {
+                return null
+            }
+        }
+
         String params() {
             def apiFields = getApiFieldsOfClass(apiClass)
 
             if (apiFields.isEmpty()) {
                 return ""
             }
+
+            String paramName = getParamName()
 
             List<String> urlVars = getVarNamesFromUrl(at.path())
             def cols = []
@@ -1025,8 +1042,16 @@ ${fieldStr}
 
                 String desc = MUTUAL_FIELDS.get(af.name)
 
+                String enclosedIn
+                if (af.name == "systemTags" || af.name == "userTags") {
+                    enclosedIn = ""
+                } else {
+                    enclosedIn = paramName == null ? "" : paramName
+                }
+
                 cols.add("""\t\t\t\tcolumn {
 \t\t\t\t\tname "${af.name}"
+\t\t\t\t\tenclosedIn "${enclosedIn}"
 \t\t\t\t\tdesc "${desc == null  ? "" : desc}"
 \t\t\t\t\tinUrl ${urlVars.contains(af.name)}
 \t\t\t\t\ttype "${af.type.simpleName}"
@@ -1193,6 +1218,13 @@ ${params()}
 
         matcher.appendTail(buffer)
         return buffer.toString()
+    }
+
+    def paramNameFromClass(Class clz) {
+        def paramName = StringUtils.removeStart(clz.simpleName, "API")
+        paramName = StringUtils.removeEnd(paramName, "Msg")
+        paramName = StringUtils.uncapitalize(paramName)
+        return paramName
     }
 
     def scanJavaSourceFiles() {

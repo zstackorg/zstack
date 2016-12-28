@@ -19,6 +19,7 @@ doc {
 
 				column {
 					name "uuid"
+					enclosedIn "startVmInstance"
 					desc "资源的UUID，唯一标示该资源"
 					inUrl true
 					type "String"
@@ -28,6 +29,7 @@ doc {
 				}
 				column {
 					name "clusterUuid"
+					enclosedIn "startVmInstance"
 					desc "集群UUID"
 					inUrl false
 					type "String"
@@ -37,6 +39,7 @@ doc {
 				}
 				column {
 					name "hostUuid"
+					enclosedIn "startVmInstance"
 					desc "物理机UUID"
 					inUrl false
 					type "String"
@@ -46,6 +49,7 @@ doc {
 				}
 				column {
 					name "systemTags"
+					enclosedIn ""
 					desc ""
 					inUrl false
 					type "List"
@@ -55,6 +59,7 @@ doc {
 				}
 				column {
 					name "userTags"
+					enclosedIn ""
 					desc ""
 					inUrl false
 					type "List"

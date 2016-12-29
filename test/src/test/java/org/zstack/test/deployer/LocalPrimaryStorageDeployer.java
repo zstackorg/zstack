@@ -2,13 +2,10 @@ package org.zstack.test.deployer;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.zstack.header.storage.primary.APIAddPrimaryStorageEvent;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.zone.ZoneInventory;
 import org.zstack.sdk.AddLocalPrimaryStorageAction;
-import org.zstack.storage.primary.local.APIAddLocalPrimaryStorageMsg;
 import org.zstack.test.Api;
-import org.zstack.test.ApiSender;
 import org.zstack.test.ApiSenderException;
 import org.zstack.test.deployer.schema.DeployerConfig;
 import org.zstack.test.deployer.schema.LocalPrimaryStorageConfig;

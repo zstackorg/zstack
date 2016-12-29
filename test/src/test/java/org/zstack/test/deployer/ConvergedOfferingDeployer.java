@@ -1,6 +1,5 @@
 package org.zstack.test.deployer;
 
-import org.zstack.header.configuration.APICreateInstanceOfferingMsg;
 import org.zstack.header.configuration.ConfigurationConstant;
 import org.zstack.header.configuration.InstanceOfferingInventory;
 import org.zstack.header.identity.SessionInventory;

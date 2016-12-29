@@ -9,7 +9,6 @@ import org.zstack.core.componentloader.ComponentLoader;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.header.rest.RESTFacade;
 import org.zstack.rest.AsyncRestQueryResult;
-import org.zstack.rest.AsyncRestState;
 import org.zstack.rest.RestConstants;
 import org.zstack.test.Api;
 import org.zstack.test.ApiSenderException;

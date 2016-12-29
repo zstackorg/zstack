@@ -5,7 +5,12 @@ package org.zstack.header.vm
 doc {
     title "在这里填写API标题"
 
-    desc "在这里填写API描述"
+    desc """\
+# 这个是创建VM的API
+
+- list
+- list2
+"""
 
     rest {
         request {

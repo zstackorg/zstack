@@ -15,7 +15,8 @@ import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusEventListener;
 import org.zstack.core.componentloader.ComponentLoader;
-import org.zstack.core.config.*;
+import org.zstack.core.config.APIListGlobalConfigMsg;
+import org.zstack.core.config.APIListGlobalConfigReply;
 import org.zstack.core.config.GlobalConfigInventory;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.SimpleQuery;
@@ -28,10 +29,7 @@ import org.zstack.ha.APIDeleteVmInstanceHaLevelMsg;
 import org.zstack.ha.APISetVmInstanceHaLevelEvent;
 import org.zstack.ha.APISetVmInstanceHaLevelMsg;
 import org.zstack.ha.VmHaLevel;
-import org.zstack.header.allocator.APIGetCpuMemoryCapacityMsg;
 import org.zstack.header.allocator.APIGetCpuMemoryCapacityReply;
-import org.zstack.header.allocator.APIGetHostAllocatorStrategiesMsg;
-import org.zstack.header.allocator.APIGetHostAllocatorStrategiesReply;
 import org.zstack.header.apimediator.APIIsReadyToGoMsg;
 import org.zstack.header.apimediator.ApiMediatorConstant;
 import org.zstack.header.cluster.*;
@@ -39,8 +37,6 @@ import org.zstack.header.cluster.ClusterInventory;
 import org.zstack.header.configuration.*;
 import org.zstack.header.configuration.DiskOfferingInventory;
 import org.zstack.header.configuration.InstanceOfferingInventory;
-import org.zstack.header.console.APIRequestConsoleAccessEvent;
-import org.zstack.header.console.APIRequestConsoleAccessMsg;
 import org.zstack.header.console.ConsoleInventory;
 import org.zstack.header.core.scheduler.SchedulerInventory;
 import org.zstack.header.exception.CloudRuntimeException;
@@ -74,7 +70,8 @@ import org.zstack.header.network.service.*;
 import org.zstack.header.network.service.NetworkServiceProviderInventory;
 import org.zstack.header.query.*;
 import org.zstack.header.search.*;
-import org.zstack.header.simulator.*;
+import org.zstack.header.simulator.ChangeVmStateOnSimulatorHostMsg;
+import org.zstack.header.simulator.SimulatorConstant;
 import org.zstack.header.simulator.storage.backup.SimulatorBackupStorageConstant;
 import org.zstack.header.simulator.storage.backup.SimulatorBackupStorageDetails;
 import org.zstack.header.simulator.storage.primary.APIAddSimulatorPrimaryStorageMsg;
@@ -87,8 +84,8 @@ import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.storage.snapshot.VolumeSnapshotInventory;
 import org.zstack.header.storage.snapshot.VolumeSnapshotTreeInventory;
-import org.zstack.header.tag.*;
 import org.zstack.header.tag.TagInventory;
+import org.zstack.header.tag.TagType;
 import org.zstack.header.vm.*;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmNicInventory;
@@ -106,12 +103,14 @@ import org.zstack.license.*;
 import org.zstack.license.LicenseInventory;
 import org.zstack.logging.APIDeleteLogEvent;
 import org.zstack.logging.APIDeleteLogMsg;
-import org.zstack.network.securitygroup.*;
 import org.zstack.network.securitygroup.APIAddSecurityGroupRuleMsg.SecurityGroupRuleAO;
+import org.zstack.network.securitygroup.*;
 import org.zstack.network.securitygroup.SecurityGroupInventory;
 import org.zstack.network.securitygroup.VmNicSecurityGroupRefInventory;
-import org.zstack.network.service.eip.*;
+import org.zstack.network.service.eip.APIUpdateEipEvent;
+import org.zstack.network.service.eip.APIUpdateEipMsg;
 import org.zstack.network.service.eip.EipInventory;
+import org.zstack.network.service.eip.EipStateEvent;
 import org.zstack.network.service.lb.*;
 import org.zstack.network.service.lb.LoadBalancerInventory;
 import org.zstack.network.service.lb.LoadBalancerListenerInventory;
@@ -119,7 +118,8 @@ import org.zstack.network.service.portforwarding.*;
 import org.zstack.network.service.portforwarding.PortForwardingRuleInventory;
 import org.zstack.network.service.vip.*;
 import org.zstack.network.service.vip.VipInventory;
-import org.zstack.network.service.virtualrouter.*;
+import org.zstack.network.service.virtualrouter.APICreateVirtualRouterOfferingMsg;
+import org.zstack.network.service.virtualrouter.APIUpdateVirtualRouterOfferingMsg;
 import org.zstack.network.service.virtualrouter.VirtualRouterOfferingInventory;
 import org.zstack.portal.managementnode.ManagementNodeManager;
 import org.zstack.sdk.*;
@@ -163,6 +163,15 @@ public class Api implements CloudBusEventListener {
 
     static {
         loader = Platform.getComponentLoader();
+
+        ZSClient.configure(
+                new ZSConfig.Builder()
+                        .setHostname("127.0.0.1")
+                        .setPort(8989)
+                        .setDefaultPollingInterval(100, TimeUnit.MILLISECONDS)
+                        .setDefaultPollingTimeout(15, TimeUnit.SECONDS)
+                        .build()
+        );
     }
 
     private void start() {

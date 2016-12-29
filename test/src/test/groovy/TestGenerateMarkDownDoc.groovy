@@ -1,6 +1,5 @@
 import org.junit.Test
 import org.zstack.rest.RestServer
-import org.zstack.rest.sdk.DocumentGenerator
 
 import java.nio.file.Paths
 

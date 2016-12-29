@@ -16,10 +16,7 @@ import org.zstack.header.image.ImageInventory;
 import org.zstack.header.network.l2.L2NetworkInventory;
 import org.zstack.header.network.l3.IpRangeInventory;
 import org.zstack.header.network.l3.L3NetworkInventory;
-import org.zstack.header.network.service.APIQueryNetworkServiceProviderMsg;
-import org.zstack.header.network.service.APIQueryNetworkServiceProviderReply;
 import org.zstack.header.network.service.NetworkServiceProviderInventory;
-import org.zstack.header.query.QueryCondition;
 import org.zstack.header.storage.backup.BackupStorageInventory;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.vm.VmInstanceInventory;
@@ -30,8 +27,6 @@ import org.zstack.network.service.lb.LoadBalancerInventory;
 import org.zstack.network.service.lb.LoadBalancerListenerInventory;
 import org.zstack.network.service.portforwarding.PortForwardingRuleInventory;
 import org.zstack.sdk.QueryNetworkServiceProviderAction;
-import org.zstack.sdk.ZSClient;
-import org.zstack.sdk.ZSConfig;
 import org.zstack.test.Api;
 import org.zstack.test.ApiSenderException;
 import org.zstack.test.BeanConstructor;
@@ -49,7 +44,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class Deployer {
     private static final CLogger logger = Utils.getLogger(Deployer.class);
@@ -116,15 +110,6 @@ public class Deployer {
     public String SPRING_CONFIG_REST_MANAGER = "rest.xml";
 
     private void scanDeployer() {
-        ZSClient.configure(
-                new ZSConfig.Builder()
-                        .setHostname("127.0.0.1")
-                        .setPort(8989)
-                        .setDefaultPollingInterval(100, TimeUnit.MILLISECONDS)
-                        .setDefaultPollingTimeout(15, TimeUnit.SECONDS)
-                        .build()
-        );
-
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(true);
         scanner.addIncludeFilter(new AssignableTypeFilter(AbstractDeployer.class));
         scanner.addExcludeFilter(new AnnotationTypeFilter(Controller.class));

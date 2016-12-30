@@ -30,6 +30,7 @@ import org.zstack.sdk.QueryNetworkServiceProviderAction;
 import org.zstack.test.Api;
 import org.zstack.test.ApiSenderException;
 import org.zstack.test.BeanConstructor;
+import org.zstack.test.WebBeanConstructor;
 import org.zstack.test.deployer.schema.*;
 import org.zstack.utils.Utils;
 import org.zstack.utils.data.SizeUnit;
@@ -133,7 +134,7 @@ public class Deployer {
     }
 
     public Deployer(String xmlName) {
-        this(xmlName, new BeanConstructor());
+        this(xmlName, new WebBeanConstructor());
     }
 
     private void addDefaultConfig(String config) {

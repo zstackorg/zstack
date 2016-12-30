@@ -26,7 +26,7 @@ public class CloneVmInstanceAction extends AbstractAction {
     public java.lang.String vmInstanceUuid;
 
     @Param(required = false, validValues = {"InstantStart","JustCreate"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String strategy = "InstantStart)";
+    public java.lang.String strategy = "InstantStart";
 
     @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
     public java.util.List names;

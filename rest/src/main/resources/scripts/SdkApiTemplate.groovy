@@ -43,7 +43,7 @@ class SdkApiTemplate implements JavaSdkTemplate {
             resultClassName = StringUtils.capitalize(baseName)
             resultClassName = "${resultClassName}Result"
 
-            isQueryApi = APIQueryMessage.class.isAssignableFrom(apiMessageClass);
+            isQueryApi = APIQueryMessage.class.isAssignableFrom(apiMessageClass)
         } catch (Throwable t) {
             throw new CloudRuntimeException(String.format("failed to make SDK for the class[%s]", apiMessageClass), t)
         }
@@ -129,7 +129,7 @@ class SdkApiTemplate implements JavaSdkTemplate {
                 }
                 
                 if (val instanceof String) {
-                    return " = \"${StringEscapeUtils.escapeJava(val.toString())})\";"
+                    return " = \"${StringEscapeUtils.escapeJava(val.toString())}\";"
                 } else {
                     return " = ${val.toString()};"
                 }

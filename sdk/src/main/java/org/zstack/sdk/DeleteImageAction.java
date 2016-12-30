@@ -29,7 +29,7 @@ public class DeleteImageAction extends AbstractAction {
     public java.util.List backupStorageUuids;
 
     @Param(required = false)
-    public java.lang.String deleteMode = "Permissive)";
+    public java.lang.String deleteMode = "Permissive";
 
     @Param(required = false)
     public java.util.List systemTags;

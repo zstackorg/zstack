@@ -26,7 +26,7 @@ public class DeleteDiskOfferingAction extends AbstractAction {
     public java.lang.String uuid;
 
     @Param(required = false)
-    public java.lang.String deleteMode = "Permissive)";
+    public java.lang.String deleteMode = "Permissive";
 
     @Param(required = false)
     public java.util.List systemTags;

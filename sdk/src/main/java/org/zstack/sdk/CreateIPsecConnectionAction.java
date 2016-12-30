@@ -35,7 +35,7 @@ public class CreateIPsecConnectionAction extends AbstractAction {
     public java.lang.String peerAddress;
 
     @Param(required = false, validValues = {"psk","certs"}, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String authMode = "psk)";
+    public java.lang.String authMode = "psk";
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String authKey;
@@ -47,28 +47,28 @@ public class CreateIPsecConnectionAction extends AbstractAction {
     public java.util.List peerCidrs;
 
     @Param(required = false, validValues = {"md5","sha1","sha256","sha384","sha512"}, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String ikeAuthAlgorithm = "sha1)";
+    public java.lang.String ikeAuthAlgorithm = "sha1";
 
     @Param(required = false, validValues = {"3des","aes-128","aes-192","aes-256"}, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String ikeEncryptionAlgorithm = "aes-128)";
+    public java.lang.String ikeEncryptionAlgorithm = "aes-128";
 
     @Param(required = false)
     public int ikeDhGroup = 2;
 
     @Param(required = false, validValues = {"md5","sha1","sha256","sha384","sha512"}, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String policyAuthAlgorithm = "sha1)";
+    public java.lang.String policyAuthAlgorithm = "sha1";
 
     @Param(required = false, validValues = {"3des","aes-128","aes-192","aes-256"}, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String policyEncryptionAlgorithm = "aes-128)";
+    public java.lang.String policyEncryptionAlgorithm = "aes-128";
 
     @Param(required = false, validValues = {"dh-group2","dh-group5","dh-group14","dh-group15","dh-group16","dh-group17","dh-group18","dh-group19","dh-group20","dh-group21","dh-group22","dh-group23","dh-group24","dh-group25","dh-group26"}, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String pfs;
 
     @Param(required = false, validValues = {"tunnel","transport"}, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String policyMode = "tunnel)";
+    public java.lang.String policyMode = "tunnel";
 
     @Param(required = false, validValues = {"esp","ah","ah-esp"}, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String transformProtocol = "esp)";
+    public java.lang.String transformProtocol = "esp";
 
     @Param(required = false)
     public java.lang.String resourceUuid;

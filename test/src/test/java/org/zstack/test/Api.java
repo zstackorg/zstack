@@ -1321,6 +1321,7 @@ public class Api implements CloudBusEventListener {
         AddSimulatorPrimaryStorageAction action = new AddSimulatorPrimaryStorageAction();
 
         action.sessionId = adminSession.getUuid();
+        action.name = inv.getName();
         action.description = inv.getDescription();
         action.type = SimulatorPrimaryStorageConstant.SIMULATOR_PRIMARY_STORAGE_TYPE;
         action.url = inv.getUrl();

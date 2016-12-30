@@ -1279,6 +1279,7 @@ public class Api implements CloudBusEventListener {
         action.managementIp = inv.getManagementIp();
         action.memoryCapacity = inv.getAvailableMemoryCapacity();
         action.cpuCapacity = inv.getAvailableCpuCapacity();
+        action.clusterUuid = inv.getClusterUuid();
         AddSimulatorHostAction.Result res = action.call();
         throwExceptionIfNeed(res.error);
 

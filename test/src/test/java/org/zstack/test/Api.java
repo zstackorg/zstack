@@ -462,6 +462,7 @@ public class Api implements CloudBusEventListener {
         ChangeClusterStateAction action = new ChangeClusterStateAction();
         action.sessionId = adminSession.getUuid();
         action.stateEvent = evt.toString();
+        action.uuid = uuid;
         ChangeClusterStateAction.Result res = action.call();
         throwExceptionIfNeed(res.error);
 
@@ -488,6 +489,7 @@ public class Api implements CloudBusEventListener {
             action.memoryCapacity = SizeUnit.GIGABYTE.toByte(8);
             action.cpuCapacity = 2400 * 4;
             action.sessionId = adminSession.getUuid();
+            action.name = "host" + i;
             AddSimulatorHostAction.Result res = action.call();
             throwExceptionIfNeed(res.error);
 
@@ -1137,6 +1139,7 @@ public class Api implements CloudBusEventListener {
         action.name = "TestIpRange";
         action.description = "test";
         AddIpRangeAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
 
         return JSONObjectUtil.rehashObject(res.value.inventory, IpRangeInventory.class);
     }
@@ -1221,10 +1224,8 @@ public class Api implements CloudBusEventListener {
     }
 
     public void deleteIpRange(String uuid, SessionInventory session) throws ApiSenderException {
-        APIDeleteIpRangeMsg msg = new APIDeleteIpRangeMsg(uuid);
-
         DeleteIpRangeAction action = new DeleteIpRangeAction();
-        action.sessionId = getSessionUuid(adminSession);
+        action.sessionId = getSessionUuid(session);
         action.uuid = uuid;
         DeleteIpRangeAction.Result res = action.call();
         throwExceptionIfNeed(res.error);
@@ -2826,6 +2827,7 @@ public class Api implements CloudBusEventListener {
         a.l3NetworkUuid = l3Uuid;
         a.staticIp = staticIp;
         a.vmInstanceUuid = vmUuid;
+        a.sessionId = adminSession.getUuid();
         AttachL3NetworkToVmAction.Result r = a.call();
 
         throwExceptionIfNeed(r.error);

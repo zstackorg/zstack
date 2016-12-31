@@ -25,15 +25,14 @@ import org.zstack.header.identity.SuppressCredentialCheck;
 import org.zstack.header.message.*;
 import org.zstack.header.query.APIQueryMessage;
 import org.zstack.header.query.QueryCondition;
+import org.zstack.header.rest.APINoSee;
 import org.zstack.header.rest.RESTFacade;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.rest.RestResponse;
 import org.zstack.rest.sdk.DocumentGenerator;
 import org.zstack.rest.sdk.JavaSdkTemplate;
 import org.zstack.rest.sdk.SdkFile;
-import org.zstack.utils.DebugUtils;
-import org.zstack.utils.GroovyUtils;
-import org.zstack.utils.Utils;
+import org.zstack.utils.*;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.path.PathUtil;
@@ -44,6 +43,7 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
@@ -156,6 +156,8 @@ public class RestServer implements Component, CloudBusEventListener {
         List<String> optionalPaths = new ArrayList<>();
         String actionName;
 
+        Map<String, Field> allApiClassFields = new HashMap<>();
+
         @Override
         public String toString() {
             return String.format("%s-%s", requestAnnotation.method(), "null".equals(requestAnnotation.path()) ? apiClass.getName() : path);
@@ -195,6 +197,36 @@ public class RestServer implements Component, CloudBusEventListener {
                 throw new CloudRuntimeException(String.format("Invalid @RestRequest of %s, either isAction must be set to true or" +
                         " parameterName is set to a non-empty string", apiClass.getName()));
             }
+
+            List<Field> fs = FieldUtils.getAllFields(apiClass);
+            fs = fs.stream().filter(f -> !f.isAnnotationPresent(APINoSee.class) && !Modifier.isStatic(f.getModifiers())).collect(Collectors.toList());
+            for (Field f : fs) {
+                allApiClassFields.put(f.getName(), f);
+
+                if (requestAnnotation.method() == HttpMethod.GET) {
+                    if (APIQueryMessage.class.isAssignableFrom(apiClass)) {
+                        // query messages are specially handled
+                        continue;
+                    }
+
+                    if (Collection.class.isAssignableFrom(f.getType())) {
+                        Class gtype = FieldUtils.getGenericType(f);
+
+                        if (gtype == null) {
+                            throw new CloudRuntimeException(String.format("%s.%s is of collection type but doesn't not have" +
+                                    " a generic type", apiClass, f.getName()));
+                        }
+
+                        if (!gtype.getName().startsWith("java.")) {
+                            throw new CloudRuntimeException(String.format("%s.%s is of collection type with a generic type" +
+                                    "[%s] not belonging to JDK", apiClass, f.getName(), gtype));
+                        }
+                    } else if (Map.class.isAssignableFrom(f.getType())) {
+                        throw new CloudRuntimeException(String.format("%s.%s is of map type, however, the GET method doesn't" +
+                                " support query parameters of map type", apiClass, f.getName()));
+                    }
+                }
+            }
         }
 
         String getMappingField(String key) {
@@ -203,6 +235,31 @@ public class RestServer implements Component, CloudBusEventListener {
             }
 
             return requestMappingFields.get(key);
+        }
+
+        Object queryParameterToApiFieldValue(String name, String[] vals) throws RestException {
+            Field f = allApiClassFields.get(name);
+            if (f == null) {
+                return null;
+            }
+
+            if (Collection.class.isAssignableFrom(f.getType())) {
+                Class gtype = FieldUtils.getGenericType(f);
+                List lst = new ArrayList();
+                for (String v : vals) {
+                    lst.add(TypeUtils.stringToValue(v, gtype));
+                }
+
+                return lst;
+            } else {
+                if (vals.length > 1) {
+                    throw new RestException(HttpStatus.BAD_REQUEST.value(),
+                            String.format("Invalid query parameter[%s], only one value is allowed for the parameter but" +
+                                    " mupltiple values found", name));
+                }
+
+                return TypeUtils.stringToValue(vals[0], f.getType());
+            }
         }
     }
 
@@ -228,16 +285,25 @@ public class RestServer implements Component, CloudBusEventListener {
             if (annotation.fieldsTo().length > 0) {
                 responseMappingFields = new HashMap<>();
 
-                for (String mf : annotation.fieldsTo()) {
-                    String[] kv = mf.split("=");
-                    if (kv.length == 2) {
-                        responseMappingFields.put(kv[0].trim(), kv[1].trim());
-                    } else if (kv.length == 1) {
-                        responseMappingFields.put(kv[0].trim(), kv[0].trim());
-                    } else {
-                        throw new CloudRuntimeException(String.format("bad mappingFields[%s] of %s", mf, apiResponseClass));
-                    }
+                if (annotation.fieldsTo().length == 1 && "all".equals(annotation.fieldsTo()[0])) {
+                    List<Field> apiFields = FieldUtils.getAllFields(apiResponseClass);
+                    apiFields = apiFields.stream().filter(f -> !f.isAnnotationPresent(APINoSee.class) && !Modifier.isStatic(f.getModifiers())).collect(Collectors.toList());
 
+                    for (Field f : apiFields) {
+                        responseMappingFields.put(f.getName(), f.getName());
+                    }
+                } else {
+                    for (String mf : annotation.fieldsTo()) {
+                        String[] kv = mf.split("=");
+                        if (kv.length == 2) {
+                            responseMappingFields.put(kv[0].trim(), kv[1].trim());
+                        } else if (kv.length == 1) {
+                            responseMappingFields.put(kv[0].trim(), kv[0].trim());
+                        } else {
+                            throw new CloudRuntimeException(String.format("bad mappingFields[%s] of %s", mf, apiResponseClass));
+                        }
+
+                    }
                 }
             }
         }
@@ -277,7 +343,7 @@ public class RestServer implements Component, CloudBusEventListener {
             StringBuilder sb = new StringBuilder(String.format("[ID: %s] Response to %s (%s),", info.session.getId(),
                     info.remoteHost, info.requestUrl));
             sb.append(String.format(" Status Code: %s,", statusCode));
-            sb.append(String.format(" Body: %s", body.isEmpty() ? null : body));
+            sb.append(String.format(" Body: %s", body == null || body.isEmpty() ? null : body));
 
             requestLogger.trace(sb.toString());
         }
@@ -461,8 +527,29 @@ public class RestServer implements Component, CloudBusEventListener {
             return;
         }
 
-        Map<String, String> vars = matcher.extractUriTemplateVariables(api.path, getDecodedUrl(req));
-        Object parameter = body.get(parameterName);
+        Object parameter;
+        if (req.getMethod().equals(HttpMethod.GET.toString())) {
+            // GET uses query string to pass parameters
+            Map<String, Object> m = new HashMap<>();
+
+            Map<String, String[]> queryParameters = req.getParameterMap();
+            for (Map.Entry<String,  String[]> e : queryParameters.entrySet()) {
+                String k = e.getKey();
+                String[] vals = e.getValue();
+
+                Object val = api.queryParameterToApiFieldValue(k, vals);
+                if (val == null) {
+                    logger.warn(String.format("unknown query parameter[%s], ignored", k));
+                    continue;
+                }
+
+                m.put(k, val);
+            }
+
+            parameter = m;
+        } else {
+            parameter = body.get(parameterName);
+        }
 
         APIMessage msg;
         if (parameter == null) {
@@ -477,16 +564,19 @@ public class RestServer implements Component, CloudBusEventListener {
             msg.setSession(session);
         }
 
-        Object systemTags = body.get("systemTags");
-        if (systemTags != null) {
-            msg.setSystemTags((List<String>) systemTags);
+        if (!req.getMethod().equals(HttpMethod.GET.toString())) {
+            Object systemTags = body.get("systemTags");
+            if (systemTags != null) {
+                msg.setSystemTags((List<String>) systemTags);
+            }
+
+            Object userTags = body.get("userTags");
+            if (userTags != null) {
+                msg.setUserTags((List<String>) userTags);
+            }
         }
 
-        Object userTags = body.get("userTags");
-        if (userTags != null) {
-            msg.setUserTags((List<String>) userTags);
-        }
-
+        Map<String, String> vars = matcher.extractUriTemplateVariables(api.path, getDecodedUrl(req));
         for (Map.Entry<String, String> e : vars.entrySet()) {
             // set fields parsed from the URL
             String key = e.getKey();
@@ -562,7 +652,7 @@ public class RestServer implements Component, CloudBusEventListener {
 
                 msg.setSortBy(varvalue);
             } else if ("q".startsWith(varname)) {
-                String[] conds = varvalue.split("&");
+                String[] conds = e.getValue();
 
                 for (String cond : conds) {
                     String OP = null;

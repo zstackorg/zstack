@@ -3,6 +3,7 @@ package org.zstack.sdk;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import okhttp3.*;
+import okhttp3.internal.http.HttpMethod;
 
 import java.io.IOException;
 import java.util.*;
@@ -181,7 +182,6 @@ public class ZSClient {
                     // we remove the extra / here
                     .addPathSegment("/v1".replaceFirst("/", ""));
 
-            String urlstr;
             List<String> varNames = getVarNamesFromUrl(info.path);
             if (!varNames.isEmpty()) {
                 Map<String, Object> vars = new HashMap<>();
@@ -197,10 +197,8 @@ public class ZSClient {
 
                 String path = substituteUrl(info.path, vars);
                 builder.addPathSegment(path.replaceFirst("/", ""));
-                urlstr = builder.build().url().toString();
             } else {
                 builder.addPathSegment(info.path.replaceFirst("/", ""));
-                urlstr = builder.build().url().toString();
             }
 
             final Map<String, Object> params = new HashMap<>();
@@ -216,9 +214,28 @@ public class ZSClient {
                 }
             }
 
-            Map m = new HashMap();
-            m.put(info.parameterName, params);
-            reqBuilder.url(urlstr).method(info.httpMethod, RequestBody.create(Constants.JSON, gson.toJson(m)));
+            if (info.httpMethod.equals("GET")) {
+                for (Map.Entry<String, Object> e : params.entrySet()) {
+                    String k = e.getKey();
+                    Object v = e.getValue();
+
+                    if (v instanceof Collections) {
+                        for (Object o : (Collection) v) {
+                            builder.addQueryParameter(k, o.toString());
+                        }
+                    } else if (v instanceof Map) {
+                        throw new ApiException(String.format("GET won't support map as a parameter type. %s.%s", action.getClass(), k));
+                    } else {
+                        builder.addQueryParameter(k, v.toString());
+                    }
+                }
+
+                reqBuilder.url(builder.build().url().toString()).get();
+            } else {
+                Map m = new HashMap();
+                m.put(info.parameterName, params);
+                reqBuilder.url(builder.build().url().toString()).method(info.httpMethod, RequestBody.create(Constants.JSON, gson.toJson(m)));
+            }
 
             if (info.needSession) {
                 Object sessionId = action.getParameterValue(Constants.SESSION_ID);

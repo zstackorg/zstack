@@ -48,6 +48,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -675,6 +677,37 @@ public class RestServer implements Component, CloudBusEventListener {
         return true;
     }
 
+    private String substituteUrl(String url, Map<String, String> tokens) {
+        Pattern pattern = Pattern.compile("\\{(.+?)\\}");
+        Matcher matcher = pattern.matcher(url);
+        StringBuffer buffer = new StringBuffer();
+        while (matcher.find()) {
+            String varName = matcher.group(1);
+            Object replacement = tokens.get(varName);
+            if (replacement == null) {
+                throw new CloudRuntimeException(String.format("cannot find value for URL variable[%s]", varName));
+            }
+
+            matcher.appendReplacement(buffer, "");
+            buffer.append(replacement.toString());
+        }
+
+        matcher.appendTail(buffer);
+        return buffer.toString();
+    }
+
+    private List<String> getVarNamesFromUrl(String url) {
+        Pattern pattern = Pattern.compile("\\{(.+?)\\}");
+        Matcher matcher = pattern.matcher(url);
+
+        List<String> urlVars = new ArrayList<>();
+        while (matcher.find()) {
+            urlVars.add(matcher.group(1));
+        }
+
+        return urlVars;
+    }
+
     private void build() {
         Reflections reflections = Platform.getReflections();
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RestRequest.class);
@@ -688,6 +721,24 @@ public class RestServer implements Component, CloudBusEventListener {
                 paths.add(api.path);
             }
             paths.addAll(api.optionalPaths);
+
+            // normalize the path,
+            // paths for example /backup-storage/{backupStorageUuid}/actions
+            // and /backup-storage/{uuid}/actions are treated as equal,
+            // and will be normalized to /backup-storage/{0}/actions
+            paths = paths.stream().map(p -> {
+                List<String> varNames = getVarNamesFromUrl(p);
+                if (varNames.isEmpty()) {
+                    return p;
+                }
+
+                Map<String, String> m = new HashMap<>();
+                for (int i=0; i<varNames.size(); i++) {
+                    m.put(varNames.get(i), String.format("{%s}", i));
+                }
+
+                return substituteUrl(p, m);
+            }).collect(Collectors.toList());
 
             for (String path : paths) {
                 if (!apis.containsKey(path)) {
@@ -728,6 +779,18 @@ public class RestServer implements Component, CloudBusEventListener {
                 }
 
                 set.put(a.toString(), a);
+            }
+
+            List<Api> actions = as.stream().filter(a -> a.requestAnnotation.isAction()).collect(Collectors.toList());
+            set = new HashMap<>();
+            for (Api a : actions) {
+                Api old = set.get(a.actionName);
+                if (old != null) {
+                    throw new CloudRuntimeException(String.format("duplicate rest API[%s, %s], they are both actions with the" +
+                            " same action name[%s]", a.apiClass, old.apiClass, a.actionName));
+                }
+
+                set.put(a.actionName, a);
             }
         }
     }

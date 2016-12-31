@@ -29,7 +29,7 @@ public class TestChangeVmPassword {
         DBUtil.reDeployDB();
         WebBeanConstructor con = new WebBeanConstructor();
         deployer = new Deployer("deployerXml/vm/TestChangeVmPassword.xml", con);
-//        deployer.addSpringConfig("mevocoRelated.xml");
+        deployer.addSpringConfig("KVMRelated.xml");
         deployer.build();
         api = deployer.getApi();
         loader = deployer.getComponentLoader();
@@ -38,7 +38,7 @@ public class TestChangeVmPassword {
     }
 
     @Test
-    public void test_running() throws ApiSenderException {
+    public void test() throws ApiSenderException {
         VmInstanceInventory inv = api.listVmInstances(null).get(0);
         api.createSystemTag(inv.getUuid(), TestQemuAgentSystemTag.TestSystemTags.qemu.getTagFormat(), VmInstanceVO.class);
 

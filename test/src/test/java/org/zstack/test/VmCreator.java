@@ -4,6 +4,7 @@ import org.zstack.core.MessageCommandRecorder;
 import org.zstack.header.apimediator.ApiMediatorConstant;
 import org.zstack.header.identity.SessionInventory;
 import org.zstack.header.vm.*;
+import org.zstack.sdk.ApiException;
 import org.zstack.sdk.CreateVmInstanceAction;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -73,7 +74,8 @@ public class VmCreator {
         action.primaryStorageUuidForRootVolume = primaryStorageUuidForRootVolume;
         action.strategy = strategy == null ? null : strategy.toString();
         action.sessionId = session == null ? api.getAdminSession().getUuid() : session.getUuid();
-        CreateVmInstanceAction.Result res = action.call().throwExceptionIfError();
+        CreateVmInstanceAction.Result res = action.call();
+        api.throwExceptionIfNeed(res.error);
 
         String callingChain = MessageCommandRecorder.endAndToString();
         logger.debug(callingChain);

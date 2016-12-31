@@ -48,7 +48,7 @@ public class TestCreateVmFailure1 {
         try {
             api.createVmFromClone(vm);
         } catch (ApiSenderException e) {
-            Assert.assertEquals("SYS.1006", e.getError().getCode());
+            Assert.assertEquals("SYS.1003", e.getError().getCode());
         }
     }
 

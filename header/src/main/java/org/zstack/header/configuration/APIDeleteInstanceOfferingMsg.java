@@ -10,7 +10,7 @@ import org.zstack.header.rest.RestRequest;
 @RestRequest(
         path = "/instance-offerings/{uuid}",
         method = HttpMethod.DELETE,
-        responseClass = APIDeleteDiskOfferingEvent.class
+        responseClass = APIDeleteInstanceOfferingEvent.class
 )
 public class APIDeleteInstanceOfferingMsg extends APIDeleteMessage implements InstanceOfferingMessage {
     @APIParam(checkAccount = true, operationTarget = true)

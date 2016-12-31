@@ -404,6 +404,7 @@ public class Api implements CloudBusEventListener {
         APIChangeZoneStateMsg msg = new APIChangeZoneStateMsg(uuid, evt.toString());
 
         ChangeZoneStateAction action = new ChangeZoneStateAction();
+        action.uuid = uuid;
         action.sessionId = adminSession.getUuid();
         action.stateEvent = evt.toString();
         ChangeZoneStateAction.Result res = action.call();
@@ -1428,7 +1429,7 @@ public class Api implements CloudBusEventListener {
 
     public IpRangeInventory addIpRangeByFullConfig(IpRangeInventory inv, SessionInventory session) throws ApiSenderException {
         AddIpRangeAction action = new AddIpRangeAction();
-        action.name = "ip-range";
+        action.name = inv.getName();
         action.sessionId = session.getUuid();
         action.l3NetworkUuid = inv.getL3NetworkUuid();
         action.startIp = inv.getStartIp();
@@ -1452,7 +1453,7 @@ public class Api implements CloudBusEventListener {
 
     public DiskOfferingInventory addDiskOfferingByFullConfig(DiskOfferingInventory inv, SessionInventory session) throws ApiSenderException {
         CreateDiskOfferingAction action = new CreateDiskOfferingAction();
-        action.sessionId = getSessionUuid(adminSession);
+        action.sessionId = getSessionUuid(session);
         action.name = inv.getName();
         action.diskSize = inv.getDiskSize();
         action.description = inv.getDescription();
@@ -1469,8 +1470,10 @@ public class Api implements CloudBusEventListener {
         action.sessionId = getSessionUuid(adminSession);
         action.name = String.format("clone-%s", toClone.getName());
         action.imageUuid = toClone.getImageUuid();
-        action.dataDiskOfferingUuids = toClone.getAllVolumes().stream().map(VolumeInventory::getUuid).collect(Collectors.toList());
-        action.l3NetworkUuids = toClone.getVmNics().stream().map(VmNicInventory::getUuid).collect(Collectors.toList());
+        action.dataDiskOfferingUuids = toClone.getAllVolumes().stream()
+                .filter(v -> v.getType().equals(VolumeType.Data.toString()))
+                .map(VolumeInventory::getDiskOfferingUuid).collect(Collectors.toList());
+        action.l3NetworkUuids = toClone.getVmNics().stream().map(VmNicInventory::getL3NetworkUuid).collect(Collectors.toList());
         action.defaultL3NetworkUuid = toClone.getDefaultL3NetworkUuid();
         action.type = toClone.getType();
         action.instanceOfferingUuid = toClone.getInstanceOfferingUuid();
@@ -2005,10 +2008,10 @@ public class Api implements CloudBusEventListener {
     }
 
     public UserGroupInventory createGroup(String accountUuid, String name, SessionInventory session) throws ApiSenderException {
-        CreateUserAction action = new CreateUserAction();
+        CreateUserGroupAction action = new CreateUserGroupAction();
         action.sessionId = getSessionUuid(session);
         action.name = name;
-        CreateUserAction.Result res = action.call();
+        CreateUserGroupAction.Result res = action.call();
         throwExceptionIfNeed(res.error);
 
         return JSONObjectUtil.rehashObject(res.value.inventory, UserGroupInventory.class);

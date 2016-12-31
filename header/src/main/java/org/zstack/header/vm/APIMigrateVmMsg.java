@@ -55,6 +55,10 @@ public class APIMigrateVmMsg extends APIMessage implements VmInstanceMessage {
     @APIParam(required = false, resourceType = HostVO.class)
     private String hostUuid;
 
+    public void setVmInstanceUuid(String vmInstanceUuid) {
+        this.vmInstanceUuid = vmInstanceUuid;
+    }
+
     public String getVmUuid() {
         return vmInstanceUuid;
     }

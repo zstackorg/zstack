@@ -77,7 +77,7 @@ public class ReconnectVirtualRouterAction extends AbstractAction {
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/vm-instances/appliances/virtual-routers/{uuid}/actions";
+        info.path = "/vm-instances/appliances/virtual-routers/{vmInstanceUuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "reconnectVirtualRouter";

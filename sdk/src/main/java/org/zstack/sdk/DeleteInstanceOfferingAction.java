@@ -9,7 +9,7 @@ public class DeleteInstanceOfferingAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public DeleteDiskOfferingResult value;
+        public DeleteInstanceOfferingResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -50,8 +50,8 @@ public class DeleteInstanceOfferingAction extends AbstractAction {
             return ret;
         }
         
-        DeleteDiskOfferingResult value = res.getResult(DeleteDiskOfferingResult.class);
-        ret.value = value == null ? new DeleteDiskOfferingResult() : value;
+        DeleteInstanceOfferingResult value = res.getResult(DeleteInstanceOfferingResult.class);
+        ret.value = value == null ? new DeleteInstanceOfferingResult() : value;
         return ret;
     }
 
@@ -66,8 +66,8 @@ public class DeleteInstanceOfferingAction extends AbstractAction {
                     return;
                 }
                 
-                DeleteDiskOfferingResult value = res.getResult(DeleteDiskOfferingResult.class);
-                ret.value = value == null ? new DeleteDiskOfferingResult() : value;
+                DeleteInstanceOfferingResult value = res.getResult(DeleteInstanceOfferingResult.class);
+                ret.value = value == null ? new DeleteInstanceOfferingResult() : value;
                 completion.complete(ret);
             }
         });

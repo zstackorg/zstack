@@ -219,7 +219,7 @@ public class ZSClient {
                     String k = e.getKey();
                     Object v = e.getValue();
 
-                    if (v instanceof Collections) {
+                    if (v instanceof Collection) {
                         for (Object o : (Collection) v) {
                             builder.addQueryParameter(k, o.toString());
                         }

@@ -798,6 +798,25 @@ public class RestServer implements Component, CloudBusEventListener {
         return urlVars;
     }
 
+    private String normalizePath(String p) {
+        // normalize the path,
+        // paths for example /backup-storage/{backupStorageUuid}/actions
+        // and /backup-storage/{uuid}/actions are treated as equal,
+        // and will be normalized to /backup-storage/{0}/actions
+
+        List<String> varNames = getVarNamesFromUrl(p);
+        if (varNames.isEmpty()) {
+            return p;
+        }
+
+        Map<String, String> m = new HashMap<>();
+        for (int i=0; i<varNames.size(); i++) {
+            m.put(varNames.get(i), String.format("{%s}", i));
+        }
+
+        return substituteUrl(p, m);
+    }
+
     private void build() {
         Reflections reflections = Platform.getReflections();
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(RestRequest.class);
@@ -812,37 +831,29 @@ public class RestServer implements Component, CloudBusEventListener {
             }
             paths.addAll(api.optionalPaths);
 
-            // normalize the path,
-            // paths for example /backup-storage/{backupStorageUuid}/actions
-            // and /backup-storage/{uuid}/actions are treated as equal,
-            // and will be normalized to /backup-storage/{0}/actions
-            paths = paths.stream().map(p -> {
-                List<String> varNames = getVarNamesFromUrl(p);
-                if (varNames.isEmpty()) {
-                    return p;
-                }
-
-                Map<String, String> m = new HashMap<>();
-                for (int i=0; i<varNames.size(); i++) {
-                    m.put(varNames.get(i), String.format("{%s}", i));
-                }
-
-                return substituteUrl(p, m);
-            }).collect(Collectors.toList());
 
             for (String path : paths) {
-                if (!apis.containsKey(path)) {
-                    apis.put(path, api);
+                String normalizedPath = normalizePath(path);
+
+                api = new Api(clz, at);
+                api.path = path;
+
+                if (!apis.containsKey(normalizedPath)) {
+                    apis.put(normalizedPath, api);
                 } else {
-                    Object c = apis.get(path);
+                    Object c = apis.get(normalizedPath);
+
                     List lst;
                     if (c instanceof Api) {
+                        // merge to a list
                         lst = new ArrayList();
                         lst.add(c);
-                        apis.put(path, lst);
+
+                        apis.put(normalizedPath, lst);
                     } else {
                         lst = (List) c;
                     }
+
                     lst.add(api);
                 }
             }

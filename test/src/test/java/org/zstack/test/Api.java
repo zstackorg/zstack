@@ -589,6 +589,7 @@ public class Api implements CloudBusEventListener {
         action.uuid = uuid;
         action.stateEvent = event.toString();
         ChangePrimaryStorageStateAction.Result res = action.call();
+        throwExceptionIfNeed(res.error);
 
         return JSONObjectUtil.rehashObject(res.value.inventory, PrimaryStorageInventory.class);
     }
@@ -874,7 +875,7 @@ public class Api implements CloudBusEventListener {
                                             String primaryStorageUuid,
                                             SessionInventory session) throws ApiSenderException {
         CreateDataVolumeAction action = new CreateDataVolumeAction();
-        action.sessionId = getSessionUuid(adminSession);
+        action.sessionId = getSessionUuid(session);
         action.primaryStorageUuid = primaryStorageUuid;
         action.name = name;
         action.diskOfferingUuid = diskOfferingUuid;
@@ -1022,10 +1023,8 @@ public class Api implements CloudBusEventListener {
     }
 
     public L3NetworkInventory createL3BasicNetwork(String l2NetworkUuid, SessionInventory session) throws ApiSenderException {
-        APICreateL3NetworkMsg msg = new APICreateL3NetworkMsg();
-
         CreateL3NetworkAction action = new CreateL3NetworkAction();
-        action.sessionId = getSessionUuid(adminSession);
+        action.sessionId = getSessionUuid(session);
         action.l2NetworkUuid = l2NetworkUuid;
         action.type = L3NetworkConstant.L3_BASIC_NETWORK_TYPE;
         action.name = "Test-L3Network";
@@ -1131,7 +1130,7 @@ public class Api implements CloudBusEventListener {
 
     public IpRangeInventory addIpRange(String l3NetworkUuid, String startIp, String endIp, String gateway, String netmask, SessionInventory session) throws ApiSenderException {
         AddIpRangeAction action = new AddIpRangeAction();
-        action.sessionId = getSessionUuid(adminSession);
+        action.sessionId = getSessionUuid(session == null ? adminSession : session);
         action.l3NetworkUuid = l3NetworkUuid;
         action.startIp = startIp;
         action.endIp = endIp;
@@ -1636,11 +1635,9 @@ public class Api implements CloudBusEventListener {
     }
 
     public VmInstanceInventory rebootVmInstance(String uuid, SessionInventory session) throws ApiSenderException {
-        APIRebootVmInstanceMsg msg = new APIRebootVmInstanceMsg();
-
         RebootVmInstanceAction action = new RebootVmInstanceAction();
         action.uuid = uuid;
-        action.sessionId = getSessionUuid(adminSession);
+        action.sessionId = getSessionUuid(session);
         RebootVmInstanceAction.Result res = action.call();
         throwExceptionIfNeed(res.error);
         return JSONObjectUtil.rehashObject(res.value.inventory, VmInstanceInventory.class);
@@ -1763,7 +1760,7 @@ public class Api implements CloudBusEventListener {
     public ImageInventory addDataVolumeTemplateFromDataVolume(String volUuid, List<String> bsUuids, SessionInventory session) throws ApiSenderException {
         CreateDataVolumeTemplateFromVolumeAction action = new CreateDataVolumeTemplateFromVolumeAction();
         action.name = "data-volume";
-        action.sessionId = getSessionUuid(adminSession);
+        action.sessionId = getSessionUuid(session);
         action.backupStorageUuids = bsUuids;
         action.volumeUuid = volUuid;
         CreateDataVolumeTemplateFromVolumeAction.Result res = action.call();
@@ -2064,7 +2061,7 @@ public class Api implements CloudBusEventListener {
         DetachPolicyFromUserGroupAction action = new DetachPolicyFromUserGroupAction();
         action.groupUuid = groupUuid;
         action.policyUuid = policyUuid;
-        action.sessionId = getSessionUuid(adminSession);
+        action.sessionId = getSessionUuid(session);
         DetachPolicyFromUserGroupAction.Result res = action.call();
         throwExceptionIfNeed(res.error);
     }
@@ -3447,15 +3444,15 @@ public class Api implements CloudBusEventListener {
     }
 
     public L3NetworkInventory updateL3Network(L3NetworkInventory inv, SessionInventory session) throws ApiSenderException {
-        APIUpdateL3NetworkMsg msg = new APIUpdateL3NetworkMsg();
-        msg.setSession(session == null ? adminSession : session);
-        msg.setName(inv.getName());
-        msg.setDescription(inv.getDescription());
-        msg.setUuid(inv.getUuid());
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APIUpdateL3NetworkEvent evt = sender.send(msg, APIUpdateL3NetworkEvent.class);
-        return evt.getInventory();
+        UpdateL3NetworkAction a = new UpdateL3NetworkAction();
+        a.sessionId = getSessionUuid(session);
+        a.name = inv.getName();
+        a.description = inv.getDescription();
+        a.uuid = inv.getUuid();
+        UpdateL3NetworkAction.Result r = a.call();
+        throwExceptionIfNeed(r.error);
+
+        return JSONObjectUtil.rehashObject(r.value.inventory, L3NetworkInventory.class);
     }
 
     public IpRangeInventory updateIpRange(IpRangeInventory inv) throws ApiSenderException {

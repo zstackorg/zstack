@@ -80,7 +80,7 @@ public class DetachPolicyFromUserGroupAction extends AbstractAction {
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "DELETE";
-        info.path = "/accounts/groups/{groupUuid}/policies/{uuid}";
+        info.path = "/accounts/groups/{groupUuid}/policies/{policyUuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "null";

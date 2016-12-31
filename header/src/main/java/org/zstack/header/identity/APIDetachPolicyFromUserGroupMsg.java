@@ -10,7 +10,7 @@ import org.zstack.header.rest.RestRequest;
  */
 @Action(category = AccountConstant.ACTION_CATEGORY, accountOnly = true)
 @RestRequest(
-        path = "/accounts/groups/{groupUuid}/policies/{uuid}",
+        path = "/accounts/groups/{groupUuid}/policies/{policyUuid}",
         method = HttpMethod.DELETE,
         parameterName = "null",
         responseClass = APIDetachPolicyFromUserGroupEvent.class

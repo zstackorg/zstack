@@ -98,7 +98,7 @@ public class UpdateKVMHostAction extends AbstractAction {
         info.path = "/hosts/kvm/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "updateHost";
+        info.parameterName = "updateKVMHost";
         return info;
     }
 

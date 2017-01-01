@@ -26,7 +26,6 @@ class SdkApiTemplate implements JavaSdkTemplate {
     Class apiMessageClass
     RestRequest requestAnnotation
 
-    String baseName;
     String resultClassName
     boolean isQueryApi
 
@@ -35,7 +34,7 @@ class SdkApiTemplate implements JavaSdkTemplate {
             this.apiMessageClass = apiMessageClass
             this.requestAnnotation = apiMessageClass.getAnnotation(RestRequest.class)
 
-            baseName = requestAnnotation.responseClass().simpleName
+            String baseName = requestAnnotation.responseClass().simpleName
             baseName = StringUtils.removeStart(baseName, "API")
             baseName = StringUtils.removeEnd(baseName, "Event")
             baseName = StringUtils.removeEnd(baseName, "Reply")
@@ -206,7 +205,7 @@ class SdkApiTemplate implements JavaSdkTemplate {
         info.path = "${path}";
         info.needSession = ${!apiMessageClass.isAnnotationPresent(SuppressCredentialCheck.class)};
         info.needPoll = ${!APISyncCallMessage.class.isAssignableFrom(apiMessageClass)};
-        info.parameterName = "${requestAnnotation.isAction() ? StringUtils.uncapitalize(baseName) : requestAnnotation.parameterName()}";
+        info.parameterName = "${requestAnnotation.isAction() ? StringUtils.uncapitalize(normalizeApiName()) : requestAnnotation.parameterName()}";
         return info;
     }
 """)

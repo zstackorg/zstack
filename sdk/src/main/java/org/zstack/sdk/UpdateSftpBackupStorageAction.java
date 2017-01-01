@@ -98,7 +98,7 @@ public class UpdateSftpBackupStorageAction extends AbstractAction {
         info.path = "/backup-storage/sftp/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "updateBackupStorage";
+        info.parameterName = "updateSftpBackupStorage";
         return info;
     }
 

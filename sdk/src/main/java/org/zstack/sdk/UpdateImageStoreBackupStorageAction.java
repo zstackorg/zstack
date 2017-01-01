@@ -98,7 +98,7 @@ public class UpdateImageStoreBackupStorageAction extends AbstractAction {
         info.path = "/backup-storage/image-store/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "updateBackupStorage";
+        info.parameterName = "updateImageStoreBackupStorage";
         return info;
     }
 

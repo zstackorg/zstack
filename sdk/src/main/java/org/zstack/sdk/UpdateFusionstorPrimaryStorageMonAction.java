@@ -95,7 +95,7 @@ public class UpdateFusionstorPrimaryStorageMonAction extends AbstractAction {
         info.path = "/primary-storage/fusionstor/mons/{monUuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "updateMonToFusionstorPrimaryStorage";
+        info.parameterName = "updateFusionstorPrimaryStorageMon";
         return info;
     }
 

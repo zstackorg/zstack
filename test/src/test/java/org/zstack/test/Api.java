@@ -1802,35 +1802,35 @@ public class Api implements CloudBusEventListener {
     }
 
     public SessionInventory loginByAccount(String accountName, String password) throws ApiSenderException {
-        APILogInByAccountMsg msg = new APILogInByAccountMsg();
-        msg.setAccountName(accountName);
-        msg.setPassword(password);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APILogInReply reply = sender.call(msg, APILogInReply.class);
-        return reply.getInventory();
+        LogInByAccountAction a = new LogInByAccountAction();
+        a.accountName = accountName;
+        a.password = password;
+        LogInByAccountAction.Result res = a.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.inventory, SessionInventory.class);
     }
 
     public SessionInventory loginByUserAccountName(String userName, String password, String accountName) throws ApiSenderException {
-        APILogInByUserMsg msg = new APILogInByUserMsg();
-        msg.setAccountName(accountName);
-        msg.setUserName(userName);
-        msg.setPassword(password);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APILogInReply reply = sender.call(msg, APILogInReply.class);
-        return reply.getInventory();
+        LogInByUserAction a = new LogInByUserAction();
+        a.accountName = accountName;
+        a.userName = userName;
+        a.password = password;
+        LogInByUserAction.Result res = a.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.inventory, SessionInventory.class);
     }
 
     public SessionInventory loginByUser(String userName, String password, String accountUuid) throws ApiSenderException {
-        APILogInByUserMsg msg = new APILogInByUserMsg();
-        msg.setAccountUuid(accountUuid);
-        msg.setUserName(userName);
-        msg.setPassword(password);
-        ApiSender sender = new ApiSender();
-        sender.setTimeout(timeout);
-        APILogInReply reply = sender.call(msg, APILogInReply.class);
-        return reply.getInventory();
+        LogInByUserAction a = new LogInByUserAction();
+        a.accountUuid = accountUuid;
+        a.userName = userName;
+        a.password = password;
+        LogInByUserAction.Result res = a.call();
+        throwExceptionIfNeed(res.error);
+
+        return JSONObjectUtil.rehashObject(res.value.inventory, SessionInventory.class);
     }
 
     public void logout(String sessionUuid) throws ApiSenderException {

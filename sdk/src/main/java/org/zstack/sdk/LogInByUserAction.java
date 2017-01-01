@@ -3,13 +3,13 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UpdateVirtualRouterOfferingAction extends AbstractAction {
+public class LogInByUserAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
     public static class Result {
         public ErrorCode error;
-        public UpdateInstanceOfferingResult value;
+        public LogInResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -22,33 +22,23 @@ public class UpdateVirtualRouterOfferingAction extends AbstractAction {
         }
     }
 
-    @Param(required = false)
-    public java.lang.Boolean isDefault;
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String accountUuid;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String imageUuid;
+    public java.lang.String accountName;
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String uuid;
+    public java.lang.String userName;
 
-    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String name;
-
-    @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String description;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String password;
 
     @Param(required = false)
     public java.util.List systemTags;
 
     @Param(required = false)
     public java.util.List userTags;
-
-    @Param(required = true)
-    public String sessionId;
-
-    public long timeout;
-    
-    public long pollingInterval;
 
 
     public Result call() {
@@ -59,8 +49,8 @@ public class UpdateVirtualRouterOfferingAction extends AbstractAction {
             return ret;
         }
         
-        UpdateInstanceOfferingResult value = res.getResult(UpdateInstanceOfferingResult.class);
-        ret.value = value == null ? new UpdateInstanceOfferingResult() : value;
+        LogInResult value = res.getResult(LogInResult.class);
+        ret.value = value == null ? new LogInResult() : value;
         return ret;
     }
 
@@ -75,8 +65,8 @@ public class UpdateVirtualRouterOfferingAction extends AbstractAction {
                     return;
                 }
                 
-                UpdateInstanceOfferingResult value = res.getResult(UpdateInstanceOfferingResult.class);
-                ret.value = value == null ? new UpdateInstanceOfferingResult() : value;
+                LogInResult value = res.getResult(LogInResult.class);
+                ret.value = value == null ? new LogInResult() : value;
                 completion.complete(ret);
             }
         });
@@ -89,10 +79,10 @@ public class UpdateVirtualRouterOfferingAction extends AbstractAction {
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/instance-offerings/virtual-routers/{uuid}/actions";
-        info.needSession = true;
-        info.needPoll = true;
-        info.parameterName = "updateVirtualRouterOffering";
+        info.path = "/accounts/users/login";
+        info.needSession = false;
+        info.needPoll = false;
+        info.parameterName = "logInByUser";
         return info;
     }
 

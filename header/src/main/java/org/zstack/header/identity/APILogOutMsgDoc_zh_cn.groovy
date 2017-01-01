@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "DELETE /v1/accounts/sessions/{uuid}"
+			url "DELETE /v1/accounts/sessions/{uuid}"
+
 
             
 
@@ -23,7 +24,7 @@ doc {
 					name "sessionUuid"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

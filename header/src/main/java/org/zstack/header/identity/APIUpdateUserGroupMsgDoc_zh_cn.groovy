@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "PUT /v1/accounts/groups/actions"
+			url "PUT /v1/accounts/groups/actions"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "uuid"
 					enclosedIn "updateUserGroup"
 					desc "资源的UUID，唯一标示该资源"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "name"
 					enclosedIn "updateUserGroup"
 					desc "资源名称"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "description"
 					enclosedIn "updateUserGroup"
 					desc "资源的详细描述"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

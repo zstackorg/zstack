@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "POST /v1/vm-instances/{vmUuid}/schedulers/rebooting"
+			url "POST /v1/vm-instances/{vmUuid}/schedulers/rebooting"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "vmUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "schedulerName"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "schedulerDescription"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "type"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "interval"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "Integer"
 					optional true
 					since "0.6"
@@ -73,7 +74,7 @@ doc {
 					name "repeatCount"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "Integer"
 					optional true
 					since "0.6"
@@ -83,7 +84,7 @@ doc {
 					name "startTime"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "Long"
 					optional true
 					since "0.6"
@@ -93,7 +94,7 @@ doc {
 					name "cron"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -103,7 +104,7 @@ doc {
 					name "resourceUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -113,7 +114,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -123,7 +124,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

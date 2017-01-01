@@ -9,7 +9,10 @@ doc {
 
     rest {
         request {
-            url "GET /v1null"
+			url "GET /v1/l3-networks/{l3NetworkUuid}/ip/free"
+
+			url "GET /v1/l3-networks/ip-ranges/{ipRangeUuid}/ip/free"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +26,7 @@ doc {
 					name "l3NetworkUuid"
 					enclosedIn "params"
 					desc "三层网络UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -33,7 +36,7 @@ doc {
 					name "ipRangeUuid"
 					enclosedIn "params"
 					desc "IP段UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -43,7 +46,7 @@ doc {
 					name "start"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -53,7 +56,7 @@ doc {
 					name "limit"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "int"
 					optional true
 					since "0.6"
@@ -63,7 +66,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -73,7 +76,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"

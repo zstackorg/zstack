@@ -9,7 +9,10 @@ doc {
 
     rest {
         request {
-            url "GET /v1/instance-offerings/virtual-routers"
+			url "GET /v1/instance-offerings/virtual-routers"
+
+			url "GET /v1/instance-offerings/virtual-routers/{uuid}"
+
 
             header (OAuth: 'the-session-uuid')
 

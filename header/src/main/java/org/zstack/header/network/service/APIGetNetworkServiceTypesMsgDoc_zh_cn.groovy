@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/network-services/types"
+			url "GET /v1/network-services/types"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"

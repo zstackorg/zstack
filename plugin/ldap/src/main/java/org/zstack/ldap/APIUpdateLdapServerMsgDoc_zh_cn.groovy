@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "PUT /v1/ldap/servers/{ldapServerUuid}/actions"
+			url "PUT /v1/ldap/servers/{ldapServerUuid}/actions"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "ldapServerUuid"
 					enclosedIn "updateLdapServer"
 					desc ""
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "name"
 					enclosedIn "updateLdapServer"
 					desc "资源名称"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "description"
 					enclosedIn "updateLdapServer"
 					desc "资源的详细描述"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "url"
 					enclosedIn "updateLdapServer"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "base"
 					enclosedIn "updateLdapServer"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -73,7 +74,7 @@ doc {
 					name "username"
 					enclosedIn "updateLdapServer"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -83,7 +84,7 @@ doc {
 					name "password"
 					enclosedIn "updateLdapServer"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -93,7 +94,7 @@ doc {
 					name "encryption"
 					enclosedIn "updateLdapServer"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -103,7 +104,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -113,7 +114,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

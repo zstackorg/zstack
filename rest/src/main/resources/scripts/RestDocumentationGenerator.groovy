@@ -2,6 +2,7 @@ package scripts
 
 import groovy.json.JsonBuilder
 import org.apache.commons.lang.StringUtils
+import org.springframework.http.HttpMethod
 import org.zstack.core.Platform
 import org.zstack.header.errorcode.ErrorCode
 import org.zstack.header.exception.CloudRuntimeException
@@ -75,6 +76,10 @@ class RestDocumentationGenerator implements DocumentGenerator {
     String CHINESE_CN = "zh_cn"
     String ENGLISH_CN = "en_us"
 
+    String LOCATION_URL = "url"
+    String LOCATION_BODY = "body"
+    String LOCATION_QUERY = "query"
+
     String makeFileNameForChinese(Class clz) {
         boolean inner = clz.getEnclosingClass() != null
         String fname
@@ -147,15 +152,15 @@ class RestDocumentationGenerator implements DocumentGenerator {
         private List _values
         private String _since
         private String _type
-        private boolean _inUrl
+        private String _location
         private String _enclosedIn
 
         def enclosedIn(String v) {
             _enclosedIn = v
         }
 
-        def inUrl(boolean v) {
-            _inUrl = v
+        def location(String v) {
+            _location = v
         }
 
         def since(String v) {
@@ -510,13 +515,15 @@ ${hs.join("\n")}
                 def col = []
 
                 String enclosed = null
-                if (it._enclosedIn != "" && !it._inUrl) {
+                if (it._enclosedIn != "" && it._location == LOCATION_BODY) {
                     enclosed = "包含在`${it._enclosedIn}`结构中"
                 }
 
                 col.add(it._optional ? "${it._name} (可选)" : "${it._name}")
                 col.add(it._type)
-                col.add(it._inUrl ? "url" : "body${enclosed == null ? "" : "(${enclosed})"}")
+
+                def loc = it._location == LOCATION_BODY ? "body${enclosed == null ? "" : "(${enclosed})"}" : it._location
+                col.add(loc)
                 col.add("${it._desc}")
                 if (it._values == null || it._values.isEmpty()) {
                     col.add("")
@@ -572,28 +579,62 @@ ${table.join("\n")}
             Class clz = doc._rest._request._clz
             RestRequest at = clz.getAnnotation(RestRequest.class)
 
-            def curl = ["curl -H \"Content-Type: application/json\""]
-            if (!clz.isAnnotationPresent(SuppressCredentialCheck.class)) {
-                curl.add("-H \"${RestConstants.HEADER_OAUTH}: ${Platform.getUuid()}\"")
+            Set<String> paths = []
+            if (at.path() != "null") {
+                paths.add(at.path())
             }
+            paths.addAll(at.optionalPaths())
 
-            curl.add("-X ${at.method()}")
-            def apiFields = getRequestBody()
-            if (apiFields != null) {
-                curl.add("-d '${JSONObjectUtil.toJsonString(apiFields)}'")
-            }
+            List<String> examples = paths.collect {
+                def curl = ["curl -H \"Content-Type: application/json\""]
+                if (!clz.isAnnotationPresent(SuppressCredentialCheck.class)) {
+                    curl.add("-H \"${RestConstants.HEADER_OAUTH}: ${Platform.getUuid()}\"")
+                }
 
-            Map allFields = getApiExampleOfTheClass(clz)
-            String urlPath = substituteUrl("${RestConstants.API_VERSION}${at.path()}", allFields)
-            curl.add("http://localhost:8080${urlPath}")
+                boolean queryString = at.method() == HttpMethod.GET
 
-            return """\
-### Curl示例
+                curl.add("-X ${at.method()}")
 
+                Map allFields = getApiExampleOfTheClass(clz)
+                String urlPath = substituteUrl("${RestConstants.API_VERSION}${it}", allFields)
+
+                if (!queryString) {
+                    def apiFields = getRequestBody()
+                    if (apiFields != null) {
+                        curl.add("-d '${JSONObjectUtil.toJsonString(apiFields)}'")
+                    }
+                    curl.add("http://localhost:8080${urlPath}")
+                } else {
+                    List<String> queryVars = doc._rest._request._params._cloumns.findAll {
+                        return it._location == LOCATION_QUERY
+                    }.collect {
+                        return it._name
+                    }
+
+                    List qstr = allFields.findAll { k, v ->
+                        return queryVars.contains(k)
+                    }.collect { k, v ->
+                        return "${k}=${v}"
+                    }
+
+                    curl.add("http://localhost:8080${urlPath}?${qstr.join("&")}")
+                }
+
+                return """\
 ```
 ${curl.join(" ")}
 ```
 """
+            }
+
+
+            return """\
+### Curl示例
+
+${examples.join("\n")}
+
+"""
+
         }
 
         Map getRequestBody() {
@@ -1099,11 +1140,20 @@ ${fieldStr}
                     enclosedIn = paramName == null ? "" : paramName
                 }
 
+                def location
+                if (urlVars.contains(af.name)) {
+                    location = LOCATION_URL
+                } else if (at.method() == HttpMethod.GET) {
+                    location = LOCATION_QUERY
+                } else {
+                    location = LOCATION_BODY
+                }
+
                 cols.add("""\t\t\t\tcolumn {
 \t\t\t\t\tname "${af.name}"
 \t\t\t\t\tenclosedIn "${enclosedIn}"
 \t\t\t\t\tdesc "${desc == null  ? "" : desc}"
-\t\t\t\t\tinUrl ${urlVars.contains(af.name)}
+\t\t\t\t\tlocation "${location}"
 \t\t\t\t\ttype "${af.type.simpleName}"
 \t\t\t\t\toptional ${ap == null ? true : !ap.required()}
 \t\t\t\t\tsince "0.6"
@@ -1125,6 +1175,24 @@ ${cols.join("\n")}
             return imports.isEmpty() ? "" : imports.join("\n")
         }
 
+        String urls() {
+            Set<String> paths = []
+            if ("null" != at.path()) {
+                paths.add(at.path())
+            }
+
+            paths.addAll(at.optionalPaths())
+            paths = paths.collect {
+                return "${at.method().toString()} ${RestConstants.API_VERSION}${it}"
+            }
+
+            return paths.collect {
+                return """\
+\t\t\turl "${it}"
+"""
+            }.join("\n")
+        }
+
         String generate() {
             String paramString = params()
 
@@ -1139,7 +1207,7 @@ doc {
 
     rest {
         request {
-            url "${at.method().toString()} ${RestConstants.API_VERSION}${at.path()}"
+${urls()}
 
             ${headers()}
 

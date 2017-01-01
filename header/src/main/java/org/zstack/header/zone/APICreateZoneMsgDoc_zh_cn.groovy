@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "POST /v1/zones"
+			url "POST /v1/zones"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "name"
 					enclosedIn "zone"
 					desc "资源名称"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "description"
 					enclosedIn "zone"
 					desc "资源的详细描述"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "resourceUuid"
 					enclosedIn "zone"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

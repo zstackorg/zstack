@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/backup-storage"
+			url "GET /v1/backup-storage"
+
 
             header (OAuth: 'the-session-uuid')
 

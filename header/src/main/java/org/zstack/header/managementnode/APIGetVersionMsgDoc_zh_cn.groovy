@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "PUT /v1/management-nodes/actions"
+			url "PUT /v1/management-nodes/actions"
+
 
             
 
@@ -23,7 +24,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

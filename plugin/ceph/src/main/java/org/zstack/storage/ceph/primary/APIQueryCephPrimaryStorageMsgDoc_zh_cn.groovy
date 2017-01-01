@@ -9,7 +9,10 @@ doc {
 
     rest {
         request {
-            url "GET /v1/primary-storage/ceph"
+			url "GET /v1/primary-storage/ceph"
+
+			url "GET /v1/primary-storage/ceph/{uuid}"
+
 
             header (OAuth: 'the-session-uuid')
 

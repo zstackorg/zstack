@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "POST /v1/eips/{eipUuid}/vm-instances/nics/{vmNicUuid"
+			url "POST /v1/eips/{eipUuid}/vm-instances/nics/{vmNicUuid"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "eipUuid"
 					enclosedIn ""
 					desc "弹性IP UUID"
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "vmNicUuid"
 					enclosedIn ""
 					desc "云主机网卡UUID"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "PUT /v1/accounts/resources/actions"
+			url "PUT /v1/accounts/resources/actions"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "resourceUuids"
 					enclosedIn "shareResource"
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "accountUuids"
 					enclosedIn "shareResource"
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "toPublic"
 					enclosedIn "shareResource"
 					desc ""
-					inUrl false
+					location "body"
 					type "boolean"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

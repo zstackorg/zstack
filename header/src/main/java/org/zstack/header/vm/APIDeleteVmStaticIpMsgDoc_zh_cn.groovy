@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "DELETE /v1/vm-instances/{vmInstanceUuid}/static-ips"
+			url "DELETE /v1/vm-instances/{vmInstanceUuid}/static-ips"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "vmInstanceUuid"
 					enclosedIn "params"
 					desc "云主机UUID"
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "l3NetworkUuid"
 					enclosedIn "params"
 					desc "三层网络UUID"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "deleteMode"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

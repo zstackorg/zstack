@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/images-l3networks/dependencies"
+			url "GET /v1/images-l3networks/dependencies"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "zoneUuid"
 					enclosedIn "params"
 					desc "区域UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "l3NetworkUuids"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "imageUuid"
 					enclosedIn "params"
 					desc "镜像UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"

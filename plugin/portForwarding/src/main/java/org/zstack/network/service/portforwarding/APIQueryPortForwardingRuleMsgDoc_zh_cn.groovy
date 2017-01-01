@@ -9,7 +9,10 @@ doc {
 
     rest {
         request {
-            url "GET /v1/port-forwarding"
+			url "GET /v1/port-forwarding"
+
+			url "GET /v1/port-forwarding/{uuid}"
+
 
             header (OAuth: 'the-session-uuid')
 

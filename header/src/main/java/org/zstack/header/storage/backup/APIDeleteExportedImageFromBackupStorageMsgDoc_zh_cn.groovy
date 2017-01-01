@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "DELETE /v1/backup-storage/{backupStorageUuid}/exported-images/{imageUuid}"
+			url "DELETE /v1/backup-storage/{backupStorageUuid}/exported-images/{imageUuid}"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "backupStorageUuid"
 					enclosedIn ""
 					desc "镜像存储UUID"
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "imageUuid"
 					enclosedIn ""
 					desc "镜像UUID"
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "POST /v1/backup-storage/fusionstor"
+			url "POST /v1/backup-storage/fusionstor"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "monUrls"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "poolName"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "url"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "name"
 					enclosedIn "params"
 					desc "资源名称"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "description"
 					enclosedIn "params"
 					desc "资源的详细描述"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -73,7 +74,7 @@ doc {
 					name "type"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -83,7 +84,7 @@ doc {
 					name "resourceUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -93,7 +94,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -103,7 +104,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

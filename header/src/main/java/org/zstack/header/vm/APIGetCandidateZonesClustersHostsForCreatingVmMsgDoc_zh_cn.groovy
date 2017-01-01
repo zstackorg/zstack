@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/vm-instances/candidate-destinations"
+			url "GET /v1/vm-instances/candidate-destinations"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "instanceOfferingUuid"
 					enclosedIn "params"
 					desc "计算规格UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "imageUuid"
 					enclosedIn "params"
 					desc "镜像UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "l3NetworkUuids"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional false
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "rootDiskOfferingUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "dataDiskOfferingUuids"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -73,7 +74,7 @@ doc {
 					name "zoneUuid"
 					enclosedIn "params"
 					desc "区域UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -83,7 +84,7 @@ doc {
 					name "clusterUuid"
 					enclosedIn "params"
 					desc "集群UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -93,7 +94,7 @@ doc {
 					name "defaultL3NetworkUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -103,7 +104,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -113,7 +114,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"

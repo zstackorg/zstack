@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/l3-networks/network-services/refs"
+			url "GET /v1/l3-networks/network-services/refs"
+
 
             header (OAuth: 'the-session-uuid')
 

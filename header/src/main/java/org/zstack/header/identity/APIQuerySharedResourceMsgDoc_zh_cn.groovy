@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/accounts/resources"
+			url "GET /v1/accounts/resources"
+
 
             header (OAuth: 'the-session-uuid')
 

@@ -9,7 +9,10 @@ doc {
 
     rest {
         request {
-            url "GET /v1/load-balancers"
+			url "GET /v1/load-balancers"
+
+			url "GET /v1/load-balancers/{uuid}"
+
 
             header (OAuth: 'the-session-uuid')
 

@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "POST /v1/vm-instances/appliances/virtual-routers"
+			url "POST /v1/vm-instances/appliances/virtual-routers"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "managementNetworkUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "publicNetworkUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "networkServicesProvided"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "Set"
 					optional false
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "name"
 					enclosedIn "params"
 					desc "资源名称"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "instanceOfferingUuid"
 					enclosedIn "params"
 					desc "计算规格UUID"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -73,7 +74,7 @@ doc {
 					name "imageUuid"
 					enclosedIn "params"
 					desc "镜像UUID"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -83,7 +84,7 @@ doc {
 					name "l3NetworkUuids"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional false
 					since "0.6"
@@ -93,7 +94,7 @@ doc {
 					name "type"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -103,7 +104,7 @@ doc {
 					name "rootDiskOfferingUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -113,7 +114,7 @@ doc {
 					name "dataDiskOfferingUuids"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -123,7 +124,7 @@ doc {
 					name "zoneUuid"
 					enclosedIn "params"
 					desc "区域UUID"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -133,7 +134,7 @@ doc {
 					name "clusterUuid"
 					enclosedIn "params"
 					desc "集群UUID"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -143,7 +144,7 @@ doc {
 					name "hostUuid"
 					enclosedIn "params"
 					desc "物理机UUID"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -153,7 +154,7 @@ doc {
 					name "primaryStorageUuidForRootVolume"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -163,7 +164,7 @@ doc {
 					name "description"
 					enclosedIn "params"
 					desc "资源的详细描述"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -173,7 +174,7 @@ doc {
 					name "defaultL3NetworkUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -183,7 +184,7 @@ doc {
 					name "strategy"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -193,7 +194,7 @@ doc {
 					name "resourceUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -203,7 +204,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -213,7 +214,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

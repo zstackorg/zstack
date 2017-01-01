@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/primary-storage/local-storage/capacities"
+			url "GET /v1/primary-storage/local-storage/capacities"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "hostUuid"
 					enclosedIn "params"
 					desc "物理机UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "primaryStorageUuid"
 					enclosedIn "params"
 					desc "主存储UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"

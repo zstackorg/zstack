@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "PUT /v1/vm-instances/appliances/virtual-routers/{uuid}/actions"
+			url "PUT /v1/vm-instances/appliances/virtual-routers/{vmInstanceUuid}/actions"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "vmInstanceUuid"
 					enclosedIn "reconnectVirtualRouter"
 					desc "云主机UUID"
-					inUrl false
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "POST /v1/instance-offerings/virtual-routers"
+			url "POST /v1/instance-offerings/virtual-routers"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "zoneUuid"
 					enclosedIn "params"
 					desc "区域UUID"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "managementNetworkUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "imageUuid"
 					enclosedIn "params"
 					desc "镜像UUID"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "publicNetworkUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "isDefault"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "Boolean"
 					optional true
 					since "0.6"
@@ -73,7 +74,7 @@ doc {
 					name "name"
 					enclosedIn "params"
 					desc "资源名称"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -83,7 +84,7 @@ doc {
 					name "description"
 					enclosedIn "params"
 					desc "资源的详细描述"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -93,7 +94,7 @@ doc {
 					name "cpuNum"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "int"
 					optional false
 					since "0.6"
@@ -103,7 +104,7 @@ doc {
 					name "cpuSpeed"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "int"
 					optional false
 					since "0.6"
@@ -113,7 +114,7 @@ doc {
 					name "memorySize"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "long"
 					optional false
 					since "0.6"
@@ -123,7 +124,7 @@ doc {
 					name "allocatorStrategy"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -133,7 +134,7 @@ doc {
 					name "sortKey"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "int"
 					optional true
 					since "0.6"
@@ -143,7 +144,7 @@ doc {
 					name "type"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -153,7 +154,7 @@ doc {
 					name "resourceUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -163,7 +164,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -173,7 +174,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

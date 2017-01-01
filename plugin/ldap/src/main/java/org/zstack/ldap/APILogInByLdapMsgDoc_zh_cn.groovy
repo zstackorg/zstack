@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "PUT /v1/ldap/uids/{uid}/actions"
+			url "PUT /v1/ldap/uids/{uid}/actions"
+
 
             
 
@@ -23,7 +24,7 @@ doc {
 					name "uid"
 					enclosedIn "logInByLdap"
 					desc ""
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "password"
 					enclosedIn "logInByLdap"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

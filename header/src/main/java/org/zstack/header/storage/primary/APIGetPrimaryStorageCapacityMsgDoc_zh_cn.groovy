@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/primary-storage/capacities"
+			url "GET /v1/primary-storage/capacities"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "zoneUuids"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "clusterUuids"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "primaryStorageUuids"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "all"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "query"
 					type "boolean"
 					optional true
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -73,7 +74,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"

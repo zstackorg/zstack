@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/l3-networks/{l3NetworkUuid/dhcp-ip"
+			url "GET /v1/l3-networks/{l3NetworkUuid/dhcp-ip"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "l3NetworkUuid"
 					enclosedIn ""
 					desc "三层网络UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"

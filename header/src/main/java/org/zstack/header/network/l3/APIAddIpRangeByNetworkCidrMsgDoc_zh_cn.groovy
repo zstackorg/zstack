@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "POST /v1/l3-networks/{l3NetworkUuid}/ip-ranges/by-cidr"
+			url "POST /v1/l3-networks/{l3NetworkUuid}/ip-ranges/by-cidr"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "name"
 					enclosedIn "params"
 					desc "资源名称"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "description"
 					enclosedIn "params"
 					desc "资源的详细描述"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "l3NetworkUuid"
 					enclosedIn "params"
 					desc "三层网络UUID"
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "networkCidr"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "resourceUuid"
 					enclosedIn "params"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -73,7 +74,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -83,7 +84,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

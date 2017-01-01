@@ -9,7 +9,10 @@ doc {
 
     rest {
         request {
-            url "GET /v1/backup-storage/fusionstor"
+			url "GET /v1/backup-storage/fusionstor"
+
+			url "GET /v1/backup-storage/fusionstor/{uuid}"
+
 
             header (OAuth: 'the-session-uuid')
 

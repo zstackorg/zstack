@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "PUT /v1/ldap/servers/actions"
+			url "PUT /v1/ldap/servers/actions"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "name"
 					enclosedIn "testAddLdapServerConnection"
 					desc "资源名称"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "description"
 					enclosedIn "testAddLdapServerConnection"
 					desc "资源的详细描述"
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "url"
 					enclosedIn "testAddLdapServerConnection"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "base"
 					enclosedIn "testAddLdapServerConnection"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "username"
 					enclosedIn "testAddLdapServerConnection"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -73,7 +74,7 @@ doc {
 					name "password"
 					enclosedIn "testAddLdapServerConnection"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -83,7 +84,7 @@ doc {
 					name "encryption"
 					enclosedIn "testAddLdapServerConnection"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional false
 					since "0.6"
@@ -93,7 +94,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -103,7 +104,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

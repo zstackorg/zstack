@@ -9,7 +9,10 @@ doc {
 
     rest {
         request {
-            url "GET /v1/consoles/agents"
+			url "GET /v1/consoles/agents"
+
+			url "GET /v1/consoles/agents/{uuid}"
+
 
             header (OAuth: 'the-session-uuid')
 

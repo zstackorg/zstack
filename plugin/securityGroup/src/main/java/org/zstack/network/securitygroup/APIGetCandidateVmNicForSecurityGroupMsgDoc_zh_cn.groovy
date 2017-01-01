@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/security-groups/{securityGroupUuid}/vm-instances/candidate-nics"
+			url "GET /v1/security-groups/{securityGroupUuid}/vm-instances/candidate-nics"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "securityGroupUuid"
 					enclosedIn ""
 					desc "安全组UUID"
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"

@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "GET /v1/eips/vm-instances/candidate-nics"
+			url "GET /v1/eips/vm-instances/candidate-nics"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "eipUuid"
 					enclosedIn "params"
 					desc "弹性IP UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "vipUuid"
 					enclosedIn "params"
 					desc "VIP UUID"
-					inUrl false
+					location "query"
 					type "String"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "query"
 					type "List"
 					optional true
 					since "0.6"

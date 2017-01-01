@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "PUT /v1/backup-storage/sftp/{uuid}/actions"
+			url "PUT /v1/backup-storage/sftp/{uuid}/actions"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "username"
 					enclosedIn "updateSftpBackupStorage"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "password"
 					enclosedIn "updateSftpBackupStorage"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "hostname"
 					enclosedIn "updateSftpBackupStorage"
 					desc ""
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "sshPort"
 					enclosedIn "updateSftpBackupStorage"
 					desc ""
-					inUrl false
+					location "body"
 					type "Integer"
 					optional true
 					since "0.6"
@@ -63,7 +64,7 @@ doc {
 					name "uuid"
 					enclosedIn "updateSftpBackupStorage"
 					desc "资源的UUID，唯一标示该资源"
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -73,7 +74,7 @@ doc {
 					name "name"
 					enclosedIn "updateSftpBackupStorage"
 					desc "资源名称"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -83,7 +84,7 @@ doc {
 					name "description"
 					enclosedIn "updateSftpBackupStorage"
 					desc "资源的详细描述"
-					inUrl false
+					location "body"
 					type "String"
 					optional true
 					since "0.6"
@@ -93,7 +94,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -103,7 +104,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "DELETE /v1/load-balancers/listeners/{uuid}"
+			url "DELETE /v1/load-balancers/listeners/{uuid}"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "uuid"
 					enclosedIn ""
 					desc "资源的UUID，唯一标示该资源"
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

@@ -68,4 +68,13 @@ public class APIGetFreeIpMsg extends APISyncCallMessage implements L3NetworkMess
     public void setLimit(int limit) {
         this.limit = limit;
     }
+
+    public static APIGetFreeIpMsg __example__() {
+        APIGetFreeIpMsg msg = new APIGetFreeIpMsg();
+        msg.l3NetworkUuid = uuid();
+        msg.ipRangeUuid = uuid();
+        msg.start = "192.168.10.100";
+
+        return msg;
+    }
 }

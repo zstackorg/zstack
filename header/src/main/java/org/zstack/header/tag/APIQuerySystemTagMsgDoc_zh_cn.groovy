@@ -9,7 +9,10 @@ doc {
 
     rest {
         request {
-            url "GET /v1/system-tags"
+			url "GET /v1/system-tags"
+
+			url "GET /v1/system-tags/{uuid}"
+
 
             header (OAuth: 'the-session-uuid')
 

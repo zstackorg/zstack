@@ -9,7 +9,10 @@ doc {
 
     rest {
         request {
-            url "GET /v1/ldap/servers"
+			url "GET /v1/ldap/servers"
+
+			url "GET /v1/ldap/servers/{uuid}"
+
 
             header (OAuth: 'the-session-uuid')
 

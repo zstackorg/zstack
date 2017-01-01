@@ -9,7 +9,8 @@ doc {
 
     rest {
         request {
-            url "DELETE /v1/clusters/{clusterUuid}/primary-storage/{primaryStorageUuid}"
+			url "DELETE /v1/clusters/{clusterUuid}/primary-storage/{primaryStorageUuid}"
+
 
             header (OAuth: 'the-session-uuid')
 
@@ -23,7 +24,7 @@ doc {
 					name "primaryStorageUuid"
 					enclosedIn ""
 					desc "主存储UUID"
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -33,7 +34,7 @@ doc {
 					name "clusterUuid"
 					enclosedIn ""
 					desc "集群UUID"
-					inUrl true
+					location "url"
 					type "String"
 					optional false
 					since "0.6"
@@ -43,7 +44,7 @@ doc {
 					name "systemTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"
@@ -53,7 +54,7 @@ doc {
 					name "userTags"
 					enclosedIn ""
 					desc ""
-					inUrl false
+					location "body"
 					type "List"
 					optional true
 					since "0.6"

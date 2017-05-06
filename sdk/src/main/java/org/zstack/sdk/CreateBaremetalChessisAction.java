@@ -22,13 +22,13 @@ public class CreateBaremetalChessisAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = true, maxLength = 32, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String ipmiAddress;
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String ipmiUsername;
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String ipmiPassword;
 
     @Param(required = false)

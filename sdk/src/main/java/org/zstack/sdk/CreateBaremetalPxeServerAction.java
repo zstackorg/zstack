@@ -3,13 +3,13 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateBaremetalHostExtraNicCfgAction extends AbstractAction {
+public class CreateBaremetalPxeServerAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
     public static class Result {
         public ErrorCode error;
-        public CreateBaremetalHostExtraNicCfgResult value;
+        public CreateBaremetalPxeServerResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -22,26 +22,17 @@ public class CreateBaremetalHostExtraNicCfgAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String hostCfgUuid;
+    @Param(required = true, maxLength = 128, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
+    public java.lang.String dhcpInterface;
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String mac;
+    @Param(required = false, maxLength = 32, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String dhcpRangeBegin;
 
-    @Param(required = true, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String ip;
+    @Param(required = false, maxLength = 32, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String dhcpRangeEnd;
 
-    @Param(required = true, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String netmask;
-
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String gateway;
-
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String dns;
-
-    @Param(required = false)
-    public java.lang.String resourceUuid;
+    @Param(required = false, maxLength = 32, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String dhcpRangeNetmask;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -64,8 +55,8 @@ public class CreateBaremetalHostExtraNicCfgAction extends AbstractAction {
             return ret;
         }
         
-        CreateBaremetalHostExtraNicCfgResult value = res.getResult(CreateBaremetalHostExtraNicCfgResult.class);
-        ret.value = value == null ? new CreateBaremetalHostExtraNicCfgResult() : value; 
+        CreateBaremetalPxeServerResult value = res.getResult(CreateBaremetalPxeServerResult.class);
+        ret.value = value == null ? new CreateBaremetalPxeServerResult() : value; 
 
         return ret;
     }
@@ -91,7 +82,7 @@ public class CreateBaremetalHostExtraNicCfgAction extends AbstractAction {
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/baremetal/niccfg";
+        info.path = "/baremetal/pxeserver";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

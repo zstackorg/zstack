@@ -3,13 +3,13 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UpdateBaremetalHostExtraNicCfgAction extends AbstractAction {
+public class DeleteBaremetalPxeServerAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
     public static class Result {
         public ErrorCode error;
-        public UpdateBaremetalHostExtraNicCfgResult value;
+        public DeleteBaremetalPxeServerResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,23 +25,8 @@ public class UpdateBaremetalHostExtraNicCfgAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String ip;
-
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String netmask;
-
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String gateway;
-
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String dns;
-
     @Param(required = false)
-    public java.lang.String mac;
-
-    @Param(required = false)
-    public java.lang.String hostCfgUuid;
+    public java.lang.String deleteMode = "Permissive";
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -64,8 +49,8 @@ public class UpdateBaremetalHostExtraNicCfgAction extends AbstractAction {
             return ret;
         }
         
-        UpdateBaremetalHostExtraNicCfgResult value = res.getResult(UpdateBaremetalHostExtraNicCfgResult.class);
-        ret.value = value == null ? new UpdateBaremetalHostExtraNicCfgResult() : value; 
+        DeleteBaremetalPxeServerResult value = res.getResult(DeleteBaremetalPxeServerResult.class);
+        ret.value = value == null ? new DeleteBaremetalPxeServerResult() : value; 
 
         return ret;
     }
@@ -90,11 +75,11 @@ public class UpdateBaremetalHostExtraNicCfgAction extends AbstractAction {
 
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "PUT";
-        info.path = "/baremetal/niccfg/{uuid}/actions";
+        info.httpMethod = "DELETE";
+        info.path = "/baremetal/pxeserver/{uuid}";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "updateBaremetalHostExtraNicCfg";
+        info.parameterName = "params";
         return info;
     }
 

@@ -18,46 +18,6 @@ public class BaremetalHostCfgInventory  {
         return this.chessisUuid;
     }
 
-    public java.lang.String mac;
-    public void setMac(java.lang.String mac) {
-        this.mac = mac;
-    }
-    public java.lang.String getMac() {
-        return this.mac;
-    }
-
-    public java.lang.String ip;
-    public void setIp(java.lang.String ip) {
-        this.ip = ip;
-    }
-    public java.lang.String getIp() {
-        return this.ip;
-    }
-
-    public java.lang.String netmask;
-    public void setNetmask(java.lang.String netmask) {
-        this.netmask = netmask;
-    }
-    public java.lang.String getNetmask() {
-        return this.netmask;
-    }
-
-    public java.lang.String gateway;
-    public void setGateway(java.lang.String gateway) {
-        this.gateway = gateway;
-    }
-    public java.lang.String getGateway() {
-        return this.gateway;
-    }
-
-    public java.lang.String dns;
-    public void setDns(java.lang.String dns) {
-        this.dns = dns;
-    }
-    public java.lang.String getDns() {
-        return this.dns;
-    }
-
     public java.lang.String password;
     public void setPassword(java.lang.String password) {
         this.password = password;
@@ -96,6 +56,14 @@ public class BaremetalHostCfgInventory  {
     }
     public java.sql.Timestamp getLastOpDate() {
         return this.lastOpDate;
+    }
+
+    public java.util.List<BaremetalHostNicCfgInventory> nicCfgs;
+    public void setNicCfgs(java.util.List<BaremetalHostNicCfgInventory> nicCfgs) {
+        this.nicCfgs = nicCfgs;
+    }
+    public java.util.List<BaremetalHostNicCfgInventory> getNicCfgs() {
+        return this.nicCfgs;
     }
 
 }

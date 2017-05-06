@@ -25,19 +25,7 @@ public class UpdateBaremetalHostCfgAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String ip;
-
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String netmask;
-
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String gateway;
-
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String dns;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
+    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
     public java.lang.String password;
 
     @Param(required = false, validValues = {"true","false"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
@@ -46,8 +34,8 @@ public class UpdateBaremetalHostCfgAction extends AbstractAction {
     @Param(required = false, validValues = {"true","false"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String unattended;
 
-    @Param(required = false)
-    public java.lang.String mac;
+    @Param(required = true, nonempty = true, nullElements = false, emptyString = false, noTrim = false)
+    public java.util.List nicCfgs;
 
     @Param(required = false)
     public java.lang.String chessisUuid;

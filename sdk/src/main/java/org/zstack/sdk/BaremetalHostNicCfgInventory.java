@@ -1,6 +1,6 @@
 package org.zstack.sdk;
 
-public class BaremetalHostExtraNicCfgInventory  {
+public class BaremetalHostNicCfgInventory  {
 
     public java.lang.String uuid;
     public void setUuid(java.lang.String uuid) {
@@ -56,6 +56,14 @@ public class BaremetalHostExtraNicCfgInventory  {
     }
     public java.lang.String getDns() {
         return this.dns;
+    }
+
+    public java.lang.Boolean pxe;
+    public void setPxe(java.lang.Boolean pxe) {
+        this.pxe = pxe;
+    }
+    public java.lang.Boolean getPxe() {
+        return this.pxe;
     }
 
     public java.sql.Timestamp createDate;

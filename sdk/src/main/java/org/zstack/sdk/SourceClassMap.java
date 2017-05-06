@@ -36,8 +36,8 @@ public class SourceClassMap {
 			put("org.zstack.header.aliyun.oss.OssBucketInventory", "org.zstack.sdk.OssBucketInventory");
 			put("org.zstack.header.aliyun.oss.OssBucketProperty", "org.zstack.sdk.OssBucketProperty");
 			put("org.zstack.header.baremetal.BaremetalException", "org.zstack.sdk.BaremetalException");
-			put("org.zstack.header.baremetal.host.extraniccfg.BaremetalHostExtraNicCfgInventory", "org.zstack.sdk.BaremetalHostExtraNicCfgInventory");
-			put("org.zstack.header.baremetal.host.hostcfg.BaremetalHostCfgInventory", "org.zstack.sdk.BaremetalHostCfgInventory");
+			put("org.zstack.header.baremetal.host.BaremetalHostCfgInventory", "org.zstack.sdk.BaremetalHostCfgInventory");
+			put("org.zstack.header.baremetal.host.BaremetalHostNicCfgInventory", "org.zstack.sdk.BaremetalHostNicCfgInventory");
 			put("org.zstack.header.baremetal.power.BaremetalChessisInventory", "org.zstack.sdk.BaremetalChessisInventory");
 			put("org.zstack.header.baremetal.pxeserver.BaremetalPxeServerInventory", "org.zstack.sdk.BaremetalPxeServerInventory");
 			put("org.zstack.header.cluster.ClusterInventory", "org.zstack.sdk.ClusterInventory");
@@ -153,8 +153,8 @@ public class SourceClassMap {
 			put("org.zstack.sdk.BackupStorageInventory", "org.zstack.header.storage.backup.BackupStorageInventory");
 			put("org.zstack.sdk.BaremetalChessisInventory", "org.zstack.header.baremetal.power.BaremetalChessisInventory");
 			put("org.zstack.sdk.BaremetalException", "org.zstack.header.baremetal.BaremetalException");
-			put("org.zstack.sdk.BaremetalHostCfgInventory", "org.zstack.header.baremetal.host.hostcfg.BaremetalHostCfgInventory");
-			put("org.zstack.sdk.BaremetalHostExtraNicCfgInventory", "org.zstack.header.baremetal.host.extraniccfg.BaremetalHostExtraNicCfgInventory");
+			put("org.zstack.sdk.BaremetalHostCfgInventory", "org.zstack.header.baremetal.host.BaremetalHostCfgInventory");
+			put("org.zstack.sdk.BaremetalHostNicCfgInventory", "org.zstack.header.baremetal.host.BaremetalHostNicCfgInventory");
 			put("org.zstack.sdk.BaremetalPxeServerInventory", "org.zstack.header.baremetal.pxeserver.BaremetalPxeServerInventory");
 			put("org.zstack.sdk.CephBackupStorageInventory", "org.zstack.storage.ceph.backup.CephBackupStorageInventory");
 			put("org.zstack.sdk.CephBackupStorageMonInventory", "org.zstack.storage.ceph.backup.CephBackupStorageMonInventory");

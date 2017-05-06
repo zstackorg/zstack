@@ -25,13 +25,13 @@ public class UpdateBaremetalChessisAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, maxLength = 32, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String ipmiAddress;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String ipmiUsername;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String ipmiPassword;
 
     @Param(required = false, validValues = {"true","false"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)

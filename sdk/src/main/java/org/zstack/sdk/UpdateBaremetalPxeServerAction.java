@@ -3,13 +3,13 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PrepareBaremetalPxeServerAction extends AbstractAction {
+public class UpdateBaremetalPxeServerAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
     public static class Result {
         public ErrorCode error;
-        public PrepareBaremetalPxeServerResult value;
+        public UpdateBaremetalPxeServerResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -22,16 +22,19 @@ public class PrepareBaremetalPxeServerAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String uuid;
+
+    @Param(required = false, maxLength = 128, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String dhcpInterface;
 
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, maxLength = 32, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String dhcpRangeBegin;
 
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, maxLength = 32, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String dhcpRangeEnd;
 
-    @Param(required = false, maxLength = 15, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, maxLength = 32, minLength = 7, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String dhcpRangeNetmask;
 
     @Param(required = false)
@@ -55,8 +58,8 @@ public class PrepareBaremetalPxeServerAction extends AbstractAction {
             return ret;
         }
         
-        PrepareBaremetalPxeServerResult value = res.getResult(PrepareBaremetalPxeServerResult.class);
-        ret.value = value == null ? new PrepareBaremetalPxeServerResult() : value; 
+        UpdateBaremetalPxeServerResult value = res.getResult(UpdateBaremetalPxeServerResult.class);
+        ret.value = value == null ? new UpdateBaremetalPxeServerResult() : value; 
 
         return ret;
     }
@@ -81,11 +84,11 @@ public class PrepareBaremetalPxeServerAction extends AbstractAction {
 
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "POST";
-        info.path = "/baremetal/pxeserver";
+        info.httpMethod = "PUT";
+        info.path = "/baremetal/pxeserver/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "params";
+        info.parameterName = "updateBaremetalPxeServer";
         return info;
     }
 

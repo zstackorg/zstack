@@ -96,4 +96,5 @@
     <import resource="springConfigXml/rest.xml"/>
     <import resource="springConfigXml/vxlan.xml"/>
     <import resource="springConfigXml/notification.xml"/>
+    <import resource="springConfigXml/webhook.xml"/>
 </beans>

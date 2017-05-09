@@ -34,7 +34,7 @@ public class UpdateBaremetalHostCfgAction extends AbstractAction {
     @Param(required = false, validValues = {"true","false"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String unattended;
 
-    @Param(required = true, nonempty = true, nullElements = false, emptyString = false, noTrim = false)
+    @Param(required = false, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
     public java.util.List nicCfgs;
 
     @Param(required = false)

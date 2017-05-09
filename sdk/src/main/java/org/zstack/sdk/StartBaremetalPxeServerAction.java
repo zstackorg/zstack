@@ -3,13 +3,13 @@ package org.zstack.sdk;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateBaremetalHostCfgAction extends AbstractAction {
+public class StartBaremetalPxeServerAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
     public static class Result {
         public ErrorCode error;
-        public CreateBaremetalHostCfgResult value;
+        public StartBaremetalPxeServerResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -23,22 +23,7 @@ public class CreateBaremetalHostCfgAction extends AbstractAction {
     }
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String chessisUuid;
-
-    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
-    public java.lang.String password;
-
-    @Param(required = false, validValues = {"true","false"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vnc;
-
-    @Param(required = false, validValues = {"true","false"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String unattended;
-
-    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
-    public java.util.List nicCfgs;
-
-    @Param(required = false)
-    public java.lang.String resourceUuid;
+    public java.lang.String pxeServerUuid;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -61,8 +46,8 @@ public class CreateBaremetalHostCfgAction extends AbstractAction {
             return ret;
         }
         
-        CreateBaremetalHostCfgResult value = res.getResult(CreateBaremetalHostCfgResult.class);
-        ret.value = value == null ? new CreateBaremetalHostCfgResult() : value; 
+        StartBaremetalPxeServerResult value = res.getResult(StartBaremetalPxeServerResult.class);
+        ret.value = value == null ? new StartBaremetalPxeServerResult() : value; 
 
         return ret;
     }
@@ -87,11 +72,11 @@ public class CreateBaremetalHostCfgAction extends AbstractAction {
 
     RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "POST";
-        info.path = "/baremetal/hostcfg";
+        info.httpMethod = "PUT";
+        info.path = "/baremetal/pxeserver/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "params";
+        info.parameterName = "startBaremetalPxeServer";
         return info;
     }
 

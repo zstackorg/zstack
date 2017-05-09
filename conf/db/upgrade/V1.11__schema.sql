@@ -764,6 +764,7 @@ CREATE TABLE `BaremetalPxeServerVO` (
   `dhcpRangeBegin` varchar(32) DEFAULT NULL COMMENT 'dhcp range begin',
   `dhcpRangeEnd` varchar(32) DEFAULT NULL COMMENT 'dhcp range end',
   `dhcpRangeNetmask` varchar(32) DEFAULT NULL COMMENT 'dhcp range netmask',
+  `status` varchar(32) DEFAULT NULL COMMENT 'pxe server status'
   `lastOpDate` timestamp ON UPDATE CURRENT_TIMESTAMP,
   `createDate` timestamp,
   PRIMARY KEY  (`uuid`)

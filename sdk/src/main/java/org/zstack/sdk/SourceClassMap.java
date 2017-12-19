@@ -5,6 +5,7 @@ import java.util.HashMap;
 public class SourceClassMap {
     final static HashMap<String, String> srcToDstMapping = new HashMap() {
         {
+			put("org.zstack.aliyun.monitor.EcsMetricsProperty", "org.zstack.sdk.EcsMetricsProperty");
 			put("org.zstack.appliancevm.ApplianceVmInventory", "org.zstack.sdk.ApplianceVmInventory");
 			put("org.zstack.billing.DataVolumeSpending", "org.zstack.sdk.DataVolumeSpending");
 			put("org.zstack.billing.DataVolumeSpendingInventory", "org.zstack.sdk.DataVolumeSpendingInventory");
@@ -259,6 +260,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.EcsImageInventory", "org.zstack.header.aliyun.image.EcsImageInventory");
 			put("org.zstack.sdk.EcsInstanceInventory", "org.zstack.header.aliyun.ecs.EcsInstanceInventory");
 			put("org.zstack.sdk.EcsInstanceType", "org.zstack.header.aliyun.ecs.EcsInstanceType");
+			put("org.zstack.sdk.EcsMetricsProperty", "org.zstack.aliyun.monitor.EcsMetricsProperty");
 			put("org.zstack.sdk.EcsSecurityGroupInventory", "org.zstack.header.aliyun.network.group.EcsSecurityGroupInventory");
 			put("org.zstack.sdk.EcsSecurityGroupRuleInventory", "org.zstack.header.aliyun.network.group.EcsSecurityGroupRuleInventory");
 			put("org.zstack.sdk.EcsVSwitchInventory", "org.zstack.header.aliyun.network.vpc.EcsVSwitchInventory");

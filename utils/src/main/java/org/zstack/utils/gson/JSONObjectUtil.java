@@ -6,7 +6,6 @@ import org.json.JSONArray;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import static org.zstack.utils.CollectionDSL.e;
 import static org.zstack.utils.CollectionDSL.map;
@@ -28,7 +27,34 @@ public class JSONObjectUtil {
             Collection c = collections.newInstance();
             JSONArray jarr = new JSONArray(content);
             for (int i=0; i<jarr.length(); i++) {
+//                String ob = jarr.get(i).toString();
                 String objstr = jarr.getString(i);
+                if (String.class != clazz) {
+                    c.add(gson.fromJson(objstr, clazz));
+                } else {
+                    c.add(objstr);
+                }
+            }
+            return (K) c;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * difference between toCollection and toObjectCollection is "jarr.get(i).toString()"
+     * toObjectCollection has default meta structure for json, such as the bellow data:
+     * d:[{"k1":"v1"},{"k2":"v2"}]
+     */
+    public static <T, K extends Collection> K toObjectCollection(String content, Class<K> collections, Class<T> clazz) {
+        try {
+            if (collections.isInterface()) {
+                throw new IllegalArgumentException(String.format("collections must be a concrete class, not interface[%s]", collections.getName()));
+            }
+            Collection c = collections.newInstance();
+            JSONArray jarr = new JSONArray(content);
+            for (int i=0; i<jarr.length(); i++) {
+                String objstr = jarr.get(i).toString();
                 if (String.class != clazz) {
                     c.add(gson.fromJson(objstr, clazz));
                 } else {

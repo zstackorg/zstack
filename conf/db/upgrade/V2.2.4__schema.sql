@@ -19,3 +19,17 @@ CREATE TABLE  `zstack`.`LongJobVO` (
     PRIMARY KEY  (`uuid`),
     CONSTRAINT `fkLongJobVOManagementNodeVO` FOREIGN KEY (`managementNodeUuid`) REFERENCES `ManagementNodeVO` (`uuid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+# VipQos table
+CREATE TABLE IF NOT EXISTS `zstack`.`VipQosVO` (
+    `uuid` VARCHAR(32) NOT NULL UNIQUE COMMENT 'uuid',
+    `vipUuid` VARCHAR(32) NOT NULL,
+    `port` int(16) unsigned,
+    `inboundBandwidth` bigint unsigned,
+    `outboundBandwidth` bigint unsigned,
+    `type` VARCHAR(255) NOT NULL,
+    `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+    PRIMARY KEY (`uuid`),
+    CONSTRAINT `fkVipQosVOVipVO` FOREIGN KEY (`vipUuid`) REFERENCES `zstack`.`VipVO` (`uuid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

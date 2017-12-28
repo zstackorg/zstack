@@ -2616,7 +2616,7 @@ public class KVMHost extends HostBase implements Host {
                             if (CoreGlobalProperty.CHRONY_SERVERS != null) {
                                 if (!CoreGlobalProperty.CHRONY_SERVERS.contains(self.getManagementIp())) {
                                     runner.putArgument("chrony_servers", String.join(",", CoreGlobalProperty.CHRONY_SERVERS));
-                                } else if (info.isNewAdded()) {
+                                } else {
                                     runner.putArgument("disable_ntp", "true");
                                 }
                             }

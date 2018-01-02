@@ -2613,7 +2613,7 @@ public class KVMHost extends HostBase implements Host {
                             }
                             runner.putArgument("pkg_kvmagent", agentPackageName);
                             runner.putArgument("hostname", String.format("%s.zstack.org", self.getManagementIp().replaceAll("\\.", "-")));
-                            if (CoreGlobalProperty.CHRONY_SERVERS != null && !CoreGlobalProperty.CHRONY_SERVERS.contains(self.getManagementIp())) {
+                            if (CoreGlobalProperty.CHRONY_SERVERS != null) {
                                 runner.putArgument("chrony_servers", String.join(",", CoreGlobalProperty.CHRONY_SERVERS));
                             }
 

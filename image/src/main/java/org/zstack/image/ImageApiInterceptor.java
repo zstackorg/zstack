@@ -5,6 +5,7 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
+import org.zstack.core.db.SQL;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.errorcode.ErrorFacade;
@@ -19,10 +20,7 @@ import org.zstack.header.storage.backup.BackupStorageVO;
 import org.zstack.header.storage.backup.BackupStorageVO_;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
-import org.zstack.header.volume.VolumeFormat;
-import org.zstack.header.volume.VolumeState;
-import org.zstack.header.volume.VolumeStatus;
-import org.zstack.header.volume.VolumeVO;
+import org.zstack.header.volume.*;
 
 import java.util.List;
 
@@ -87,16 +85,64 @@ public class ImageApiInterceptor implements ApiMessageInterceptor {
         }
     }
 
-    private void validate(APICreateRootVolumeTemplateFromVolumeSnapshotMsg msg) {
-        if (msg.getPlatform() == null) {
-            msg.setPlatform(ImagePlatform.Linux.toString());
+    private void fillPlatform(APICreateRootVolumeTemplateFromVolumeSnapshotMsg msg) {
+        if(msg.getPlatform() != null) {
+            return;
         }
+
+        List<String> platforms = SQL.New("select platform from VmInstanceVO where uuid = (" +
+                " select vmInstanceUuid from VolumeVO vol where" +
+                " vol.uuid = (select volumeUuid from VolumeSnapshotVO where uuid = :snapshotUuid) and type = :volumeType" +
+                ")")
+                .param("snapshotUuid", msg.getSnapshotUuid())
+                .param("volumeType", VolumeType.Root)
+                .list();
+
+        if(platforms.isEmpty() || platforms.size() != 1) {
+            msg.setPlatform(ImagePlatform.Linux.toString());
+            return;
+        }
+
+        msg.setPlatform(platforms.get(0));
+    }
+
+    private void fillGuestOsType(APICreateRootVolumeTemplateFromVolumeSnapshotMsg msg) {
+        if(msg.getGuestOsType() != null) {
+            return;
+        }
+
+        List<String> guestOsTypes = SQL.New("select guestOsType from ImageVO where uuid = (" +
+                " select rootImageUuid from VolumeVO vol where " +
+                " vol.uuid = (select volumeUuid from VolumeSnapshotVO where uuid = :snapshotUuid) and type = :volumeType" +
+                ")")
+                .param("snapshotUuid", msg.getSnapshotUuid())
+                .param("volumeType", VolumeType.Root)
+                .list();
+
+        if(guestOsTypes.isEmpty() || guestOsTypes.size() != 1){
+            return;
+        }
+
+        msg.setGuestOsType(guestOsTypes.get(0));
+    }
+
+    private void validate(APICreateRootVolumeTemplateFromVolumeSnapshotMsg msg) {
+        fillPlatform(msg);
+        fillGuestOsType(msg);
     }
 
     private void validate(APICreateRootVolumeTemplateFromRootVolumeMsg msg) {
         if (msg.getPlatform() == null) {
             String platform = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.rootVolumeUuid, msg.getRootVolumeUuid()).select(VmInstanceVO_.platform).findValue();
             msg.setPlatform(platform == null ? ImagePlatform.Linux.toString() : platform);
+        }
+
+        if (msg.getGuestOsType() == null) {
+            List<String> osTypes = SQL.New("select i.guestOsType from VolumeVO v, ImageVO i where v.uuid=:vol and v.rootImageUuid = i.uuid").
+                    param("vol", msg.getRootVolumeUuid()).list();
+            if (osTypes != null && osTypes.size() > 0) {
+                msg.setGuestOsType(osTypes.get(0));
+            }
         }
     }
 

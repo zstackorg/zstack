@@ -505,7 +505,9 @@ public class VmInstanceBase extends AbstractVmInstance {
         amsg.setServiceId(bus.makeLocalServiceId(HostAllocatorConstant.SERVICE_ID));
         amsg.setAllocatorStrategy(self.getAllocatorStrategy());
         amsg.setVmOperation(VmOperation.Start.toString());
-        amsg.setImage(ImageInventory.valueOf(dbf.findByUuid(self.getImageUuid(), ImageVO.class)));
+        if (self.getImageUuid() != null && dbf.findByUuid(self.getImageUuid(), ImageVO.class) != null) {
+            amsg.setImage(ImageInventory.valueOf(dbf.findByUuid(self.getImageUuid(), ImageVO.class)));
+        }
         amsg.setL3NetworkUuids(CollectionUtils.transformToList(self.getVmNics(), new Function<String, VmNicVO>() {
             @Override
             public String call(VmNicVO arg) {
@@ -531,12 +533,7 @@ public class VmInstanceBase extends AbstractVmInstance {
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                String signature = vmMgr.getVmInstanceSyncSignature(self.getUuid());
-                if (signature != null) {
-                    return signature;
-                } else {
-                    return syncThreadName;
-                }
+                return syncThreadName;
             }
 
             @Override
@@ -1275,15 +1272,11 @@ public class VmInstanceBase extends AbstractVmInstance {
             completion.fail(allowed);
             return;
         }
-        if (self.getVmNics().size() == 0) {
-            completion.fail(operr("cannot get target migration host without any nics on vm"));
-            return;
-        }
+
         final DesignatedAllocateHostMsg amsg = new DesignatedAllocateHostMsg();
         amsg.setCpuCapacity(self.getCpuNum());
         amsg.setMemoryCapacity(self.getMemorySize());
         amsg.getAvoidHostUuids().add(self.getHostUuid());
-        amsg.setImage(ImageInventory.valueOf(dbf.findByUuid(self.getImageUuid(), ImageVO.class)));
         if (msg instanceof GetVmMigrationTargetHostMsg) {
             GetVmMigrationTargetHostMsg gmsg = (GetVmMigrationTargetHostMsg) msg;
             if (gmsg.getAvoidHostUuids() != null) {
@@ -1413,12 +1406,7 @@ public class VmInstanceBase extends AbstractVmInstance {
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                String signature = vmMgr.getVmInstanceSyncSignature(self.getUuid());
-                if (signature != null) {
-                    return signature;
-                } else {
-                    return syncThreadName;
-                }
+                return syncThreadName;
             }
 
             @Override
@@ -1813,12 +1801,7 @@ public class VmInstanceBase extends AbstractVmInstance {
 
             @Override
             public String getSyncSignature() {
-                String signature = vmMgr.getVmInstanceSyncSignature(self.getUuid());
-                if (signature != null) {
-                    return signature;
-                } else {
-                    return syncThreadName;
-                }
+                return syncThreadName;
             }
 
             @Override
@@ -2086,12 +2069,7 @@ public class VmInstanceBase extends AbstractVmInstance {
 
             @Override
             public String getSyncSignature() {
-                String signature = vmMgr.getVmInstanceSyncSignature(self.getUuid());
-                if (signature != null) {
-                    return signature;
-                } else {
-                    return syncThreadName;
-                }
+                return syncThreadName;
             }
 
             @Override
@@ -3325,7 +3303,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                 msg.setMemoryCapacity(struct.alignedMemory - oldMemorySize);
                 msg.setAllocatorStrategy(HostAllocatorConstant.DESIGNATED_HOST_ALLOCATOR_STRATEGY_TYPE);
                 msg.setVmInstance(VmInstanceInventory.valueOf(self));
-                if (self.getImageUuid() != null) {
+                if (self.getImageUuid() != null && dbf.findByUuid(self.getImageUuid(), ImageVO.class) != null) {
                     msg.setImage(ImageInventory.valueOf(dbf.findByUuid(self.getImageUuid(), ImageVO.class)));
                 }
                 msg.setHostUuid(self.getHostUuid());
@@ -3906,12 +3884,7 @@ public class VmInstanceBase extends AbstractVmInstance {
 
             @Override
             public String getSyncSignature() {
-                String signature = vmMgr.getVmInstanceSyncSignature(self.getUuid());
-                if (signature != null) {
-                    return signature;
-                } else {
-                    return syncThreadName;
-                }
+                return syncThreadName;
             }
 
             @Override
@@ -4232,12 +4205,7 @@ public class VmInstanceBase extends AbstractVmInstance {
 
             @Override
             public String getSyncSignature() {
-                String signature = vmMgr.getVmInstanceSyncSignature(self.getUuid());
-                if (signature != null) {
-                    return signature;
-                } else {
-                    return syncThreadName;
-                }
+                return syncThreadName;
             }
 
             @Override

@@ -90,7 +90,7 @@ public class AttachL3NetworkToIPsecConnectionAction extends AbstractAction {
         info.path = "/ipsec/{uuid}/l3networks";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "";
+        info.parameterName = "params";
         return info;
     }
 

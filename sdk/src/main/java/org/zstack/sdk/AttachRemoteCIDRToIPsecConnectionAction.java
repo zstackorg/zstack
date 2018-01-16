@@ -90,7 +90,7 @@ public class AttachRemoteCIDRToIPsecConnectionAction extends AbstractAction {
         info.path = "/ipsec/{uuid}/remote-cidrs";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "";
+        info.parameterName = "params";
         return info;
     }
 

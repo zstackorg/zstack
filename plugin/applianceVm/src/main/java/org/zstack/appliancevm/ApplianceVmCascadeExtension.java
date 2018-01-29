@@ -598,10 +598,17 @@ public class ApplianceVmCascadeExtension extends AbstractAsyncCascadeExtension {
                 }
             });
 
-            String sql = "select apvm from ApplianceVmVO apvm where apvm.uuid in (select nic.vmInstanceUuid from VmNicVO nic where nic.l3NetworkUuid in (:l3Uuids))";
-            TypedQuery<ApplianceVmVO> q = dbf.getEntityManager().createQuery(sql, ApplianceVmVO.class);
-            q.setParameter("l3Uuids", l3uuids);
-            List<ApplianceVmVO> apvms = q.getResultList();
+            List<ApplianceVmVO> apvms = new Callable<List<ApplianceVmVO>>() {
+                @Override
+                @Transactional(readOnly = true)
+                public List<ApplianceVmVO> call(){
+                    String sql = "select apvm from ApplianceVmVO apvm where apvm.uuid in (select nic.vmInstanceUuid from VmNicVO nic where nic.l3NetworkUuid in (:l3Uuids))";
+                    TypedQuery<ApplianceVmVO> q = dbf.getEntityManager().createQuery(sql, ApplianceVmVO.class);
+                    q.setParameter("l3Uuids",l3uuids);
+                    return q.getResultList();
+                }
+            }.call();
+
             if (!apvms.isEmpty()) {
                 for (ApvmCascadeFilterExtensionPoint ext : pluginRgty.getExtensionList(ApvmCascadeFilterExtensionPoint.class)) {
                     apvms = ext.filterApplianceVmCascade(apvms, action.getParentIssuer(), l3uuids);

@@ -77,7 +77,7 @@ class AddImageLongJobCase extends SubCase {
         env.afterSimulator(SftpBackupStorageConstant.DOWNLOAD_IMAGE_PATH) { Object response ->
             //DownloadImageMsg
             LongJobVO vo = Q.New(LongJobVO.class).eq(LongJobVO_.description,_description).find()
-            assert vo.state == LongJobState.Running
+            assert vo.state == LongJobState.Running || vo.state == LongJobState.Waiting
             flag += 1
             return response
         }

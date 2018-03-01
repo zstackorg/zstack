@@ -1146,7 +1146,6 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
                 }
             }
         }
-
         String accountUuid = msgData.getSession().getAccountUuid();
         String imageType = msgData.getType();
         imageType = imageType == null ? DefaultImageFactory.type.toString() : imageType;
@@ -1201,7 +1200,6 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
         for (AddImageExtensionPoint ext : pluginRgty.getExtensionList(AddImageExtensionPoint.class)) {
             ext.preAddImage(inv);
         }
-
         final List<DownloadImageMsg> dmsgs = CollectionUtils.transformToList(msgData.getBackupStorageUuids(), new Function<DownloadImageMsg, String>() {
             @Override
             public DownloadImageMsg call(String arg) {
@@ -1215,7 +1213,6 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
         });
 
         CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddImageExtensionPoint.class), ext -> ext.beforeAddImage(inv));
-
         new LoopAsyncBatch<DownloadImageMsg>(msgData.getNeedReplyMessage()) {
             AtomicBoolean success = new AtomicBoolean(false);
 
@@ -1676,7 +1673,6 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
 
                     @Override
                     public void run(final FlowTrigger trigger, Map data) {
-
                         new While<>(targetBackupStorages).all((arg, completion) -> {
                             SyncImageSizeMsg smsg = new SyncImageSizeMsg();
                             smsg.setBackupStorageUuid(arg.getUuid());

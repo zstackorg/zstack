@@ -1,7 +1,7 @@
 package org.zstack.test.integration.longjob
 
 import com.google.gson.Gson
-import junit.framework.Assert
+import org.zstack.core.Platform
 import org.zstack.core.db.Q
 import org.zstack.header.image.APIAddImageMsg
 import org.zstack.header.image.ImageConstant
@@ -24,6 +24,7 @@ class AddImageLongJobCase extends SubCase {
     EnvSpec env
     Gson gson
     BackupStorageInventory bs
+    String myDescription
 
     @Override
     void clean() {
@@ -45,6 +46,7 @@ class AddImageLongJobCase extends SubCase {
         env.create {
             testApiMessageValidator()
             testAddImage()
+            testAddImageAppointResourceUuid()
         }
     }
 
@@ -72,12 +74,12 @@ class AddImageLongJobCase extends SubCase {
     void testAddImage() {
         int oldSize = Q.New(ImageVO.class).list().size()
         int flag = 0
-        String _description = "my-test"
+        myDescription = "my-test"
 
         env.afterSimulator(SftpBackupStorageConstant.DOWNLOAD_IMAGE_PATH) { Object response ->
             //DownloadImageMsg
-            LongJobVO vo = Q.New(LongJobVO.class).eq(LongJobVO_.description,_description).find()
-            assert vo.state == LongJobState.Running || vo.state == LongJobState.Waiting
+            LongJobVO vo = Q.New(LongJobVO.class).eq(LongJobVO_.description, myDescription).find()
+            assert vo.state == LongJobState.Running
             flag += 1
             return response
         }
@@ -94,7 +96,7 @@ class AddImageLongJobCase extends SubCase {
             sessionId = adminSession()
             jobName = "APIAddImageMsg"
             jobData = gson.toJson(msg)
-            description = _description
+            description = myDescription
         } as LongJobInventory
 
         assert jobInv.getJobName() == "APIAddImageMsg"
@@ -108,5 +110,36 @@ class AddImageLongJobCase extends SubCase {
         int newSize = Q.New(ImageVO.class).count().intValue()
         assert newSize > oldSize
         assert 1 == flag
+    }
+
+    void testAddImageAppointResourceUuid(){
+        myDescription = "my-test3"
+
+        String uuid = Platform.uuid
+        APIAddImageMsg msg = new APIAddImageMsg()
+        msg.setName("TinyLinux")
+        msg.setBackupStorageUuids(Collections.singletonList(bs.uuid))
+        msg.setUrl("http://192.168.1.20/share/images/tinylinux.qcow2")
+        msg.setFormat(ImageConstant.RAW_FORMAT_STRING)
+        msg.setMediaType(ImageConstant.ImageMediaType.RootVolumeTemplate.toString())
+        msg.setPlatform(ImagePlatform.Linux.toString())
+        msg.setResourceUuid(uuid)
+
+        LongJobInventory jobInv = submitLongJob {
+            sessionId = adminSession()
+            jobName = "APIAddImageMsg"
+            jobData = gson.toJson(msg)
+            description = myDescription
+        } as LongJobInventory
+
+        assert jobInv.getJobName() == "APIAddImageMsg"
+        assert jobInv.state == org.zstack.sdk.LongJobState.Running
+
+        retryInSecs() {
+            LongJobVO job = dbFindByUuid(jobInv.getUuid(), LongJobVO.class)
+            assert job.state == LongJobState.Succeeded
+        }
+
+        assert null != dbFindByUuid(uuid,ImageVO.class)
     }
 }

@@ -1,6 +1,7 @@
 package org.zstack.test.integration.longjob
 
 import com.google.gson.Gson
+import org.zstack.core.Platform
 import org.zstack.core.db.Q
 import org.zstack.header.image.APICreateRootVolumeTemplateFromRootVolumeMsg
 import org.zstack.header.image.ImagePlatform
@@ -26,6 +27,7 @@ class CreateRootVolumeTemplateLongJobCase extends SubCase {
     Gson gson
     BackupStorageInventory bs
     VmInstanceInventory vm
+    String myDescription
 
     @Override
     void clean() {
@@ -47,6 +49,7 @@ class CreateRootVolumeTemplateLongJobCase extends SubCase {
         env.create {
             testApiMessageValidator()
             testCreateRootVolumeTemplate()
+            testCreateRootVolumeTemplateAppointResourceUuid()
         }
     }
 
@@ -73,19 +76,19 @@ class CreateRootVolumeTemplateLongJobCase extends SubCase {
     void testCreateRootVolumeTemplate() {
         int oldSize = Q.New(ImageVO.class).list().size()
         int flag = 0
-        String _description = "my-test"
+        myDescription = "my-test"
 
         env.afterSimulator(LocalStorageKvmBackend.GET_VOLUME_SIZE) { Object response ->
             //SyncVolumeSizeMsg
-            LongJobVO vo = Q.New(LongJobVO.class).eq(LongJobVO_.description, _description).find()
-            assert vo.state == LongJobState.Running || vo.state == LongJobState.Waiting
+            LongJobVO vo = Q.New(LongJobVO.class).eq(LongJobVO_.description, myDescription).find()
+            assert vo.state == LongJobState.Running
             flag += 1
             return response
         }
 
         env.afterSimulator(LocalStorageKvmBackend.CREATE_TEMPLATE_FROM_VOLUME) { Object response ->
             //CreateTemplateFromVmRootVolumeMsg
-            LongJobVO vo = Q.New(LongJobVO.class).eq(LongJobVO_.description, "my-test").find()
+            LongJobVO vo = Q.New(LongJobVO.class).eq(LongJobVO_.description, myDescription).find()
             assert vo.state == LongJobState.Running
             flag += 1
             return response
@@ -93,7 +96,7 @@ class CreateRootVolumeTemplateLongJobCase extends SubCase {
 
         env.afterSimulator(SftpBackupStorageConstant.GET_IMAGE_SIZE) { Object response ->
             //SyncImageSizeMsg -> BackupStorageAskInstallPathMsg
-            LongJobVO vo = Q.New(LongJobVO.class).eq(LongJobVO_.description, "my-test").find()
+            LongJobVO vo = Q.New(LongJobVO.class).eq(LongJobVO_.description, myDescription).find()
             assert vo.state == LongJobState.Running
             flag += 1
             return response
@@ -109,7 +112,7 @@ class CreateRootVolumeTemplateLongJobCase extends SubCase {
             sessionId = adminSession()
             jobName = "APICreateRootVolumeTemplateFromRootVolumeMsg"
             jobData = gson.toJson(msg)
-            description = _description
+            description = myDescription
         } as LongJobInventory
 
         assert jobInv.jobName == "APICreateRootVolumeTemplateFromRootVolumeMsg"
@@ -123,5 +126,34 @@ class CreateRootVolumeTemplateLongJobCase extends SubCase {
         int newSize = Q.New(ImageVO.class).list().size()
         assert newSize > oldSize
         assert 3 == flag
+    }
+
+    void testCreateRootVolumeTemplateAppointResourceUuid(){
+        myDescription = "my-test3"
+        String uuid = Platform.uuid
+
+        APICreateRootVolumeTemplateFromRootVolumeMsg msg = new APICreateRootVolumeTemplateFromRootVolumeMsg()
+        msg.name = "test"
+        msg.rootVolumeUuid = vm.rootVolumeUuid
+        msg.platform = ImagePlatform.Linux.toString()
+        msg.backupStorageUuids = Collections.singletonList(bs.uuid)
+        msg.resourceUuid = uuid
+
+        LongJobInventory jobInv = submitLongJob {
+            sessionId = adminSession()
+            jobName = "APICreateRootVolumeTemplateFromRootVolumeMsg"
+            jobData = gson.toJson(msg)
+            description = myDescription
+        } as LongJobInventory
+
+        assert jobInv.jobName == "APICreateRootVolumeTemplateFromRootVolumeMsg"
+        assert jobInv.state == org.zstack.sdk.LongJobState.Running
+
+        retryInSecs() {
+            LongJobVO job = dbFindByUuid(jobInv.getUuid(), LongJobVO.class)
+            assert job.state == LongJobState.Succeeded
+        }
+
+        assert null != dbFindByUuid(uuid,ImageVO.class)
     }
 }

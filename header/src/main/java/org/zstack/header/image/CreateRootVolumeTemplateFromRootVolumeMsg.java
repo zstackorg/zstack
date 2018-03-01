@@ -19,7 +19,7 @@ public class CreateRootVolumeTemplateFromRootVolumeMsg extends NeedReplyMessage 
     private String rootVolumeUuid;
     private String platform;
     private boolean system;
-
+    private String resourceUuid;
     private SessionInventory session;
 
     public String getName() {
@@ -84,5 +84,13 @@ public class CreateRootVolumeTemplateFromRootVolumeMsg extends NeedReplyMessage 
 
     public void setSession(SessionInventory session) {
         this.session = session;
+    }
+
+    public String getResourceUuid() {
+        return resourceUuid;
+    }
+
+    public void setResourceUuid(String resourceUuid) {
+        this.resourceUuid = resourceUuid;
     }
 }

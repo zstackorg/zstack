@@ -105,12 +105,14 @@ CREATE TABLE  `zstack`.`AlarmActionVO` (
 
 CREATE TABLE  `zstack`.`AlarmLabelVO` (
     `uuid` varchar(32) NOT NULL UNIQUE,
-    `key` varchar(1024) NOT NULL,
+    `key` varchar(128) NOT NULL,
     `value` text NOT NULL,
     `operator` varchar(128) NOT NULL,
     `alarmUuid` varchar(32) NOT NULL,
     PRIMARY KEY  (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `zstack`.`AlarmLabelVO` ADD UNIQUE INDEX(`alarmUuid`,`key`);
 
 CREATE TABLE  `zstack`.`AlarmVO` (
     `uuid` varchar(32) NOT NULL UNIQUE,
@@ -199,3 +201,5 @@ ALTER TABLE EventSubscriptionActionVO ADD CONSTRAINT fkEventSubscriptionActionVO
 # Foreign keys for table EventSubscriptionLabelVO
 
 ALTER TABLE EventSubscriptionLabelVO ADD CONSTRAINT fkEventSubscriptionLabelVOEventSubscriptionVO FOREIGN KEY (subscriptionUuid) REFERENCES EventSubscriptionVO (uuid) ON DELETE CASCADE;
+
+UPDATE SchedulerTriggerVO set repeatCount=0 where repeatCount is NULL;

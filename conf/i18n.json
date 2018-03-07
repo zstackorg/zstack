@@ -1417,6 +1417,16 @@
     "fileName": "src/main/java/org/zstack/compute/affinityGroup/AffinityGroupManagerImpl.java"
   },
   {
+    "raw": "Can not operate on affinityGroup [uuid: %s] which is not enabled",
+    "en_US": "Can not operate on affinityGroup [uuid: {0}] which is not enabled",
+    "zh_CN": "不能对不是enabled状态的亲和组操作",
+    "arguments": [
+      "affinityGroupUuid"
+    ],
+    "line": 108,
+    "fileName": "src/zstack/./premium/mevoco/src/main/java/org/zstack/compute/affinityGroup/AffinityGroupInterceptor.java"
+  },
+  {
     "raw": "the backup storage[uuid:%s, type:%s] requires bound primary storage, however, the primary storage has not been added",
     "en_US": "the backup storage[uuid:{0}, type:{1}] requires bound primary storage, however, the primary storage has not been added",
     "zh_CN": "无法找到跟镜像服务器[uuid:{0}, type:{1}]配对的主存储。一些镜像服务器必须跟配对的主存储共同使用，例如Ceph镜像服务器只能搭配Ceph主存储使用。请检查你主存储的设置",

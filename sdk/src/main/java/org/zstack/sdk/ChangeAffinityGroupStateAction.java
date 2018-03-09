@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class CreateSchedulerTriggerAction extends AbstractAction {
+public class ChangeAffinityGroupStateAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class CreateSchedulerTriggerAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.CreateSchedulerTriggerResult value;
+        public org.zstack.sdk.ChangeAffinityGroupStateResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,29 +25,11 @@ public class CreateSchedulerTriggerAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String name;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String uuid;
 
-    @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String description;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,2147483647L}, noTrim = false)
-    public java.lang.Integer schedulerInterval;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,2147483647L}, noTrim = false)
-    public java.lang.Integer repeatCount = 0;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.Long startTime;
-
-    @Param(required = true, validValues = {"simple","cron"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String schedulerType;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String cron;
-
-    @Param(required = false)
-    public java.lang.String resourceUuid;
+    @Param(required = true, validValues = {"enable","disable"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String stateEvent;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -72,8 +54,8 @@ public class CreateSchedulerTriggerAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.CreateSchedulerTriggerResult value = res.getResult(org.zstack.sdk.CreateSchedulerTriggerResult.class);
-        ret.value = value == null ? new org.zstack.sdk.CreateSchedulerTriggerResult() : value; 
+        org.zstack.sdk.ChangeAffinityGroupStateResult value = res.getResult(org.zstack.sdk.ChangeAffinityGroupStateResult.class);
+        ret.value = value == null ? new org.zstack.sdk.ChangeAffinityGroupStateResult() : value; 
 
         return ret;
     }
@@ -102,11 +84,11 @@ public class CreateSchedulerTriggerAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "POST";
-        info.path = "/scheduler/triggers";
+        info.httpMethod = "PUT";
+        info.path = "/affinity-groups/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "params";
+        info.parameterName = "changeAffinityGroupState";
         return info;
     }
 

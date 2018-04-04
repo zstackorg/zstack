@@ -6,8 +6,9 @@ CREATE TABLE `zstack`.`SharedBlockGroupVO` (
 
 CREATE TABLE `zstack`.`SharedBlockVO` (
     `uuid` varchar(32) NOT NULL UNIQUE,
+    `sharedBlockGroupUuid` varchar(32) NOT NULL,
     `type` varchar(128) NOT NULL,
-    `diskUuid` varchar(64) NOT NULL,
+    `diskUuid` varchar(64) NOT NULL UNIQUE,
     `name` varchar(255) NOT NULL,
     `description` varchar(2048) DEFAULT NULL,
     `state` varchar(64) NOT NULL,
@@ -19,7 +20,13 @@ CREATE TABLE `zstack`.`SharedBlockVO` (
 
 CREATE TABLE `zstack`.`SharedBlockGroupPrimaryStorageHostRefVO` (
     `primaryStorageUuid` varchar(32) NOT NULL,
-    `hostId` varchar(32) NOT NULL UNIQUE,
+    `hostUuid` varchar(32) NOT NULL,
+    `status` varchar(32) NOT NULL,
+    `lastOpDate` timestamp ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp,
+    `hostId` INT NOT NULL,
     CONSTRAINT `fkSharedBlockGroupPrimaryStorageHostRefVOPrimaryStorageEO` FOREIGN KEY (`primaryStorageUuid`) REFERENCES `zstack`.`PrimaryStorageEO` (`uuid`) ON DELETE CASCADE,
-    PRIMARY KEY (`primaryStorageUuid`, `hostId`)
+    CONSTRAINT `fkSharedBlockGroupPrimaryStorageHostRefVOHostEO` FOREIGN KEY (`hostUuid`) REFERENCES `zstack`.`HostEO` (`uuid`) ON DELETE CASCADE,
+    CONSTRAINT `ukSharedBlockGroupPrimaryStorageHostRefVO` UNIQUE (`primaryStorageUuid`,`hostId`),
+    PRIMARY KEY (`primaryStorageUuid`, `hostUuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

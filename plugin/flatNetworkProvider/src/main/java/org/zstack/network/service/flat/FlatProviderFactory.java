@@ -93,7 +93,8 @@ public class FlatProviderFactory implements NetworkServiceProviderFactory, Prepa
         rpvo.getNetworkServiceTypes().add(NetworkServiceType.DHCP.toString());
         rpvo.getNetworkServiceTypes().add(UserdataConstant.USERDATA_TYPE_STRING);
         rpvo.getNetworkServiceTypes().add(EipConstant.EIP_NETWORK_SERVICE_TYPE);
-        //rpvo.getNetworkServiceTypes().add(NetworkServiceType.DNS.toString());
+        rpvo.getNetworkServiceTypes().add(NetworkServiceType.DNS.toString());
+        rpvo.getNetworkServiceTypes().add(NetworkServiceType.HostRoute.toString());
         rpvo.setType(FlatNetworkServiceConstant.FLAT_NETWORK_SERVICE_TYPE_STRING);
         rpvo = dbf.persistAndRefresh(rpvo);
         flatProvider = NetworkServiceProviderInventory.valueOf(rpvo);

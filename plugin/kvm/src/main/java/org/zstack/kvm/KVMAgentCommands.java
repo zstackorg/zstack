@@ -790,6 +790,15 @@ public class KVMAgentCommands {
         private Integer VDIMonitorNumber;
         private boolean useBootMenu;
         private boolean kvmHiddenState;
+        private String vmCpuModel;
+
+        public String getVmCpuModel() {
+            return vmCpuModel;
+        }
+
+        public void setVmCpuModel(String vmCpuModel) {
+            this.vmCpuModel = vmCpuModel;
+        }
 
         public String getSpiceStreamingMode() {
             return spiceStreamingMode;

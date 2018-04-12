@@ -881,30 +881,28 @@ public class L3BasicNetwork implements L3Network {
                     }
                 });
 
-                if (!self.getNetworkServices().isEmpty()) {
-                    flow(new NoRollbackFlow() {
-                        String __name__ = "apply-to-backend";
+                flow(new NoRollbackFlow() {
+                    String __name__ = "apply-to-backend";
 
-                        @Override
-                        public void run(final FlowTrigger trigger, Map data) {
-                            AddHostRouteMsg amsg = new AddHostRouteMsg();
-                            amsg.setL3NetworkUuid(self.getUuid());
-                            amsg.setPrefix(msg.getPrefix());
-                            amsg.setNexthop(msg.getNexthop());
-                            bus.makeLocalServiceId(amsg, NetworkServiceConstants.HOSTROUTE_SERVICE_ID);
-                            bus.send(amsg, new CloudBusCallBack(trigger) {
-                                @Override
-                                public void run(MessageReply reply) {
-                                    if (reply.isSuccess()) {
-                                        trigger.next();
-                                    } else {
-                                        trigger.fail(reply.getError());
-                                    }
+                    @Override
+                    public void run(final FlowTrigger trigger, Map data) {
+                        AddHostRouteMsg amsg = new AddHostRouteMsg();
+                        amsg.setL3NetworkUuid(self.getUuid());
+                        amsg.setPrefix(msg.getPrefix());
+                        amsg.setNexthop(msg.getNexthop());
+                        bus.makeLocalServiceId(amsg, NetworkServiceConstants.HOSTROUTE_SERVICE_ID);
+                        bus.send(amsg, new CloudBusCallBack(trigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (reply.isSuccess()) {
+                                    trigger.next();
+                                } else {
+                                    trigger.fail(reply.getError());
                                 }
-                            });
-                        }
-                    });
-                }
+                            }
+                        });
+                    }
+                });
 
                 done(new FlowDoneHandler(msg) {
                     @Override

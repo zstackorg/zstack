@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 
-public class FlatHostRouteBackend implements NetworkServiceHostRouteBackend, DhcpServerExtensionPoint {
+public class FlatHostRouteBackend implements NetworkServiceHostRouteBackend, DhcpServerExtensionPoint, PrepareDbInitialValueExtensionPoint {
     private static final CLogger logger = Utils.getLogger(FlatHostRouteBackend.class);
 
     @Autowired
@@ -98,5 +98,39 @@ public class FlatHostRouteBackend implements NetworkServiceHostRouteBackend, Dhc
     public void afterRemoveDhcpServerIP(String L3NetworkUuid, UsedIpInventory dhcpSererIp) {
         SQL.New(L3NetworkHostRouteVO.class).eq(L3NetworkHostRouteVO_.l3NetworkUuid, L3NetworkUuid)
                 .eq(L3NetworkHostRouteVO_.prefix, NetworkServiceConstants.METADATA_HOST_PREFIX).delete();
+    }
+
+    @Override
+    public void prepareDbInitialValue() {
+        SimpleQuery<NetworkServiceProviderVO> query = dbf.createQuery(NetworkServiceProviderVO.class);
+        query.add(NetworkServiceProviderVO_.type, SimpleQuery.Op.EQ, FlatNetworkServiceConstant.FLAT_NETWORK_SERVICE_TYPE_STRING);
+        NetworkServiceProviderVO rpvo = query.find();
+        if (rpvo != null) {
+            // check if any network service type missing, if any, complement them
+            SimpleQuery<NetworkServiceTypeVO> q = dbf.createQuery(NetworkServiceTypeVO.class);
+            q.add(NetworkServiceTypeVO_.networkServiceProviderUuid, SimpleQuery.Op.EQ, rpvo.getUuid());
+            List<NetworkServiceTypeVO> refs = q.list();
+            Set<String> types = new HashSet<String>();
+            for (NetworkServiceTypeVO ref : refs) {
+                types.add(ref.getType());
+            }
+
+            if (!types.contains(NetworkServiceType.HostRoute.toString())) {
+                NetworkServiceTypeVO ref = new NetworkServiceTypeVO();
+                ref.setNetworkServiceProviderUuid(rpvo.getUuid());
+                ref.setType(NetworkServiceType.HostRoute.toString());
+                dbf.persist(ref);
+            }
+
+            return;
+        }
+
+        rpvo = new NetworkServiceProviderVO();
+        rpvo.setUuid(Platform.getUuid());
+        rpvo.setName("Flat Network Service Provider");
+        rpvo.setDescription("Flat Network Service Provider");
+        rpvo.getNetworkServiceTypes().add(NetworkServiceType.HostRoute.toString());
+        rpvo.setType(FlatNetworkServiceConstant.FLAT_NETWORK_SERVICE_TYPE_STRING);
+        dbf.persistAndRefresh(rpvo);
     }
 }

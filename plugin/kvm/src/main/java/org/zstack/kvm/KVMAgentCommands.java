@@ -1503,6 +1503,8 @@ public class KVMAgentCommands {
         private String installPath;
         private boolean fullSnapshot;
         private String volumeInstallPath;
+        private String newVolumeUuid;
+        private String newVolumeInstallPath;
 
         public String getVolumeUuid() {
             return volumeUuid;
@@ -1550,6 +1552,22 @@ public class KVMAgentCommands {
 
         public void setInstallPath(String installPath) {
             this.installPath = installPath;
+        }
+
+        public String getNewVolumeInstallPath() {
+            return newVolumeInstallPath;
+        }
+
+        public void setNewVolumeInstallPath(String newVolumeInstallPath) {
+            this.newVolumeInstallPath = newVolumeInstallPath;
+        }
+
+        public String getNewVolumeUuid() {
+            return newVolumeUuid;
+        }
+
+        public void setNewVolumeUuid(String newVolumeUuid) {
+            this.newVolumeUuid = newVolumeUuid;
         }
     }
 

@@ -3782,6 +3782,16 @@
     "fileName": "src/main/java/org/zstack/identity/AccountManagerImpl.java"
   },
   {
+    "raw": "session [uuid:%s] expired, can not renew",
+    "en_US": "session [uuid:{0}] expired, can not renew",
+    "zh_CN": "当前会话 [uuid:{0}] 已经超时，不能更新",
+    "arguments": [
+      "msg.getSessionUuid()"
+    ],
+    "line": 529,
+    "fileName": "src/zstack/./identity/src/main/java/org/zstack/identity/AccountManagerImpl.java"
+  },
+  {
     "raw": "account[%s] not found",
     "en_US": "account[{0}] not found",
     "zh_CN": "没有找到账户[{0}]",

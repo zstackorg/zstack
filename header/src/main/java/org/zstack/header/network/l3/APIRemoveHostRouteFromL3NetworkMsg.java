@@ -49,7 +49,7 @@ public class APIRemoveHostRouteFromL3NetworkMsg extends APIMessage implements L3
         APIRemoveHostRouteFromL3NetworkMsg msg = new APIRemoveHostRouteFromL3NetworkMsg();
 
         msg.setL3NetworkUuid(uuid());
-        msg.setL3NetworkUuid("169.254.169.254/32");
+        msg.setPrefix("169.254.169.254/32");
 
         return msg;
     }

@@ -2785,6 +2785,8 @@ public class KVMHost extends HostBase implements Host {
                                             creator.setTagByTokens(map(e(HostSystemTags.EXTRA_IPS_TOKEN, StringUtils.join(ips, ","))));
                                             creator.recreate = true;
                                             creator.create();
+                                        } else {
+                                            HostSystemTags.EXTRA_IPS.delete(self.getUuid());
                                         }
                                     }
 

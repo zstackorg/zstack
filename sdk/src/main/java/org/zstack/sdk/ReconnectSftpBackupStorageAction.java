@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class CloneVmInstanceAction extends AbstractAction {
+public class ReconnectSftpBackupStorageAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class CloneVmInstanceAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.CloneVmInstanceResult value;
+        public org.zstack.sdk.ReconnectSftpBackupStorageResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -26,16 +26,7 @@ public class CloneVmInstanceAction extends AbstractAction {
     }
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vmInstanceUuid;
-
-    @Param(required = false, validValues = {"InstantStart","JustCreate"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String strategy = "InstantStart";
-
-    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
-    public java.util.List names;
-
-    @Param(required = false)
-    public java.lang.Boolean full = false;
+    public java.lang.String uuid;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -60,8 +51,8 @@ public class CloneVmInstanceAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.CloneVmInstanceResult value = res.getResult(org.zstack.sdk.CloneVmInstanceResult.class);
-        ret.value = value == null ? new org.zstack.sdk.CloneVmInstanceResult() : value; 
+        org.zstack.sdk.ReconnectSftpBackupStorageResult value = res.getResult(org.zstack.sdk.ReconnectSftpBackupStorageResult.class);
+        ret.value = value == null ? new org.zstack.sdk.ReconnectSftpBackupStorageResult() : value; 
 
         return ret;
     }
@@ -91,10 +82,10 @@ public class CloneVmInstanceAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/vm-instances/{vmInstanceUuid}/actions";
+        info.path = "/backup-storage/sftp/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "cloneVmInstance";
+        info.parameterName = "reconnectSftpBackupStorage";
         return info;
     }
 

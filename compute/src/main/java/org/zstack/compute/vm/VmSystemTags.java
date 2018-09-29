@@ -92,4 +92,10 @@ public class VmSystemTags {
     public static String DUAL_STACK_NIC_SECONDARY_L3_TOKEN = "secondaryL3NetworkUuid";
     public static String DUAL_STACK_NIC_TOKEN = "dualStackNic";
     public static PatternedSystemTag DUAL_STACK_NIC = new PatternedSystemTag(String.format("dualStackNic::{%s}::{%s}", DUAL_STACK_NIC_PRIMARY_L3_TOKEN, DUAL_STACK_NIC_SECONDARY_L3_TOKEN), VmInstanceVO.class);
+
+    public static final String VM_MACHINE_TYPE_TOKEN = "vmMachineType";
+    public static PatternedSystemTag VM_MACHINE_TYPE = new PatternedSystemTag(
+            String.format("vmMachineType::{%s}", VM_MACHINE_TYPE_TOKEN),
+            VmInstanceVO.class
+    );
 }

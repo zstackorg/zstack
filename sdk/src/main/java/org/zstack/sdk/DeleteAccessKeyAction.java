@@ -85,7 +85,7 @@ public class DeleteAccessKeyAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "DELETE";
-        info.path = "/accesskey/{uuid}";
+        info.path = "/accesskeys/{uuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "";

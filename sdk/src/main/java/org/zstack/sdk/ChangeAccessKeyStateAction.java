@@ -85,7 +85,7 @@ public class ChangeAccessKeyStateAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/accesskey/{uuid}/actions";
+        info.path = "/accesskeys/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "changeAccessKeyState";

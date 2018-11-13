@@ -25,7 +25,7 @@ public class CreateAccessKeyAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = true, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String accountUuid;
 
     @Param(required = true, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
@@ -91,7 +91,7 @@ public class CreateAccessKeyAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/accesskey";
+        info.path = "/accesskeys";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

@@ -107,5 +107,4 @@ public class LongJobInventory  {
     public java.lang.Long getExecuteTime() {
         return this.executeTime;
     }
-
 }

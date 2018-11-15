@@ -91,7 +91,7 @@ public class CreateAccessKeyAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/accesskey";
+        info.path = "/accesskeys";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

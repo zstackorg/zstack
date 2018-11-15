@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class GetAccessKeyAction extends AbstractAction {
+public class QueryAccessKeyAction extends QueryAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class GetAccessKeyAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.GetAccessKeyResult value;
+        public org.zstack.sdk.QueryAccessKeyResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,20 +25,6 @@ public class GetAccessKeyAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String accountUuid;
-
-    @Param(required = true, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String userUuid;
-
-    @Param(required = false)
-    public java.util.List systemTags;
-
-    @Param(required = false)
-    public java.util.List userTags;
-
-    @Param(required = true)
-    public String sessionId;
 
 
     private Result makeResult(ApiResult res) {
@@ -48,8 +34,8 @@ public class GetAccessKeyAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.GetAccessKeyResult value = res.getResult(org.zstack.sdk.GetAccessKeyResult.class);
-        ret.value = value == null ? new org.zstack.sdk.GetAccessKeyResult() : value; 
+        org.zstack.sdk.QueryAccessKeyResult value = res.getResult(org.zstack.sdk.QueryAccessKeyResult.class);
+        ret.value = value == null ? new org.zstack.sdk.QueryAccessKeyResult() : value; 
 
         return ret;
     }
@@ -79,7 +65,7 @@ public class GetAccessKeyAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/accesskey/list";
+        info.path = "/accesskeys";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

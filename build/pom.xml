@@ -50,7 +50,6 @@
                                         <exclude>springConfigXml/sharedMountPointPrimaryStorage.xml</exclude>
                                         <exclude>springConfigXml/ceph.xml</exclude>
                                         <exclude>springConfigXml/fusionstor.xml</exclude>
-                                        <exclude>springConfigXml/tag.xml</exclude>
                                         <exclude>serviceConfig/metadata.xml</exclude>
                                     </excludes>
                                 </resource>
@@ -352,6 +351,11 @@
                 <dependency>
                     <groupId>org.zstack</groupId>
                     <artifactId>v2v</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.zstack</groupId>
+                    <artifactId>tag2</artifactId>
                     <version>${project.version}</version>
                 </dependency>
             </dependencies>

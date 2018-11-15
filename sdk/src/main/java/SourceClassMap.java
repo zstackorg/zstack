@@ -154,6 +154,7 @@ public class SourceClassMap {
 			put("org.zstack.header.storage.database.backup.DatabaseBackupInventory", "org.zstack.sdk.databasebackup.DatabaseBackupInventory");
 			put("org.zstack.header.storage.database.backup.DatabaseBackupStorageRefInventory", "org.zstack.sdk.databasebackup.DatabaseBackupStorageRefInventory");
 			put("org.zstack.header.storage.database.backup.DatabaseBackupStruct", "org.zstack.sdk.databasebackup.DatabaseBackupStruct");
+			put("org.zstack.header.storage.database.backup.DatabaseType", "org.zstack.sdk.databasebackup.DatabaseType");
 			put("org.zstack.header.storage.primary.ImageCacheInventory", "org.zstack.sdk.ImageCacheInventory");
 			put("org.zstack.header.storage.primary.PrimaryStorageHostStatus", "org.zstack.sdk.PrimaryStorageHostStatus");
 			put("org.zstack.header.storage.primary.PrimaryStorageInventory", "org.zstack.sdk.PrimaryStorageInventory");
@@ -167,6 +168,8 @@ public class SourceClassMap {
 			put("org.zstack.header.storageDevice.ScsiLunVmInstanceRefInventory", "org.zstack.sdk.ScsiLunVmInstanceRefInventory");
 			put("org.zstack.header.tag.SystemTagInventory", "org.zstack.sdk.SystemTagInventory");
 			put("org.zstack.header.tag.TagInventory", "org.zstack.sdk.TagInventory");
+			put("org.zstack.header.tag.TagPatternInventory", "org.zstack.sdk.TagPatternInventory");
+			put("org.zstack.header.tag.TagPatternType", "org.zstack.sdk.TagPatternType");
 			put("org.zstack.header.tag.UserTagInventory", "org.zstack.sdk.UserTagInventory");
 			put("org.zstack.header.vipQos.VipQosInventory", "org.zstack.sdk.VipQosInventory");
 			put("org.zstack.header.vm.CloneVmInstanceInventory", "org.zstack.sdk.CloneVmInstanceInventory");
@@ -556,6 +559,8 @@ public class SourceClassMap {
 			put("org.zstack.sdk.SupportedResourceStruct", "org.zstack.header.cloudformation.SupportedResourceStruct");
 			put("org.zstack.sdk.SystemTagInventory", "org.zstack.header.tag.SystemTagInventory");
 			put("org.zstack.sdk.TagInventory", "org.zstack.header.tag.TagInventory");
+			put("org.zstack.sdk.TagPatternInventory", "org.zstack.header.tag.TagPatternInventory");
+			put("org.zstack.sdk.TagPatternType", "org.zstack.header.tag.TagPatternType");
 			put("org.zstack.sdk.TaskProgressInventory", "org.zstack.header.core.progress.TaskProgressInventory");
 			put("org.zstack.sdk.TwoFactorAuthenticationSecretInventory", "org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretInventory");
 			put("org.zstack.sdk.UsbDeviceInventory", "org.zstack.usbDevice.UsbDeviceInventory");
@@ -612,6 +617,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.databasebackup.DatabaseBackupInventory", "org.zstack.header.storage.database.backup.DatabaseBackupInventory");
 			put("org.zstack.sdk.databasebackup.DatabaseBackupStorageRefInventory", "org.zstack.header.storage.database.backup.DatabaseBackupStorageRefInventory");
 			put("org.zstack.sdk.databasebackup.DatabaseBackupStruct", "org.zstack.header.storage.database.backup.DatabaseBackupStruct");
+			put("org.zstack.sdk.databasebackup.DatabaseType", "org.zstack.header.storage.database.backup.DatabaseType");
 			put("org.zstack.sdk.iam2.api.APIPermissionStruct", "org.zstack.iam2.api.APIGetIAM2VirtualIDAPIPermissionMsg$APIPermissionStruct");
 			put("org.zstack.sdk.iam2.api.Attribute", "org.zstack.iam2.api.Attribute");
 			put("org.zstack.sdk.iam2.api.Permission", "org.zstack.iam2.api.APIGetIAM2VirtualIDAPIPermissionReply$Permission");

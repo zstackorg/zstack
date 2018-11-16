@@ -379,6 +379,30 @@ public class KVMAgentCommands {
         }
     }
 
+    public static class PageTableExtensionCmd extends AgentCommand {
+        private Boolean disabled;
+
+        public Boolean getDisabled() {
+            return disabled;
+        }
+
+        public void setDisabled(Boolean disabled) {
+            this.disabled = disabled;
+        }
+    }
+
+    public static class PageTableExtensionResponse extends AgentResponse {
+        private Boolean disabled;
+
+        public Boolean getDisabled() {
+            return disabled;
+        }
+
+        public void setDisabled(Boolean disabled) {
+            this.disabled = disabled;
+        }
+    }
+
     public static class HostCapacityCmd extends AgentCommand {
     }
 

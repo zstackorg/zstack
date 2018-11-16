@@ -1,5 +1,7 @@
 package org.zstack.header.tag;
 
+import org.zstack.header.query.ExpandedQueries;
+import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
 
 import java.sql.Timestamp;
@@ -8,6 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Inventory(mappingVOClass = TagPatternVO.class)
+@ExpandedQueries({
+        @ExpandedQuery(expandedField = "tag", inventoryClass = UserTagInventory.class,
+                foreignKey = "uuid", expandedInventoryKey = "tagPatternUuid")
+})
 public class TagPatternInventory {
     private String uuid;
 

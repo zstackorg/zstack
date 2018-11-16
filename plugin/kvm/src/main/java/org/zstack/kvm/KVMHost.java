@@ -136,6 +136,7 @@ public class KVMHost extends HostBase implements Host {
     private String deleteConsoleFirewall;
     private String updateHostOSPath;
     private String updateDependencyPath;
+    private String setPageTableExtension;
 
     private String agentPackageName = KVMGlobalProperty.AGENT_PACKAGE_NAME;
 
@@ -216,6 +217,10 @@ public class KVMHost extends HostBase implements Host {
         ub = UriComponentsBuilder.fromHttpUrl(baseUrl);
         ub.path(KVMConstant.KVM_HOST_FACT_PATH);
         hostFactPath = ub.build().toString();
+
+        ub = UriComponentsBuilder.fromHttpUrl(baseUrl);
+        ub.path(KVMConstant.KVM_SET_PAGE_TABLE_EXTENSION);
+        setPageTableExtension = ub.build().toString();
 
         ub = UriComponentsBuilder.fromHttpUrl(baseUrl);
         ub.path(KVMConstant.KVM_ATTACH_ISO_PATH);
@@ -3100,6 +3105,32 @@ public class KVMHost extends HostBase implements Host {
                                 }
 
                                 trigger.next();
+                            }
+                        });
+
+                        flow(new NoRollbackFlow() {
+                            String __name__ = "set-page-table-extension";
+
+                            @Override
+                            public void run(FlowTrigger trigger, Map data) {
+                                PageTableExtensionCmd cmd = new PageTableExtensionCmd();
+                                cmd.setDisabled(HostSystemTags.PAGE_TABLE_EXTENSION_DISABLED.hasTag(self.getUuid(), HostVO.class));
+                                new Http<>(setPageTableExtension, cmd, PageTableExtensionResponse.class)
+                                        .call(new ReturnValueCompletion<PageTableExtensionResponse>(trigger) {
+                                            @Override
+                                            public void success(PageTableExtensionResponse resp) {
+                                                if (resp.isSuccess()) {
+                                                    trigger.next();
+                                                } else {
+                                                    trigger.fail(Platform.operr(resp.getError()));
+                                                }
+                                            }
+
+                                            @Override
+                                            public void fail(ErrorCode errorCode) {
+                                                trigger.fail(errorCode);
+                                            }
+                                        });
                             }
                         });
                     }

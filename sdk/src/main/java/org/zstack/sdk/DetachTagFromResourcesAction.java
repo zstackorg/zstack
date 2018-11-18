@@ -32,9 +32,6 @@ public class DetachTagFromResourcesAction extends AbstractAction {
     public java.util.List resourceUuids;
 
     @Param(required = false)
-    public java.lang.String deleteMode = "Permissive";
-
-    @Param(required = false)
     public java.util.List systemTags;
 
     @Param(required = false)

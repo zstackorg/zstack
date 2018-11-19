@@ -1913,10 +1913,13 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
     @Override
     public SessionInventory doAuth(RestAuthenticationParams params) throws RestException {
         SessionVO vo = Q.New(SessionVO.class).eq(SessionVO_.uuid, params.authKey).find();
-        if (vo == null) {
-            throw  new RestException(HttpStatus.FORBIDDEN.value(), "wrong OAUTH token");
+        if (vo != null) {
+            return SessionInventory.valueOf(vo);
         }
 
-        return SessionInventory.valueOf(vo);
+        /* invalid session error should be raised in ApiMessageProcessorImpl */
+        SessionInventory session = new SessionInventory();
+        session.setUuid(params.authKey);
+        return session;
     }
 }

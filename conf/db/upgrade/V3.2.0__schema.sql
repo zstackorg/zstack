@@ -35,12 +35,15 @@ CREATE PROCEDURE migrateUserTagVO()
             SET patternUuid = (REPLACE(UUID(), '-', ''));
             SET colorId = FLOOR(RAND() * 8);
             SET color = (SELECT CASE colorId
-                WHEN 0 THEN '#FFB6C1'
-                WHEN 1 THEN '#FFF0F5'
-                WHEN 2 THEN '#0000CD'
-                WHEN 3 THEN '#2E8B57'
-                WHEN 4 THEN '#FFF5EE'
-            ELSE '#FFFFFF' END);
+                WHEN 0 THEN '#318857'
+                WHEN 1 THEN '#918A12'
+                WHEN 2 THEN '#DF9900'
+                WHEN 3 THEN '#D14B52'
+                WHEN 4 THEN '#8A65D4'
+                WHEN 5 THEN '#7385A8'
+                WHEN 6 THEN '#186EAE'
+                WHEN 7 THEN '#2CA6E6'
+            ELSE '#2CA6E6' END);
 
             INSERT zstack.ResourceVO(uuid, resourceName, resourceType, concreteResourceType)
             VALUES (patternUuid, patternTag, 'TagPatternVO', 'org.zstack.header.tag.TagPatternVO');

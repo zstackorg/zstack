@@ -94,7 +94,7 @@ public class UpdateTagAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/tags/{uuid}";
+        info.path = "/tags/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "updateTag";

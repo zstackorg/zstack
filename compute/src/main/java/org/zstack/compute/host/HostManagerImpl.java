@@ -37,6 +37,8 @@ import org.zstack.header.storage.primary.PrimaryStorageCanonicalEvent;
 import org.zstack.header.storage.primary.PrimaryStorageHostRefVO;
 import org.zstack.header.storage.primary.PrimaryStorageHostRefVO_;
 import org.zstack.header.storage.primary.PrimaryStorageHostStatus;
+import org.zstack.header.tag.SystemTagInventory;
+import org.zstack.header.tag.SystemTagLifeCycleListener;
 import org.zstack.search.GetQuery;
 import org.zstack.search.SearchQuery;
 import org.zstack.tag.TagManager;
@@ -525,6 +527,35 @@ public class HostManagerImpl extends AbstractService implements HostManager, Man
         setupGlobalConfig();
         populateExtensions();
         setupCanonicalEvents();
+
+        HostSystemTags.PAGE_TABLE_EXTENSION_DISABLED.installLifeCycleListener(new SystemTagLifeCycleListener() {
+            private void doChangeHostPageTableExtension(String uuid, boolean disabled) {
+                SetHostPageTableExtensionMsg msg = new SetHostPageTableExtensionMsg();
+                msg.setDisabled(disabled);
+                msg.setUuid(uuid);
+                bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, msg.getHostUuid());
+                bus.send(msg, new CloudBusCallBack(msg) {
+                    @Override
+                    public void run(MessageReply reply) {
+                    }
+                });
+            }
+
+            @Override
+            public void tagCreated(SystemTagInventory tag) {
+                doChangeHostPageTableExtension(tag.getResourceUuid(), true);
+            }
+
+            @Override
+            public void tagDeleted(SystemTagInventory tag) {
+                doChangeHostPageTableExtension(tag.getResourceUuid(), false);
+            }
+
+            @Override
+            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            }
+        });
+
         return true;
     }
 
@@ -552,7 +583,7 @@ public class HostManagerImpl extends AbstractService implements HostManager, Man
     }
 
     @Transactional(readOnly = true)
-    private boolean noStorageAccessible(String hostUuid){
+    protected boolean noStorageAccessible(String hostUuid){
         // detach ps will delete PrimaryStorageClusterRefVO first.
         List<String> attachedPsUuids = SQL.New("select distinct ref.primaryStorageUuid" +
                 " from PrimaryStorageClusterRefVO ref, HostVO h" +

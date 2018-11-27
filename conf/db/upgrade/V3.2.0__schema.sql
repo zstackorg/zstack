@@ -58,3 +58,6 @@ CREATE TABLE IF NOT EXISTS `OssBucketDomainVO` (
 
 ALTER TABLE DataCenterVO ADD COLUMN `endpoint` VARCHAR(127) DEFAULT NULL;
 UPDATE GlobalConfigVO SET category='aliyunNas' WHERE category ='aliyunNasPrimaryStorage';
+
+ALTER TABLE `VolumeBackupVO` ADD COLUMN `mode` VARCHAR(32) DEFAULT 'incremental';
+

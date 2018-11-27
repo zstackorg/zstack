@@ -113,10 +113,4 @@
             <zstack:extension interface="org.zstack.kvm.KVMStartVmExtensionPoint" />
         </zstack:plugin>
     </bean>
-
-    <bean id="KVMHostPageTableExtension" class="org.zstack.kvm.KVMHostPageTableExtension">
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" />
-        </zstack:plugin>
-    </bean>
 </beans>

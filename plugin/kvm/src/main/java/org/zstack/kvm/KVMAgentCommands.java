@@ -172,6 +172,7 @@ public class KVMAgentCommands {
         private String hostUuid;
         private String sendCommandUrl;
         private List<String> iptablesRules;
+        private boolean pageTableExtensionDisabled;
 
         public List<String> getIptablesRules() {
             return iptablesRules;
@@ -196,11 +197,20 @@ public class KVMAgentCommands {
         public void setHostUuid(String hostUuid) {
             this.hostUuid = hostUuid;
         }
+
+        public boolean isPageTableExtensionDisabled() {
+            return pageTableExtensionDisabled;
+        }
+
+        public void setPageTableExtensionDisabled(boolean pageTableExtensionDisabled) {
+            this.pageTableExtensionDisabled = pageTableExtensionDisabled;
+        }
     }
 
     public static class ConnectResponse extends AgentResponse {
         private String libvirtVersion;
         private String qemuVersion;
+        private boolean iptablesSucc;
 
         public boolean isIptablesSucc() {
             return iptablesSucc;
@@ -209,8 +219,6 @@ public class KVMAgentCommands {
         public void setIptablesSucc(boolean iptablesSucc) {
             this.iptablesSucc = iptablesSucc;
         }
-
-        boolean iptablesSucc;
 
         public String getLibvirtVersion() {
             return libvirtVersion;
@@ -376,30 +384,6 @@ public class KVMAgentCommands {
 
         public String getSystemProductName() {
             return systemProductName;
-        }
-    }
-
-    public static class PageTableExtensionCmd extends AgentCommand {
-        private Boolean disabled;
-
-        public Boolean getDisabled() {
-            return disabled;
-        }
-
-        public void setDisabled(Boolean disabled) {
-            this.disabled = disabled;
-        }
-    }
-
-    public static class PageTableExtensionResponse extends AgentResponse {
-        private Boolean disabled;
-
-        public Boolean getDisabled() {
-            return disabled;
-        }
-
-        public void setDisabled(Boolean disabled) {
-            this.disabled = disabled;
         }
     }
 

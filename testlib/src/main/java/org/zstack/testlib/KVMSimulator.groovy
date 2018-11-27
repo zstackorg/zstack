@@ -237,9 +237,5 @@ class KVMSimulator implements Simulator {
         spec.simulator(KVMConstant.KVM_HOST_UPDATE_DEPENDENCY_PATH) {
             return new KVMAgentCommands.UpdateDependencyRsp()
         }
-
-        spec.simulator(KVMConstant.KVM_SET_PAGE_TABLE_EXTENSION) {
-            return new KVMAgentCommands.PageTableExtensionResponse()
-        }
     }
 }

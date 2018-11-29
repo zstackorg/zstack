@@ -44,7 +44,7 @@ public class CloudBusGson {
                     return false;
                 }
             }
-    }).create();
+    }).enableComplexMapKeySerialization().create();
 
     public static Message fromJson(String json) {
         return gson.fromJson(json, Message.class);

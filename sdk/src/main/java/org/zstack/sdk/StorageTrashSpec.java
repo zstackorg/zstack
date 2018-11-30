@@ -83,4 +83,5 @@ public class StorageTrashSpec  {
     public java.sql.Timestamp getCreateDate() {
         return this.createDate;
     }
+
 }

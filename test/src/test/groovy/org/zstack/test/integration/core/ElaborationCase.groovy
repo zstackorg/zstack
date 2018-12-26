@@ -110,22 +110,22 @@ class ElaborationCase extends SubCase {
         assert result.get(0).errorInfo == "test for missed error"
 
         result = getMissedElaboration {
-            from = "1999-01-01 10:00:00"
+            startTime = "1999-01-01 10:00:00"
         } as List<ElaborationInventory>
         assert result.size() > 0
 
         result = getMissedElaboration {
-            from = "1543593600000"   // 2018-12-01 00:00:00
+            startTime = "1543593600000"   // 2018-12-01 00:00:00
         } as List<ElaborationInventory>
         assert result.size() > 0
 
         result = getMissedElaboration {
-            from = "4099737600000"   // 2099-12-01 00:00:00
+            startTime = "4099737600000"   // 2099-12-01 00:00:00
         } as List<ElaborationInventory>
         assert result.size() == 0
 
         result = getMissedElaboration {
-            from = "2049-01-01 10:00:00"
+            startTime = "2049-01-01 10:00:00"
         } as List<ElaborationInventory>
         assert result.size() == 0
     }

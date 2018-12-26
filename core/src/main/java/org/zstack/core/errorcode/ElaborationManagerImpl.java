@@ -219,7 +219,7 @@ public class ElaborationManagerImpl extends AbstractService {
 
     private void handle(final APIGetMissedElaborationMsg msg) {
         APIGetMissedElaborationReply reply = new APIGetMissedElaborationReply();
-        List<ElaborationVO> vos = getMissedElatorations(msg.getRepeats(), msg.getFrom());
+        List<ElaborationVO> vos = getMissedElatorations(msg.getRepeats(), msg.getStartTime());
 
         vos.forEach(vo -> {
             ErrorCodeElaboration e = StringSimilarity.findSimilary(vo.getErrorInfo());

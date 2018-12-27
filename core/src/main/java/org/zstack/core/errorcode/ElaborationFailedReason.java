@@ -10,6 +10,7 @@ public enum ElaborationFailedReason {
     RegexAlreadyExisted("regex already existed in another json"),
     DuplicatedRegex("regex duplicate in at least 2 input files"),
     NotSameCategoriesInFile("not all categories are same in 1 input file"),
+    CategoryNotFound("can not found category for the segment"),
     MessageNotFound("can not found message_cn for the regex"),
     RegexNotFound("can not found regex for the segment"),
     InValidJsonSchema("invalid json schema"),

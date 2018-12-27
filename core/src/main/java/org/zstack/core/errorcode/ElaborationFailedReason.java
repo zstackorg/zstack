@@ -14,6 +14,7 @@ public enum ElaborationFailedReason {
     MessageNotFound("can not found message_cn for the regex"),
     RegexNotFound("can not found regex for the segment"),
     InValidJsonSchema("invalid json schema"),
+    InValidJsonArraySchema("must be json array, start with '['"),
     OtherReason("OtherReason");
 
     String type;

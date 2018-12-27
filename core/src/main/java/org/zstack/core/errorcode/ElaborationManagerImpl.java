@@ -87,7 +87,6 @@ public class ElaborationManagerImpl extends AbstractService {
             throw new RuntimeException("Unable to scan folder", e);
         }
 
-        logger.debug(files.toString());
         if (files.isEmpty()) {
             completion.fail(argerr("%s is not existed or is empty folder", filename));
             return;
@@ -171,7 +170,7 @@ public class ElaborationManagerImpl extends AbstractService {
                     for (ErrorCodeElaboration err: c) {
                         if (err.getRegex() == null || err.getRegex().isEmpty()) {
                             results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.RegexNotFound.toString()));
-                            return;
+                            continue;
                         }
 
                         if (err.getMessage_cn() == null || err.getMessage_cn().isEmpty()) {
@@ -197,20 +196,18 @@ public class ElaborationManagerImpl extends AbstractService {
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 Map<String, String> categories = new HashMap<>();
-                Set<String> files = new HashSet<>();
                 contents.forEach((f, c) -> {
                     for (ErrorCodeElaboration err: c) {
                         if (err.getCategory() == null || err.getCategory().isEmpty()) {
                             results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.CategoryNotFound.toString()));
-                            return;
+                            continue;
                         }
 
-                        if (categories.get(err.getCategory()) == null) {
+                        if (categories.get(f) == null) {
                             categories.put(f, err.getCategory());
                         } else {
-                            if (!files.contains(f) && !categories.get(f).equals(err.getCategory())) {
+                            if (!categories.get(f).equals(err.getCategory())) {
                                 results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.NotSameCategoriesInFile.toString()));
-                                files.add(f);
                             }
                         }
                     }

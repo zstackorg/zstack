@@ -90,6 +90,7 @@ class CheckElaborationCase extends SubCase {
 
         assert reasons.contains(ElaborationFailedReason.RegexNotFound.toString())
         assert reasons.contains(ElaborationFailedReason.CategoryNotFound.toString())
+        assert reasons.contains(ElaborationFailedReason.ErrorCodeAlreadyExisted.toString())
     }
 
     void check3() {
@@ -108,5 +109,6 @@ class CheckElaborationCase extends SubCase {
         assert reasons.contains(ElaborationFailedReason.InValidJsonSchema.toString())
         assert reasons.contains(ElaborationFailedReason.InValidJsonArraySchema.toString())
         assert reasons.contains(ElaborationFailedReason.FileNameWithoutJson.toString())
+        assert reasons.contains(ElaborationFailedReason.DuplicatedErrorCode.toString())
     }
 }

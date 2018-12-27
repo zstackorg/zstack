@@ -214,6 +214,31 @@ public class ElaborationManagerImpl extends AbstractService {
                 });
                 trigger.next();
             }
+        }).then(new NoRollbackFlow() {
+            String __name__ = "DuplicatedErrorCode and ErrorCodeAlreadyExisted";
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                HashSet<String> sets = new HashSet<>();
+                contents.forEach((f, c) -> {
+                    for (ErrorCodeElaboration err: c) {
+                        if (err.getCode() == null || err.getCode().isEmpty()) {
+                            continue;
+                        }
+
+                        if (!isClassPathFolder && StringSimilarity.errorCodeContained(err.getCode())) {
+                            results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.ErrorCodeAlreadyExisted.toString()));
+                        }
+
+                        if (sets.contains(err.getCode())) {
+                            results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.DuplicatedErrorCode.toString()));
+                        } else {
+                            sets.add(err.getCode());
+                        }
+                    }
+
+                });
+                trigger.next();
+            }
         }).done(new FlowDoneHandler(completion) {
             @Override
             public void handle(Map data) {
@@ -302,8 +327,7 @@ public class ElaborationManagerImpl extends AbstractService {
                         if (returnValue.isEmpty()) {
                             trigger.next();
                         } else {
-                            trigger.fail(operr("reason: %s, file: %s",
-                                    returnValue.get(0).getReason(), returnValue.get(0).getFileName()));
+                            trigger.fail(operr(returnValue.get(0).getReason()));
                         }
                     }
 
@@ -401,7 +425,7 @@ public class ElaborationManagerImpl extends AbstractService {
 
 
         if (msg.getCategory() == null && msg.getRegex() == null){
-            throw new OperationFailureException(Platform.argerr("regex or category must be set"));
+            throw new OperationFailureException(Platform.argerr("input args 'regex' or 'category' must be set"));
         }
 
         bus.reply(msg, reply);

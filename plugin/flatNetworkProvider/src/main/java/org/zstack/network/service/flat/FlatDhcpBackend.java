@@ -1524,20 +1524,22 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     public void afterAddIpRange(IpRangeInventory ipr, List<String> systemTags) {
         String dhcpTag = null;
         String dhcpServerIp = null;
-        for (String sysTag : systemTags) {
-            if (!FlatNetworkSystemTags.L3_NETWORK_DHCP_IP.isMatch(sysTag)) {
-                continue;
-            }
+        if (systemTags != null) {
+            for (String sysTag : systemTags) {
+                if (!FlatNetworkSystemTags.L3_NETWORK_DHCP_IP.isMatch(sysTag)) {
+                    continue;
+                }
 
-            Map<String, String> token = TagUtils.parse(FlatNetworkSystemTags.L3_NETWORK_DHCP_IP.getTagFormat(), sysTag);
-            dhcpServerIp = token.get(FlatNetworkSystemTags.L3_NETWORK_DHCP_IP_TOKEN);
-            if (dhcpServerIp == null) {
-                continue;
-            }
+                Map<String, String> token = TagUtils.parse(FlatNetworkSystemTags.L3_NETWORK_DHCP_IP.getTagFormat(), sysTag);
+                dhcpServerIp = token.get(FlatNetworkSystemTags.L3_NETWORK_DHCP_IP_TOKEN);
+                if (dhcpServerIp == null) {
+                    continue;
+                }
 
-            dhcpServerIp = IPv6NetworkUtils.ipv6TagValueToAddress(dhcpServerIp);
-            dhcpTag = sysTag;
-            break;
+                dhcpServerIp = IPv6NetworkUtils.ipv6TagValueToAddress(dhcpServerIp);
+                dhcpTag = sysTag;
+                break;
+            }
         }
 
         if (dhcpServerIp != null) {
@@ -1554,7 +1556,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             if (oldDhcpServerIp != null && NetworkUtils.isInRange(oldDhcpServerIp, ipr.getStartIp(), ipr.getEndIp())) {
                 /* case #2.3 */
                 deleteDhcpServerIp(ipr.getL3NetworkUuid(), oldDhcpServerIp);
-                allocateDhcpIp(ipr.getL3NetworkUuid(), false, oldDhcpServerIp);
+                allocateDhcpIp(ipr.getL3NetworkUuid(), true, oldDhcpServerIp);
             }
         }
     }

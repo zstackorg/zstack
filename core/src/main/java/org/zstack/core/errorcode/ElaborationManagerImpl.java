@@ -145,25 +145,28 @@ public class ElaborationManagerImpl extends AbstractService {
             public void run(FlowTrigger trigger, Map data) {
                 HashSet<String> sets = new HashSet<>();
                 contents.forEach((f, c) -> {
-                    ErrorCodeElaboration err = JSONObjectUtil.toObject(c, ErrorCodeElaboration.class);
-                    if (err.getRegex() == null || err.getRegex().isEmpty()) {
-                        results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.RegexNotFound.toString()));
-                        return;
+                    List<ErrorCodeElaboration> errs = JSONObjectUtil.toCollection(c, ArrayList.class, ErrorCodeElaboration.class);
+                    for (ErrorCodeElaboration err: errs) {
+                        if (err.getRegex() == null || err.getRegex().isEmpty()) {
+                            results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.RegexNotFound.toString()));
+                            return;
+                        }
+
+                        if (err.getMessage_cn() == null || err.getMessage_cn().isEmpty()) {
+                            results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.MessageNotFound.toString()));
+                        }
+
+                        if (!isClassPathFolder && StringSimilarity.regexContained(err.getRegex())) {
+                            results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.RegexAlreadyExisted.toString()));
+                        }
+
+                        if (sets.contains(err.getRegex())) {
+                            results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.DuplicatedRegex.toString()));
+                        } else {
+                            sets.add(err.getRegex());
+                        }
                     }
 
-                    if (err.getMessage_cn() == null || err.getMessage_cn().isEmpty()) {
-                        results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.MessageNotFound.toString()));
-                    }
-
-                    if (!isClassPathFolder && StringSimilarity.regexContained(err.getRegex())) {
-                        results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.RegexAlreadyExisted.toString()));
-                    }
-
-                    if (sets.contains(err.getRegex())) {
-                        results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.DuplicatedRegex.toString()));
-                    } else {
-                        sets.add(err.getRegex());
-                    }
                 });
                 trigger.next();
             }
@@ -174,18 +177,20 @@ public class ElaborationManagerImpl extends AbstractService {
                 Map<String, String> categories = new HashMap<>();
                 Set<String> files = new HashSet<>();
                 contents.forEach((f, c) -> {
-                    ErrorCodeElaboration err = JSONObjectUtil.toObject(c, ErrorCodeElaboration.class);
-                    if (err.getCategory() == null || err.getCategory().isEmpty()) {
-                        results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.CategoryNotFound.toString()));
-                        return;
-                    }
+                    List<ErrorCodeElaboration> errs = JSONObjectUtil.toCollection(c, ArrayList.class, ErrorCodeElaboration.class);
+                    for (ErrorCodeElaboration err: errs) {
+                        if (err.getCategory() == null || err.getCategory().isEmpty()) {
+                            results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.CategoryNotFound.toString()));
+                            return;
+                        }
 
-                    if (categories.get(err.getCategory()) == null) {
-                        categories.put(f, err.getCategory());
-                    } else {
-                        if (!files.contains(f) && !categories.get(f).equals(err.getCategory())) {
-                            results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.NotSameCategoriesInFile.toString()));
-                            files.add(f);
+                        if (categories.get(err.getCategory()) == null) {
+                            categories.put(f, err.getCategory());
+                        } else {
+                            if (!files.contains(f) && !categories.get(f).equals(err.getCategory())) {
+                                results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.NotSameCategoriesInFile.toString()));
+                                files.add(f);
+                            }
                         }
                     }
                 });
@@ -231,10 +236,14 @@ public class ElaborationManagerImpl extends AbstractService {
                 return Q.New(ElaborationVO.class).eq(ElaborationVO_.matched, false).gte(ElaborationVO_.repeats, times).
                         gte(ElaborationVO_.lastOpDate, new Timestamp(start)).list();
             } else if (NumberUtils.isNumber(from)) {
-                return Q.New(ElaborationVO.class).eq(ElaborationVO_.matched, false).gte(ElaborationVO_.repeats, times).
-                        gte(ElaborationVO_.lastOpDate, new Timestamp(Long.valueOf(from))).list();
+                try {
+                    return Q.New(ElaborationVO.class).eq(ElaborationVO_.matched, false).gte(ElaborationVO_.repeats, times).
+                            gte(ElaborationVO_.lastOpDate, new Timestamp(Long.valueOf(from))).list();
+                } catch (NumberFormatException e) {
+                    throw new OperationFailureException(argerr("%s is not a Long value Number", from));
+                }
             } else {
-                throw new OperationFailureException(argerr("arg 'from' should format like 'yyyy-MM-dd HH:mm:ss' or '1545380003000'"));
+                throw new OperationFailureException(argerr("arg 'startTime' should format like 'yyyy-MM-dd HH:mm:ss' or '1545380003000'"));
             }
         }
     }

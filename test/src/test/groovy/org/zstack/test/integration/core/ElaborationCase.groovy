@@ -128,6 +128,16 @@ class ElaborationCase extends SubCase {
             startTime = "2049-01-01 10:00:00"
         } as List<ElaborationInventory>
         assert result.size() == 0
+
+        getMissedElaboration {
+            startTime = "2019-01-01 300:00:00"
+        }
+
+        expect(AssertionError.class) {
+            getMissedElaboration {
+                startTime = "123456122222222222222222222"
+            }
+        }
     }
 
     void testRefreshElaboration() {

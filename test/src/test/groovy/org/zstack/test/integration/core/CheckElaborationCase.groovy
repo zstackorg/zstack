@@ -1,6 +1,8 @@
 package org.zstack.test.integration.core
 
 import org.zstack.core.Platform
+import org.zstack.core.errorcode.ElaborationFailedReason
+import org.zstack.sdk.CheckElaborationContentAction
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.path.PathUtil
@@ -39,6 +41,7 @@ class CheckElaborationCase extends SubCase {
     void testCheckElaboration() {
         checkNonExisted()
         checkFolder("elaborations")
+        check1()
     }
 
     void checkNonExisted() {
@@ -54,5 +57,20 @@ class CheckElaborationCase extends SubCase {
         checkElaborationContent {
             elaborateFile = path
         }
+    }
+
+    void check1() {
+        def action = new CheckElaborationContentAction()
+        action.sessionId = adminSession()
+        action.elaborateFile = getFilePath("elaborations/host/host.json")
+
+        def result = action.call()
+
+        assert result.error == null
+        def reasons = new ArrayList()
+        reasons.addAll(result.value.results.collect{it.reason})
+
+        assert reasons.contains(ElaborationFailedReason.RegexAlreadyExisted.toString())
+        assert reasons.contains(ElaborationFailedReason.NotSameCategoriesInFile.toString())
     }
 }

@@ -78,7 +78,11 @@ public class ElaborationManagerImpl extends AbstractService {
 
         try {
             File folder = new File(filename);
-            PathUtil.scanFolder(files, folder.getAbsolutePath());
+            if (folder.isFile()) {
+                files.add(folder.getAbsolutePath());
+            } else {
+                PathUtil.scanFolder(files, folder.getAbsolutePath());
+            }
         } catch (Exception e) {
             throw new RuntimeException("Unable to scan folder", e);
         }
@@ -111,6 +115,24 @@ public class ElaborationManagerImpl extends AbstractService {
                 trigger.next();
             }
         }).then(new NoRollbackFlow() {
+            String __name__ = "FileNameAlreadyExisted and DuplicatedFileName";
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                HashSet<String> sets = new HashSet<>();
+                for (String file: files) {
+                    String name = PathUtil.fileName(file);
+                    if (!isClassPathFolder && errTemplates.contains(name)) {
+                        results.add(new ElaborationCheckResult(file, null, ElaborationFailedReason.FileNameAlreadyExisted.toString()));
+                    }
+                    if (sets.contains(name)) {
+                        results.add(new ElaborationCheckResult(file, null, ElaborationFailedReason.DuplicatedFileName.toString()));
+                    } else {
+                        sets.add(name);
+                    }
+                }
+                trigger.next();
+            }
+        }).then(new NoRollbackFlow() {
             String __name__ = "InValidJsonArraySchema";
             @Override
             public void run(FlowTrigger trigger, Map data) {
@@ -136,24 +158,6 @@ public class ElaborationManagerImpl extends AbstractService {
                         logger.debug(e.getMessage());
                         results.add(new ElaborationCheckResult(file, null, ElaborationFailedReason.InValidJsonArraySchema.toString()));
                         files.remove(file);
-                    }
-                }
-                trigger.next();
-            }
-        }).then(new NoRollbackFlow() {
-            String __name__ = "FileNameAlreadyExisted and DuplicatedFileName";
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
-                HashSet<String> sets = new HashSet<>();
-                for (String file: files) {
-                    String name = PathUtil.fileName(file);
-                    if (!isClassPathFolder && errTemplates.contains(name)) {
-                        results.add(new ElaborationCheckResult(file, null, ElaborationFailedReason.FileNameAlreadyExisted.toString()));
-                    }
-                    if (sets.contains(name)) {
-                        results.add(new ElaborationCheckResult(file, null, ElaborationFailedReason.DuplicatedFileName.toString()));
-                    } else {
-                        sets.add(name);
                     }
                 }
                 trigger.next();

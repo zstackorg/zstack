@@ -7,7 +7,7 @@ public enum ElaborationFailedReason {
     FileNameWithoutJson("file name must endWith '.json'"),
     FileNameAlreadyExisted("elaborate file name already existed in zstack"),
     DuplicatedFileName("input filename duplicated"),
-    RegexAlreadyExisted("regex already existed in another json"),
+    RegexAlreadyExisted("regex already existed in zstack"),
     DuplicatedRegex("regex duplicate in at least 2 input files"),
     NotSameCategoriesInFile("not all categories are same in 1 input file"),
     CategoryNotFound("can not found category for the segment"),
@@ -15,6 +15,8 @@ public enum ElaborationFailedReason {
     RegexNotFound("can not found regex for the segment"),
     InValidJsonSchema("invalid json schema"),
     InValidJsonArraySchema("must be json array, start with '['"),
+    DuplicatedErrorCode("error code duplicate in at least 2 input files"),
+    ErrorCodeAlreadyExisted("error code already existed in zstack"),
     OtherReason("OtherReason");
 
     String type;

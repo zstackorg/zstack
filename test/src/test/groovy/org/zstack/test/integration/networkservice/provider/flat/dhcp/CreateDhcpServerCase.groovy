@@ -1,5 +1,8 @@
 package org.zstack.test.integration.networkservice.provider.flat.dhcp
 
+import org.zstack.core.db.Q
+import org.zstack.header.network.l3.UsedIpVO
+import org.zstack.header.network.l3.UsedIpVO_
 import org.zstack.header.network.service.NetworkServiceType
 import org.zstack.network.securitygroup.SecurityGroupConstant
 import org.zstack.network.service.flat.FlatNetworkServiceConstant
@@ -128,6 +131,7 @@ class CreateDhcpServerCase extends SubCase {
         InstanceOfferingInventory offering = env.inventoryByName("instanceOffering")
         ImageInventory image = env.inventoryByName("image1")
 
+        String dhcpIp = "192.168.0.105"
         expect (AssertionError.class) {
             addIpRange {
                 l3NetworkUuid = l3.uuid
@@ -147,7 +151,7 @@ class CreateDhcpServerCase extends SubCase {
             endIp = "192.168.0.30"
             netmask = "255.255.255.0"
             gateway = "192.168.0.1"
-            systemTags = [String.format("flatNetwork::DhcpServer::%s::ipUuid::null", "192.168.0.2")]
+            systemTags = [String.format("flatNetwork::DhcpServer::%s::ipUuid::null", dhcpIp)]
         }
 
         expect (AssertionError.class) {
@@ -173,6 +177,8 @@ class CreateDhcpServerCase extends SubCase {
                 systemTags = [String.format("flatNetwork::DhcpServer::%s::ipUuid::null", "192.168.1.110")]
             }
         }
+        String dhcpServerIp = L3_NETWORK_DHCP_IP.getTokenByResourceUuid(ipr1.getL3NetworkUuid(), L3_NETWORK_DHCP_IP_TOKEN)
+        assert dhcpServerIp == dhcpIp
 
         IpRangeInventory ipr2 = addIpRange {
             l3NetworkUuid = l3.uuid
@@ -182,6 +188,7 @@ class CreateDhcpServerCase extends SubCase {
             netmask = "255.255.255.0"
             gateway = "192.168.0.1"
         }
+        assert Q.New(UsedIpVO.class).eq(UsedIpVO_.ip, dhcpIp).count() == 1
 
         IpRangeInventory ipr3 = addIpRange {
             l3NetworkUuid = l3.uuid
@@ -196,8 +203,8 @@ class CreateDhcpServerCase extends SubCase {
             uuid = ipr1.uuid
         }
 
-        String dhcpServerIp = L3_NETWORK_DHCP_IP.getTokenByResourceUuid(ipr1.getL3NetworkUuid(), L3_NETWORK_DHCP_IP_TOKEN)
-        assert dhcpServerIp == "192.168.0.2"
+        dhcpServerIp = L3_NETWORK_DHCP_IP.getTokenByResourceUuid(ipr1.getL3NetworkUuid(), L3_NETWORK_DHCP_IP_TOKEN)
+        assert dhcpServerIp == dhcpIp
 
         expect (AssertionError.class) {
             addIpRange {

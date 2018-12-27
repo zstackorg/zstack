@@ -42,6 +42,8 @@ class CheckElaborationCase extends SubCase {
         checkNonExisted()
         checkFolder("elaborations")
         check1()
+        check2()
+        check3()
     }
 
     void checkNonExisted() {
@@ -71,6 +73,40 @@ class CheckElaborationCase extends SubCase {
         reasons.addAll(result.value.results.collect{it.reason})
 
         assert reasons.contains(ElaborationFailedReason.RegexAlreadyExisted.toString())
+        assert reasons.contains(ElaborationFailedReason.MessageNotFound.toString())
         assert reasons.contains(ElaborationFailedReason.NotSameCategoriesInFile.toString())
+    }
+
+    void check2() {
+        def action = new CheckElaborationContentAction()
+        action.sessionId = adminSession()
+        action.elaborateFile = getFilePath("elaborations/vm/vm.json")
+
+        def result = action.call()
+
+        assert result.error == null
+        def reasons = new ArrayList()
+        reasons.addAll(result.value.results.collect{it.reason})
+
+        assert reasons.contains(ElaborationFailedReason.RegexNotFound.toString())
+        assert reasons.contains(ElaborationFailedReason.CategoryNotFound.toString())
+    }
+
+    void check3() {
+        def action = new CheckElaborationContentAction()
+        action.sessionId = adminSession()
+        action.elaborateFile = getFilePath("elaborations/host")
+
+        def result = action.call()
+
+        assert result.error == null
+        def reasons = new ArrayList()
+        reasons.addAll(result.value.results.collect{it.reason})
+
+        assert reasons.contains(ElaborationFailedReason.DuplicatedFileName.toString())
+        assert reasons.contains(ElaborationFailedReason.DuplicatedRegex.toString())
+        assert reasons.contains(ElaborationFailedReason.InValidJsonSchema.toString())
+        assert reasons.contains(ElaborationFailedReason.InValidJsonArraySchema.toString())
+        assert reasons.contains(ElaborationFailedReason.FileNameWithoutJson.toString())
     }
 }

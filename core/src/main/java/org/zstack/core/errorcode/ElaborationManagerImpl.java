@@ -4,6 +4,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
@@ -23,6 +24,7 @@ import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.*;
 import org.zstack.header.message.Message;
+import org.zstack.utils.CollectionDSL;
 import org.zstack.utils.TimeUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -72,13 +74,19 @@ public class ElaborationManagerImpl extends AbstractService {
     private void preCheckElaborationContent(String filename, ReturnValueCompletion<List<ElaborationCheckResult>> completion) {
         List<ElaborationCheckResult> results = new ArrayList<>();
         List<String> files = new ArrayList<>();
-        Map<String, String> contents = new HashMap<>();
+        Map<String, List<ErrorCodeElaboration>> contents = new HashMap<>();
 
         try {
             File folder = new File(filename);
             PathUtil.scanFolder(files, folder.getAbsolutePath());
         } catch (Exception e) {
             throw new RuntimeException("Unable to scan folder", e);
+        }
+
+        logger.debug(files.toString());
+        if (files.isEmpty()) {
+            completion.fail(argerr("%s is not existed or is empty folder", filename));
+            return;
         }
 
         final boolean isClassPathFolder = (StringSimilarity.classPathFolder != null && StringSimilarity.classPathFolder.getAbsolutePath().equals(filename));
@@ -103,6 +111,36 @@ public class ElaborationManagerImpl extends AbstractService {
                 trigger.next();
             }
         }).then(new NoRollbackFlow() {
+            String __name__ = "InValidJsonArraySchema";
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                List<String> checks = CollectionDSL.list();
+                checks.addAll(files);
+                for (String file: checks) {
+                    File templateFile = new File(file);
+                    try {
+                        String content = FileUtils.readFileToString(templateFile);
+                        new JsonParser().parse(content);
+                        List<ErrorCodeElaboration> errs = JSONObjectUtil.toCollection(content, ArrayList.class, ErrorCodeElaboration.class);
+                        contents.put(file, errs);
+                    } catch (IOException e) {
+                        trigger.fail(Platform.operr(String.format("read error elaboration template files [%s] failed, due to: %s", templateFile, e.getMessage())));
+                        return;
+                    } catch (JsonSyntaxException e) {
+                        results.add(new ElaborationCheckResult(file, null, ElaborationFailedReason.InValidJsonSchema.toString()));
+                        files.remove(file);
+                    } catch (JSONException e) {
+                        results.add(new ElaborationCheckResult(file, null, ElaborationFailedReason.InValidJsonArraySchema.toString()));
+                        files.remove(file);
+                    } catch (Exception e) {
+                        logger.debug(e.getMessage());
+                        results.add(new ElaborationCheckResult(file, null, ElaborationFailedReason.InValidJsonArraySchema.toString()));
+                        files.remove(file);
+                    }
+                }
+                trigger.next();
+            }
+        }).then(new NoRollbackFlow() {
             String __name__ = "FileNameAlreadyExisted and DuplicatedFileName";
             @Override
             public void run(FlowTrigger trigger, Map data) {
@@ -121,32 +159,12 @@ public class ElaborationManagerImpl extends AbstractService {
                 trigger.next();
             }
         }).then(new NoRollbackFlow() {
-            String __name__ = "InValidJsonSchema";
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
-                for (String file: files) {
-                    File templateFile = new File(file);
-                    try {
-                        String content = FileUtils.readFileToString(templateFile);
-                        new JsonParser().parse(content);
-                        contents.put(file, content);
-                    } catch (IOException e) {
-                        trigger.fail(Platform.operr(String.format("read error elaboration template files failed, due to: %s", e.getMessage())));
-                        return;
-                    } catch (JsonSyntaxException e) {
-                        results.add(new ElaborationCheckResult(file, null, ElaborationFailedReason.InValidJsonSchema.toString()));
-                    }
-                }
-                trigger.next();
-            }
-        }).then(new NoRollbackFlow() {
             String __name__ = "RegexAlreadyExisted, DuplicatedRegex, MessageNotFound and RegexNotFound";
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 HashSet<String> sets = new HashSet<>();
                 contents.forEach((f, c) -> {
-                    List<ErrorCodeElaboration> errs = JSONObjectUtil.toCollection(c, ArrayList.class, ErrorCodeElaboration.class);
-                    for (ErrorCodeElaboration err: errs) {
+                    for (ErrorCodeElaboration err: c) {
                         if (err.getRegex() == null || err.getRegex().isEmpty()) {
                             results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.RegexNotFound.toString()));
                             return;
@@ -177,8 +195,7 @@ public class ElaborationManagerImpl extends AbstractService {
                 Map<String, String> categories = new HashMap<>();
                 Set<String> files = new HashSet<>();
                 contents.forEach((f, c) -> {
-                    List<ErrorCodeElaboration> errs = JSONObjectUtil.toCollection(c, ArrayList.class, ErrorCodeElaboration.class);
-                    for (ErrorCodeElaboration err: errs) {
+                    for (ErrorCodeElaboration err: c) {
                         if (err.getCategory() == null || err.getCategory().isEmpty()) {
                             results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.CategoryNotFound.toString()));
                             return;
@@ -214,6 +231,7 @@ public class ElaborationManagerImpl extends AbstractService {
         preCheckElaborationContent(msg.getElaborateFile(), new ReturnValueCompletion<List<ElaborationCheckResult>>(msg) {
             @Override
             public void success(List<ElaborationCheckResult> returnValue) {
+                returnValue.sort(Comparator.comparing(ElaborationCheckResult::getReason));
                 reply.setResults(returnValue);
                 bus.reply(msg, reply);
             }

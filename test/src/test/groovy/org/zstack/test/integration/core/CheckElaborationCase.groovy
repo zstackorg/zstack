@@ -1,8 +1,9 @@
 package org.zstack.test.integration.core
 
+import org.zstack.core.Platform
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
-
+import org.zstack.utils.path.PathUtil
 /**
  * Created by mingjian.deng on 2018/12/26.*/
 class CheckElaborationCase extends SubCase {
@@ -30,7 +31,28 @@ class CheckElaborationCase extends SubCase {
         }
     }
 
-    void testCheckElaboration() {
+    String getFilePath(String file) {
+        File absPath = PathUtil.findFileOnClassPath(file)
+        return absPath.toPath().toString()
+    }
 
+    void testCheckElaboration() {
+        checkNonExisted()
+        checkFolder("elaborations")
+    }
+
+    void checkNonExisted() {
+        expect(AssertionError.class) {
+            checkElaborationContent {
+                elaborateFile = "/tmp-${Platform.uuid}"
+            }
+        }
+    }
+
+    void checkFolder(String folder) {
+        String path = getFilePath(folder)
+        checkElaborationContent {
+            elaborateFile = path
+        }
     }
 }

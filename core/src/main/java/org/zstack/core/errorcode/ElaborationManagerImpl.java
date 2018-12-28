@@ -221,18 +221,19 @@ public class ElaborationManagerImpl extends AbstractService {
                 HashSet<String> sets = new HashSet<>();
                 contents.forEach((f, c) -> {
                     for (ErrorCodeElaboration err: c) {
-                        if (err.getCode() == null || err.getCode().isEmpty()) {
+                        if (err.getCode() == null || err.getCode().isEmpty() || err.getCategory() == null || err.getCategory().isEmpty()) {
                             continue;
                         }
+                        String code = err.getCategory() + "." + err.getCode();
 
-                        if (!isClassPathFolder && StringSimilarity.errorCodeContained(err.getCode())) {
+                        if (!isClassPathFolder && StringSimilarity.errorCodeContained(code)) {
                             results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.ErrorCodeAlreadyExisted.toString()));
                         }
 
-                        if (sets.contains(err.getCode())) {
+                        if (sets.contains(code)) {
                             results.add(new ElaborationCheckResult(f, err.getRegex(), ElaborationFailedReason.DuplicatedErrorCode.toString()));
                         } else {
-                            sets.add(err.getCode());
+                            sets.add(code);
                         }
                     }
 

@@ -5,6 +5,7 @@ import org.zstack.core.db.Q
 import org.zstack.header.errorcode.ElaborationVO
 import org.zstack.header.errorcode.ElaborationVO_
 import org.zstack.header.errorcode.ErrorCode
+import org.zstack.header.identity.IdentityErrors
 import org.zstack.sdk.ElaborationInventory
 import org.zstack.sdk.GetElaborationCategoriesResult
 import org.zstack.sdk.GetElaborationsResult
@@ -72,6 +73,11 @@ class ElaborationCase extends SubCase {
         err = Platform.operr("shell command[sudo PYTHONPATH=/usr/local/zstack/ansible/files/zstacklib timeout 1800 python /usr/local/zstack/ansible/kvm.py -i /usr/local/zstack/ansible/hosts --private-key /usr/local/zstack/apache-tomcat-7.0.35/webapps/zstack/WEB-INF/classes/ansible/rsaKeys/id_rsa -e '{\"chrony_servers\":\"\",\"trusted_host\":\"\",\"remote_port\":\"22\",\"update_packages\":\"false\",\"zstack_root\":\"/var/lib/zstack\",\"remote_user\":\"root\",\"hostname\":\"10-0-121-175.zstack.org\",\"pkg_kvmagent\":\"kvmagent-3.2.0.tar.gz\",\"post_url\":\"http://172.20.11.235:8080/zstack/kvm/ansiblelog/%s\\n\",\"remote_pass\":\"******\",\"host\":\"172.20.11.235\",\"pip_url\":\"http://172.20.11.235:8080/zstack/static/pypi/simple\",\"zstack_repo\":\"\\\"zstack-mn,qemu-kvm-ev-mn\\\"\",\"yum_server\":\"172.20.11.235:8080\",\"pkg_zstacklib\":\"zstacklib-3.2.0.tar.gz\"}'] failed\n ret code: 1", Platform.uuid)
         assert err.elaboration != null
         assert err.elaboration.contains("pip安装失败")
+
+        err = Platform.err(IdentityErrors.INVALID_SESSION, "xxxxxxxxx") as ErrorCode
+        assert err.elaboration != null
+        missed = Q.New(ElaborationVO.class).eq(ElaborationVO_.errorInfo, "xxxxxxxxx").find() as ElaborationVO
+        assert missed == null
     }
 
     void testGetElaborationCategory() {

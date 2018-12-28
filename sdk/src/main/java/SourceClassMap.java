@@ -86,6 +86,7 @@ public class SourceClassMap {
 			put("org.zstack.header.baremetal.chassis.BaremetalHardwareInfoInventory", "org.zstack.sdk.BaremetalHardwareInfoInventory");
 			put("org.zstack.header.baremetal.instance.BaremetalInstanceInventory", "org.zstack.sdk.BaremetalInstanceInventory");
 			put("org.zstack.header.baremetal.instance.BaremetalNicInventory", "org.zstack.sdk.BaremetalNicInventory");
+			put("org.zstack.header.baremetal.preconfiguration.PreconfigurationTemplateInventory", "org.zstack.sdk.PreconfigurationTemplateInventory");
 			put("org.zstack.header.baremetal.pxeserver.BaremetalPxeServerInventory", "org.zstack.sdk.BaremetalPxeServerInventory");
 			put("org.zstack.header.cloudformation.CloudFormationStackEventInventory", "org.zstack.sdk.CloudFormationStackEventInventory");
 			put("org.zstack.header.cloudformation.PreviewResourceStruct", "org.zstack.sdk.PreviewResourceStruct");
@@ -531,6 +532,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.PolicyStatement", "org.zstack.header.identity.PolicyStatement");
 			put("org.zstack.sdk.PolicyStatementEffect", "org.zstack.header.identity.StatementEffect");
 			put("org.zstack.sdk.PortForwardingRuleInventory", "org.zstack.network.service.portforwarding.PortForwardingRuleInventory");
+			put("org.zstack.sdk.PreconfigurationTemplateInventory", "org.zstack.header.baremetal.preconfiguration.PreconfigurationTemplateInventory");
 			put("org.zstack.sdk.PreviewResourceStruct", "org.zstack.header.cloudformation.PreviewResourceStruct");
 			put("org.zstack.sdk.PriceInventory", "org.zstack.billing.PriceInventory");
 			put("org.zstack.sdk.PricePciDeviceOfferingRefInventory", "org.zstack.billing.PricePciDeviceOfferingRefInventory");

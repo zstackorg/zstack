@@ -928,6 +928,7 @@ public class KVMAgentCommands {
         private String bootMode;
         private boolean fromForeignHypervisor;
         private String machineType;
+        private Integer pciePortNums;
 
         public boolean isFromForeignHypervisor() {
             return fromForeignHypervisor;
@@ -943,6 +944,14 @@ public class KVMAgentCommands {
 
         public void setMachineType(String machineType) {
             this.machineType = machineType;
+        }
+
+        public void setPciePortNums(Integer pciePortNums) {
+            this.pciePortNums = pciePortNums;
+        }
+
+        public Integer getPciePortNums() {
+            return pciePortNums;
         }
 
         public boolean isAdditionalQmp() {

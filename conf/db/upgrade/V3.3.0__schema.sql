@@ -33,5 +33,30 @@ CREATE TABLE `CustomPreconfigurationVO` (
     PRIMARY KEY (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- we don't know mac address of the bm vlan nic
+ALTER TABLE `BaremetalNicVO` DROP INDEX `mac`;
+ALTER TABLE `BaremetalNicVO` MODIFY `mac` varchar(17) DEFAULT NULL;
+ALTER TABLE `BaremetalNicVO` ADD COLUMN `baremetalBondingUuid` varchar(32) DEFAULT NULL;
+ALTER TABLE `BaremetalNicVO` ADD CONSTRAINT `ukBaremetalNicVO` UNIQUE (`mac`,`baremetalBondingUuid`);
+
+CREATE TABLE  `BaremetalVlanNicVO` (
+    `uuid` varchar(32) NOT NULL UNIQUE,
+    `vlan` int unsigned NOT NULL,
+    PRIMARY KEY  (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ALTER TABLE BaremetalVlanNicVO ADD CONSTRAINT fkBaremetalVlanNicVOBaremetalNicVO FOREIGN KEY (uuid) REFERENCES BaremetalNicVO (uuid) ON UPDATE RESTRICT ON DELETE CASCADE;
+
+CREATE TABLE `BaremetalBondingVO` (
+    `uuid` VARCHAR(32) NOT NULL UNIQUE,
+    `chassisUuid` VARCHAR(32) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `mode` TINYINT UNSIGNED NOT NULL,
+    `slaves` VARCHAR(2048) NOT NULL,
+    `opts` VARCHAR(1024) DEFAULT NULL,
+    `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+    PRIMARY KEY (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 ALTER TABLE `BaremetalInstanceVO` ADD COLUMN `templateUuid` varchar(32) DEFAULT NULL;
 ALTER TABLE `BaremetalInstanceVO` ADD CONSTRAINT `fkBaremetalInstanceVOPreconfigurationTemplateVO` FOREIGN KEY (`templateUuid`) REFERENCES `PreconfigurationTemplateVO` (`uuid`) ON DELETE SET NULL;

@@ -92,4 +92,12 @@ public class PreconfigurationTemplateInventory  {
         return this.lastOpDate;
     }
 
+    public java.util.Set customParams;
+    public void setCustomParams(java.util.Set customParams) {
+        this.customParams = customParams;
+    }
+    public java.util.Set getCustomParams() {
+        return this.customParams;
+    }
+
 }

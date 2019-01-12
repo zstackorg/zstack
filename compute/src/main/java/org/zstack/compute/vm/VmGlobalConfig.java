@@ -36,4 +36,6 @@ public class VmGlobalConfig {
     public static GlobalConfig EMULATE_HYPERV = new GlobalConfig(CATEGORY, "emulateHyperV");
     @GlobalConfigValidation(validValues = {"true", "false"})
     public static GlobalConfig ADDITIONAL_QMP = new GlobalConfig(CATEGORY, "additionalQmp");
+    @GlobalConfigValidation(inNumberRange = {0, 28})
+    public static GlobalConfig PCIE_PORT_NUMS = new GlobalConfig(CATEGORY, "pciePortNums");
 }

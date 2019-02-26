@@ -316,6 +316,11 @@ public class FusionstorPrimaryStorageFactory implements PrimaryStorageFactory, F
     }
 
     @Override
+    public VolumeTO convertVolumeIfNeed(KVMHostInventory host, VolumeInventory inventory, VolumeTO to) {
+        return convertVolumeToFusionstorIfNeeded(inventory, to);
+    }
+
+    @Override
     public void beforeAttachVolume(KVMHostInventory host, VmInstanceInventory vm, VolumeInventory volume, AttachDataVolumeCmd cmd, Map data) {
         cmd.setVolume(convertVolumeToFusionstorIfNeeded(volume, cmd.getVolume()));
     }

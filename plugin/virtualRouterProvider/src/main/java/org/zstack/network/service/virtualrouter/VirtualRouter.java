@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.appliancevm.*;
+import org.zstack.appliancevm.ApplianceVmCanonicalEvents.ApplianceVmStatusChangedData;
 import org.zstack.appliancevm.ApplianceVmConstant.Params;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
@@ -411,6 +412,28 @@ public class VirtualRouter extends ApplianceVmBase {
                 completion.fail(errCode);
             }
         }).start();
+    }
+
+    protected boolean changeStatus(ApplianceVmStatus status) {
+        if (status == getSelf().getStatus()) {
+            return false;
+        }
+
+        ApplianceVmStatus oldStatus = getSelf( ).getStatus();
+        getSelf().setStatus(ApplianceVmStatus.Connected);
+        self = dbf.updateAndRefresh(self);
+
+        ApplianceVmStatusChangedData d = new ApplianceVmStatusChangedData();
+        d.setApplianceVmUuid(self.getUuid());
+        d.setOldStatus(oldStatus.toString());
+        d.setNewStatus(status.toString());
+        d.setInv((ApplianceVmInventory)getSelfInventory());
+        evtf.fire(ApplianceVmCanonicalEvents.APPLIANCEVM_STATUS_CHANGED_PATH, d);
+
+        logger.debug(String.format("the virtual router [uuid:%s, name:%s] changed status from %s to %s",
+                self.getUuid(), self.getName(), oldStatus, status));
+
+        return true;
     }
 
     private class virtualRouterAfterAttachNicFlow extends NoRollbackFlow {

@@ -381,9 +381,9 @@ public class VirtualRouter extends ApplianceVmBase {
 
             @Override
             public void rollback(FlowRollback trigger, Map data) {
-                self = dbf.reload(self);
-                getSelf().setStatus(ApplianceVmStatus.Disconnected);
-                self = dbf.updateAndRefresh(self);
+                changeApplianceVmStatus(ApplianceVmStatus.Disconnected);
+                fireDisconnectedCanonicalEvent(operr("appliance vm %s reconnect failed",
+                        getSelf().getUuid()));
                 trigger.rollback();
             }
         }).then(new NoRollbackFlow() {
@@ -413,29 +413,7 @@ public class VirtualRouter extends ApplianceVmBase {
             }
         }).start();
     }
-
-    protected boolean changeStatus(ApplianceVmStatus status) {
-        if (status == getSelf().getStatus()) {
-            return false;
-        }
-
-        ApplianceVmStatus oldStatus = getSelf( ).getStatus();
-        getSelf().setStatus(ApplianceVmStatus.Connected);
-        self = dbf.updateAndRefresh(self);
-
-        ApplianceVmStatusChangedData d = new ApplianceVmStatusChangedData();
-        d.setApplianceVmUuid(self.getUuid());
-        d.setOldStatus(oldStatus.toString());
-        d.setNewStatus(status.toString());
-        d.setInv((ApplianceVmInventory)getSelfInventory());
-        evtf.fire(ApplianceVmCanonicalEvents.APPLIANCEVM_STATUS_CHANGED_PATH, d);
-
-        logger.debug(String.format("the virtual router [uuid:%s, name:%s] changed status from %s to %s",
-                self.getUuid(), self.getName(), oldStatus, status));
-
-        return true;
-    }
-
+    
     private class virtualRouterAfterAttachNicFlow extends NoRollbackFlow {
         @Override
         public void run(FlowTrigger trigger, Map data) {

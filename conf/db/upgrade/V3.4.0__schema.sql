@@ -78,6 +78,7 @@ CREATE TABLE `BaremetalBondingVO` (
 ALTER TABLE `BaremetalInstanceVO` ADD COLUMN `templateUuid` varchar(32) DEFAULT NULL;
 ALTER TABLE `BaremetalInstanceVO` ADD CONSTRAINT `fkBaremetalInstanceVOPreconfigurationTemplateVO` FOREIGN KEY (`templateUuid`) REFERENCES `PreconfigurationTemplateVO` (`uuid`) ON DELETE SET NULL;
 
+
 CREATE INDEX idxVmUuid ON VmUsageVO(vmUuid) USING BTREE;
 
 DELIMITER $$
@@ -115,4 +116,7 @@ DELIMITER;
 
 call cleanExpireVmUsageVO();
 DROP PROCEDURE IF EXISTS cleanExpireVmUsageVO;
+
+ALTER TABLE `AlarmVO` ADD COLUMN `enableRecovery` boolean NOT NULL DEFAULT FALSE;
+ALTER TABLE `SNSTextTemplateVO` ADD COLUMN  `recoveryTemplate` text DEFAULT NULL;
 

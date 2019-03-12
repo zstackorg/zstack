@@ -116,4 +116,32 @@ DELIMITER;
 call cleanExpireVmUsageVO();
 DROP PROCEDURE IF EXISTS cleanExpireVmUsageVO;
 
+CREATE TABLE `zstack`.`SchedulerJobGroupVO` (
+    `uuid` VARCHAR(32) NOT NULL UNIQUE,
+    `name` VARCHAR(255) NOT NULL,
+    `description` VARCHAR(2048) DEFAULT NULL,
+    `jobClassName` varchar(255),
+    `jobData` text,
+    `state` varchar(255),
+    `lastOpDate` timestamp ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp,
+    PRIMARY KEY (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `zstack`.`SchedulerJobGroupJobRefVO` (
+    `schedulerJobUuid` varchar(32) NOT NULL,
+    `schedulerJobGroupUuid` varchar(32) NOT NULL,
+    `lastOpDate` timestamp ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp,
+    PRIMARY KEY (`schedulerJobUuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `zstack`.`SchedulerJobGroupSchedulerTriggerRefVO` (
+    `schedulerJobGroupUuid` varchar(32) NOT NULL,
+    `schedulerTriggerUuid` varchar(32) NOT NULL,
+    `lastOpDate` timestamp ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp,
+    PRIMARY KEY  (`schedulerJobGroupUuid`, `schedulerTriggerUuid`),
+    CONSTRAINT `fkSchedulerJobGroupSchedulerTriggerRefVOSchedulerJobVO` FOREIGN KEY (`schedulerJobGroupUuid`) REFERENCES `SchedulerJobGroupVO` (`uuid`),
+    CONSTRAINT `fkSchedulerJobGroupSchedulerTriggerRefVOSchedulerTriggerVO` FOREIGN KEY (`schedulerTriggerUuid`) REFERENCES `SchedulerTriggerVO` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

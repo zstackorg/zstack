@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class CreateDataVolumeAction extends AbstractAction {
+public class UpdateSchedulerJobGroupAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class CreateDataVolumeAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.CreateDataVolumeResult value;
+        public org.zstack.sdk.UpdateSchedulerJobGroupResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,26 +25,20 @@ public class CreateDataVolumeAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String uuid;
+
+    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = false, noTrim = false)
     public java.lang.String name;
 
     @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String description;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String diskOfferingUuid;
+    @Param(required = false, validValues = {"enable","disable"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String state;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public long diskSize = 0;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String primaryStorageUuid;
-
-    @Param(required = false)
-    public java.lang.String resourceUuid;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.util.List tagUuids;
+    public java.util.Map parameters;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -75,8 +69,8 @@ public class CreateDataVolumeAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.CreateDataVolumeResult value = res.getResult(org.zstack.sdk.CreateDataVolumeResult.class);
-        ret.value = value == null ? new org.zstack.sdk.CreateDataVolumeResult() : value; 
+        org.zstack.sdk.UpdateSchedulerJobGroupResult value = res.getResult(org.zstack.sdk.UpdateSchedulerJobGroupResult.class);
+        ret.value = value == null ? new org.zstack.sdk.UpdateSchedulerJobGroupResult() : value; 
 
         return ret;
     }
@@ -105,11 +99,11 @@ public class CreateDataVolumeAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "POST";
-        info.path = "/volumes/data";
+        info.httpMethod = "PUT";
+        info.path = "/scheduler/jobgroups/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "params";
+        info.parameterName = "updateSchedulerJobGroup";
         return info;
     }
 

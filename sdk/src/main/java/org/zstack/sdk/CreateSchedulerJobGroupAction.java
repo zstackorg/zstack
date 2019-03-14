@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class CreateDataVolumeAction extends AbstractAction {
+public class CreateSchedulerJobGroupAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class CreateDataVolumeAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.CreateDataVolumeResult value;
+        public org.zstack.sdk.CreateSchedulerJobResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -31,14 +31,11 @@ public class CreateDataVolumeAction extends AbstractAction {
     @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String description;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String diskOfferingUuid;
+    @Param(required = true, validValues = {"startVm","stopVm","rebootVm","volumeSnapshot","volumeBackup","vmBackup","databaseBackup"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String type;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public long diskSize = 0;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String primaryStorageUuid;
+    public java.util.Map parameters;
 
     @Param(required = false)
     public java.lang.String resourceUuid;
@@ -75,8 +72,8 @@ public class CreateDataVolumeAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.CreateDataVolumeResult value = res.getResult(org.zstack.sdk.CreateDataVolumeResult.class);
-        ret.value = value == null ? new org.zstack.sdk.CreateDataVolumeResult() : value; 
+        org.zstack.sdk.CreateSchedulerJobResult value = res.getResult(org.zstack.sdk.CreateSchedulerJobResult.class);
+        ret.value = value == null ? new org.zstack.sdk.CreateSchedulerJobResult() : value; 
 
         return ret;
     }
@@ -106,7 +103,7 @@ public class CreateDataVolumeAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/volumes/data";
+        info.path = "/scheduler/jobgroups";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

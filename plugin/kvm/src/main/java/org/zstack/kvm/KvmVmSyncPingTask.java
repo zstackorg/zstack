@@ -9,7 +9,6 @@ import org.zstack.core.cloudbus.ReplyMessagePreSendingExtensionPoint;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.db.SimpleQuery.Op;
-import org.zstack.core.notification.N;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
@@ -37,12 +36,12 @@ import org.zstack.utils.logging.CLogger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.zstack.core.Platform.operr;
+import static org.zstack.core.Platform.*;
 
 public class KvmVmSyncPingTask extends VmTracer implements KVMPingAgentNoFailureExtensionPoint, KVMHostConnectExtensionPoint,
         ReplyMessagePreSendingExtensionPoint, HostConnectionReestablishExtensionPoint, HostAfterConnectedExtensionPoint, Component {
     private static final CLogger logger = Utils.getLogger(KvmVmSyncPingTask.class);
-    
+
     @Autowired
     private RESTFacade restf;
     @Autowired
@@ -122,22 +121,23 @@ public class KvmVmSyncPingTask extends VmTracer implements KVMPingAgentNoFailure
                     completion.fail(reply.getError());
                     return;
                 }
-
                 KVMHostAsyncHttpCallReply r = reply.castReply();
                 VmSyncResponse ret = r.toResponse(VmSyncResponse.class);
                 if (ret.isSuccess()) {
-                    Map<String, VmInstanceState> states = new HashMap<String, VmInstanceState>(ret.getStates().size());
-                    Set<String> vmsToSkipSet = new HashSet<>(vmsToSkip.keySet());
+                    Map<String, VmInstanceState> states = new HashMap<>(ret.getStates().size());
+                    Set<String> vmsToSkipSetHostSide = new HashSet<>(vmsToSkip.keySet());
                     Collection<String> vmUuidsInDeleteVmGC = DeleteVmGC.queryVmInGC(host.getUuid(), ret.getStates().keySet());
 
+                    logger.debug(String.valueOf(ret.getStates().size()));
                     for (Map.Entry<String, String> e : ret.getStates().entrySet()) {
                         if (logger.isTraceEnabled()) {
                             logger.trace(String.format("state from vmsync vm %s state %s", e.getKey(), e.getValue()));
                         }
                         if (vmUuidsInDeleteVmGC != null && vmUuidsInDeleteVmGC.contains(e.getKey())) {
                             /*the vm has been deleted and recovered that no resource, so skip to trace */
-                            vmsToSkipSet.add(e.getKey());
+                            vmsToSkipSetHostSide.add(e.getKey());
                         }
+
                         VmInstanceState state = KvmVmState.valueOf(e.getValue()).toVmInstanceState();
                         if (state == VmInstanceState.Running || state == VmInstanceState.Paused || state == VmInstanceState.Unknown) {
                             states.put(e.getKey(), state);
@@ -145,7 +145,7 @@ public class KvmVmSyncPingTask extends VmTracer implements KVMPingAgentNoFailure
 
                     }
 
-                    reportVmState(host.getUuid(), states, vmsToSkipSet);
+                    reportVmState(host.getUuid(), states, vmsToSkipSetHostSide);
                     completion.success();
                 } else {
                     ErrorCode errorCode = operr("unable to do vm sync on host[uuid:%s, ip:%s] because %s", host.getUuid(), host.getManagementIp(), ret.getError());
@@ -184,10 +184,11 @@ public class KvmVmSyncPingTask extends VmTracer implements KVMPingAgentNoFailure
                         q.add(VmInstanceVO_.uuid, Op.EQ, cmd.vmUuid);
                         VmInstanceState stateInDb = q.findValue();
                         if (stateInDb == null) {
-                            N.New(HostVO.class, cmd.hostUuid).warn_("an anonymous VM[uuid:%s, state:%s] is detected on the host[uuid:%s]", cmd.vmUuid, state, cmd.hostUuid);
+                            logger.warn(String.format("an anonymous VM[uuid:%s, state:%s] is detected on the host[uuid:%s]", cmd.vmUuid, state, cmd.hostUuid));
                             chain.next();
                             return;
                         }
+
                         VmStateChangedOnHostMsg msg = new VmStateChangedOnHostMsg();
                         msg.setVmStateAtTracingMoment(stateInDb);
                         msg.setVmInstanceUuid(cmd.vmUuid);
@@ -198,10 +199,8 @@ public class KvmVmSyncPingTask extends VmTracer implements KVMPingAgentNoFailure
                             @Override
                             public void run(MessageReply reply) {
                                 if (!reply.isSuccess()) {
-                                    N.New(HostVO.class, cmd.hostUuid).warn_("failed to report state[%s] of the vm[uuid:%s] on the host[uuid:%s], %s",
-                                            cmd.vmState, cmd.vmUuid, cmd.hostUuid, reply.getError());
-                                    N.New(VmInstanceVO.class, cmd.vmUuid).warn_("failed to report state[%s] of the vm[uuid:%s] on the host[uuid:%s], %s",
-                                            cmd.vmState, cmd.vmUuid, cmd.hostUuid, reply.getError());
+                                    logger.warn(String.format("failed to report state[%s] of the vm[uuid:%s] on the host[uuid:%s], %s",
+                                            cmd.vmState, cmd.vmUuid, cmd.hostUuid, reply.getError()));
                                 }
 
                                 chain.next();
@@ -272,8 +271,8 @@ public class KvmVmSyncPingTask extends VmTracer implements KVMPingAgentNoFailure
 
             @Override
             public void fail(ErrorCode errorCode) {
-                N.New(HostVO.class, host.getUuid()).warn_("failed to sync VM states on the host[uuid:%s, name:%s], %s",
-                        host.getUuid(), host.getName(), errorCode);
+                logger.warn(String.format("failed to sync VM states on the host[uuid:%s, name:%s], %s",
+                        host.getUuid(), host.getName(), errorCode));
                 completion.done();
             }
         });

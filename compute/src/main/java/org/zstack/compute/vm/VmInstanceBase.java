@@ -16,7 +16,6 @@ import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.defer.Defer;
 import org.zstack.core.defer.Deferred;
 import org.zstack.core.jsonlabel.JsonLabel;
-import org.zstack.core.notification.N;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
@@ -75,6 +74,7 @@ import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.operr;
 import static org.zstack.core.Platform.err;
+import static java.util.Arrays.asList;
 import static org.zstack.utils.CollectionDSL.*;
 
 
@@ -106,9 +106,6 @@ public class VmInstanceBase extends AbstractVmInstance {
     @Autowired
     private HostAllocatorManager hostAllocatorMgr;
 
-    // volume migrating is running, it was empty when mn restarted
-    public static List<String> volumeMigrateQueue = new ArrayList<>();
-
     protected VmInstanceVO self;
     protected VmInstanceVO originalCopy;
     protected String syncThreadName;
@@ -122,8 +119,8 @@ public class VmInstanceBase extends AbstractVmInstance {
             @Override
             public void run(MessageReply reply) {
                 if (!reply.isSuccess()) {
-                    N.New(VmInstanceVO.class, self.getUuid()).warn_("unable to check state of the vm[uuid:%s] on the host[uuid:%s], %s;" +
-                            "put the VM into the Unknown state", self.getUuid(), hostUuid, reply.getError());
+                    logger.warn(String.format("unable to check state of the vm[uuid:%s] on the host[uuid:%s], %s;" +
+                            "put the VM into the Unknown state", self.getUuid(), hostUuid, reply.getError()));
                     changeVmStateInDb(VmInstanceStateEvent.unknown);
                     completion.done();
                     return;
@@ -956,7 +953,11 @@ public class VmInstanceBase extends AbstractVmInstance {
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return String.format("change-vm-state-%s", syncThreadName);
+                if (msg.isFromSync()) {
+                    return syncThreadName;
+                } else {
+                    return String.format("change-vm-state-%s", syncThreadName);
+                }
             }
 
             @Override
@@ -1089,16 +1090,6 @@ public class VmInstanceBase extends AbstractVmInstance {
             return;
         }
 
-        // if vm was in VolumeMigrating state, then Stopped msg would be ignore
-        if (originalState == VmInstanceState.VolumeMigrating && (currentState == VmInstanceState.Stopped || currentState == VmInstanceState.Paused)) {
-            // vm is volumemigrating
-            if (volumeMigrateQueue.contains(msg.getVmInstanceUuid())) {
-                bus.reply(msg, reply);
-                completion.done();
-                return;
-            }
-        }
-
         final Runnable fireEvent = () -> {
             VmTracerCanonicalEvents.VmStateChangedOnHostData data = new VmTracerCanonicalEvents.VmStateChangedOnHostData();
             data.setVmUuid(self.getUuid());
@@ -1204,9 +1195,9 @@ public class VmInstanceBase extends AbstractVmInstance {
         }).error(new FlowErrorHandler(completion) {
             @Override
             public void handle(ErrorCode errCode, Map data) {
-                N.New(VmInstanceVO.class, self.getUuid()).warn_("failed to handle abnormal lifecycle of the vm[uuid:%s, original state: %s, current state:%s," +
+                logger.warn(String.format("failed to handle abnormal lifecycle of the vm[uuid:%s, original state: %s, current state:%s," +
                                 "original host: %s, current host: %s], %s", self.getUuid(), originalState, currentState,
-                        originalHostUuid, currentHostUuid, errCode);
+                        originalHostUuid, currentHostUuid, errCode));
 
                 reply.setError(errCode);
                 bus.reply(msg, reply);
@@ -3986,7 +3977,8 @@ public class VmInstanceBase extends AbstractVmInstance {
                     } else {
                         struct.alignedMemory = oldMemorySize + increaseMemory;
                     }
-                    N.New(VmInstanceVO.class, self.getUuid()).info_("automatically align memory from %s to %s", memorySize, struct.alignedMemory);
+
+                    logger.debug(String.format("automatically align memory from %s to %s", memorySize, struct.alignedMemory));
                 }
                 chain.next();
             }
@@ -4903,6 +4895,8 @@ public class VmInstanceBase extends AbstractVmInstance {
         final VmInstanceState originState = self.getState();
         changeVmStateInDb(VmInstanceStateEvent.starting);
 
+        logger.debug("we keep vm state on 'Starting' until startVm over or restart mn.");
+
         extEmitter.beforeStartVm(VmInstanceInventory.valueOf(self));
 
         FlowChain chain = getStartVmWorkFlowChain(inv);
@@ -5689,10 +5683,7 @@ public class VmInstanceBase extends AbstractVmInstance {
         chain.done(new FlowDoneHandler(completion) {
             @Override
             public void handle(Map data) {
-                self = changeVmStateInDb(VmInstanceStateEvent.stopped, ()->{
-                    self.setLastHostUuid(self.getHostUuid());
-                    self.setHostUuid(null);
-                });
+                self = changeVmStateInDb(VmInstanceStateEvent.stopped);
                 VmInstanceInventory inv = VmInstanceInventory.valueOf(self);
                 extEmitter.afterStopVm(inv);
                 completion.success();

@@ -6,7 +6,6 @@ import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.EventFacade;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.notification.N;
 import org.zstack.core.thread.SyncTask;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.exception.CloudRuntimeException;
@@ -45,13 +44,13 @@ public abstract class VmTracer {
 
     private class Tracer {
         String hostUuid;
-        Set<String> vmsToSkip;
+        Set<String> vmsToSkipHostSide;
         Map<String, VmInstanceState> hostSideStates;
         Map<String, VmInstanceState> mgmtSideStates;
 
         @Transactional(readOnly = true)
         private void buildManagementServerSideVmStates() {
-            mgmtSideStates = new HashMap<String, VmInstanceState>();
+            mgmtSideStates = new HashMap<>();
             String sql = "select vm.uuid, vm.state from VmInstanceVO vm where vm.hostUuid = :huuid or (vm.hostUuid is null and vm.lastHostUuid = :huuid)" +
                     " and vm.state not in (:vmstates)";
             TypedQuery<Tuple> q = dbf.getEntityManager().createQuery(sql, Tuple.class);
@@ -71,7 +70,7 @@ public abstract class VmTracer {
             for (Map.Entry<String, VmInstanceState> e : hostSideStates.entrySet()) {
                 String vmUuid = e.getKey();
 
-                if (vmsToSkip != null && vmsToSkip.contains(vmUuid)) {
+                if (vmsToSkipHostSide != null && vmsToSkipHostSide.contains(vmUuid)) {
                     continue;
                 }
 
@@ -94,6 +93,7 @@ public abstract class VmTracer {
             msg.setVmInstanceUuid(vmUuid);
             msg.setStateOnHost(actualState);
             msg.setHostUuid(hostUuid);
+            msg.setFromSync(true);
             bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, vmUuid);
             bus.send(msg);
         }
@@ -117,8 +117,7 @@ public abstract class VmTracer {
                 data.setHostUuid(hostUuid);
                 evtf.fire(VmTracerCanonicalEvents.STRANGER_VM_FOUND_PATH, data);
 
-                N.New(VmInstanceVO.class, vmUuid).warn_("A strange vm[%s] was found on the host[%s], May cause problems, Please manually clean this vm", vmUuid, hostUuid);
-
+                logger.warn(String.format("A strange vm[%s] was found on the host[%s], May cause problems, Please manually clean this vm", vmUuid, hostUuid));
                 return;
             }
 
@@ -142,6 +141,7 @@ public abstract class VmTracer {
             msg.setHostUuid(hostUuid);
             msg.setVmInstanceUuid(vmUuid);
             msg.setStateOnHost(VmInstanceState.Stopped);
+            msg.setFromSync(true);
             bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, vmUuid);
             bus.send(msg);
         }
@@ -153,7 +153,7 @@ public abstract class VmTracer {
         }
     }
 
-    protected void reportVmState(final String hostUuid, final Map<String, VmInstanceState> vmStates, final Set<String> vmsToSkip) {
+    protected void reportVmState(final String hostUuid, final Map<String, VmInstanceState> vmStates, final Set<String> vmsToSkipHostSide) {
         if (logger.isTraceEnabled()) {
             for (Map.Entry<String, VmInstanceState> e : vmStates.entrySet()) {
                 logger.trace(String.format("reportVmState vm: %s, state: %s", e.getKey(), e.getValue().toString()));
@@ -192,7 +192,7 @@ public abstract class VmTracer {
                 Tracer t = new Tracer();
                 t.hostUuid = hostUuid;
                 t.hostSideStates = vmStates;
-                t.vmsToSkip = vmsToSkip;
+                t.vmsToSkipHostSide = vmsToSkipHostSide;
                 t.trace();
                 return null;
             }

@@ -9,7 +9,6 @@ import org.zstack.header.identity.Action;
 import org.zstack.header.image.ImageVO;
 import org.zstack.header.message.*;
 import org.zstack.header.network.l3.L3NetworkVO;
-import org.zstack.header.notification.ApiNotification;
 import org.zstack.header.other.APIAuditor;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
@@ -120,6 +119,10 @@ public class APICreateVmInstanceMsg extends APICreateMessage implements APIAudit
      */
     @APIParam(required = false, resourceType = DiskOfferingVO.class, checkAccount = true)
     private String rootDiskOfferingUuid;
+
+    @APIParam(required = false)
+    private Long rootDiskSize;
+
     /**
      * @desc disk offering uuid for data volumes. See :ref:`DiskOfferingInventory`
      */
@@ -294,6 +297,14 @@ public class APICreateVmInstanceMsg extends APICreateMessage implements APIAudit
         this.rootDiskOfferingUuid = rootDiskOfferingUuid;
     }
 
+    public Long getRootDiskSize() {
+        return rootDiskSize;
+    }
+
+    public void setRootDiskSize(Long rootDiskSize) {
+        this.rootDiskSize = rootDiskSize;
+    }
+
     public String getPrimaryStorageUuidForRootVolume() {
         return primaryStorageUuidForRootVolume;
     }
@@ -328,20 +339,6 @@ public class APICreateVmInstanceMsg extends APICreateMessage implements APIAudit
         msg.setInstanceOfferingUuid(uuid());
         msg.setL3NetworkUuids(asList(uuid()));
         return msg;
-    }
-
-    public ApiNotification __notification__() {
-        APIMessage that = this;
-
-        return new ApiNotification() {
-            @Override
-            public void after(APIEvent evt) {
-                if (evt.isSuccess()) {
-                    ntfy("Created").resource(((APICreateVmInstanceEvent) evt).getInventory().getUuid(), VmInstanceVO.class.getSimpleName())
-                            .messageAndEvent(that, evt).done();
-                }
-            }
-        };
     }
 
     @Override

@@ -743,7 +743,7 @@ public class Platform {
 
     public static ErrorCode err(Enum errCode, ErrorCode cause, String fmt, Object...args) {
         ErrorFacade errf = getComponentLoader().getComponent(ErrorFacade.class);
-        String details = null;
+        String details;
         try {
             details = String.format(fmt, args);
         } catch (Exception e) {
@@ -752,11 +752,13 @@ public class Platform {
             details = fmt;
         }
         ErrorCode result = errf.instantiateErrorCode(errCode, details, cause);
-        try {
-            result.setElaboration(elaborate(errCode, result.getDescription(), fmt, args));
-        } catch (Throwable e) {
-            logger.warn("exception happened when found elaboration");
-            logger.warn(e.getMessage());
+        if (CoreGlobalProperty.ENABLE_ELABORATION) {
+            try {
+                result.setElaboration(elaborate(errCode, result.getDescription(), fmt, args));
+            } catch (Throwable e) {
+                logger.warn("exception happened when found elaboration");
+                logger.warn(e.getMessage());
+            }
         }
 
         return result;
@@ -813,6 +815,8 @@ public class Platform {
     }
 
     public static final String EXIT_REASON = "zstack.quit.reason";
+
+    public static final String SKIP_STOP = "skip.mn.exit";
 
     public static void exit(String reason) {
         new BootErrorLog().write(reason);

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class UpdateNotificationsStatusAction extends AbstractAction {
+public class CreateMiniClusterAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class UpdateNotificationsStatusAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.UpdateNotificationsStatusResult value;
+        public org.zstack.sdk.CreateClusterResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,11 +25,35 @@ public class UpdateNotificationsStatusAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
-    public java.util.List uuids;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String zoneUuid;
 
-    @Param(required = true, validValues = {"Unread","Read"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String status;
+    @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String name;
+
+    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
+    public java.util.List hostManagementIps;
+
+    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String username = "root";
+
+    @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String password;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,65535L}, noTrim = false)
+    public int sshPort = 22;
+
+    @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String description;
+
+    @Param(required = true, validValues = {"KVM","Simulator"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String hypervisorType;
+
+    @Param(required = false)
+    public java.lang.String resourceUuid;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.util.List tagUuids;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -60,8 +84,8 @@ public class UpdateNotificationsStatusAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.UpdateNotificationsStatusResult value = res.getResult(org.zstack.sdk.UpdateNotificationsStatusResult.class);
-        ret.value = value == null ? new org.zstack.sdk.UpdateNotificationsStatusResult() : value; 
+        org.zstack.sdk.CreateClusterResult value = res.getResult(org.zstack.sdk.CreateClusterResult.class);
+        ret.value = value == null ? new org.zstack.sdk.CreateClusterResult() : value; 
 
         return ret;
     }
@@ -90,11 +114,11 @@ public class UpdateNotificationsStatusAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "PUT";
-        info.path = "/notifications/actions";
+        info.httpMethod = "POST";
+        info.path = "/mini-clusters";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "updateNotificationsStatus";
+        info.parameterName = "params";
         return info;
     }
 

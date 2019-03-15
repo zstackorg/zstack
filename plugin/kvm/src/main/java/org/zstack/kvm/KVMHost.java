@@ -1879,6 +1879,7 @@ public class KVMHost extends HostBase implements Host {
 
     private void startVm(final VmInstanceSpec spec, final NeedReplyMessage msg, final NoErrorCompletion completion) {
         checkStateAndStatus();
+
         final StartVmCmd cmd = new StartVmCmd();
 
         boolean virtio;
@@ -2548,6 +2549,7 @@ public class KVMHost extends HostBase implements Host {
             FlowChain chain = FlowChainBuilder.newShareFlowChain();
             chain.setName(String.format("run-ansible-for-kvm-%s", self.getUuid()));
             chain.then(new ShareFlow() {
+                boolean deployed = false;
                 @Override
                 public void setup() {
                     flow(new NoRollbackFlow() {
@@ -2730,9 +2732,12 @@ public class KVMHost extends HostBase implements Host {
                             String postUrl = ub.build().toString();
 
                             runner.putArgument("post_url", postUrl);
-                            runner.run(new Completion(trigger) {
+                            runner.run(new ReturnValueCompletion<Boolean>(trigger) {
                                 @Override
-                                public void success() {
+                                public void success(Boolean run) {
+                                    if (run != null) {
+                                        deployed = run;
+                                    }
                                     trigger.next();
                                 }
 
@@ -2757,7 +2762,40 @@ public class KVMHost extends HostBase implements Host {
 
                                 @Override
                                 public void fail(ErrorCode errorCode) {
-                                    trigger.fail(errorCode);
+                                    boolean needRestart = KVMGlobalConfig.RESTART_AGENT_IF_FAKE_DEAD.value(Boolean.class);
+                                    if (!deployed && needRestart) {
+                                        // if not deployed and echo failed, we thought it is fake dead, see: ZSTACK-18628
+                                        AnsibleRunner runner = new AnsibleRunner();
+                                        runner.setAgentPort(KVMGlobalProperty.AGENT_PORT);
+                                        runner.setTargetIp(getSelf().getManagementIp());
+                                        runner.setUsername(getSelf().getUsername());
+                                        runner.setPassword(getSelf().getPassword());
+                                        runner.setSshPort(getSelf().getPort());
+
+                                        runner.restartAgent(AnsibleConstant.KVM_AGENT_NAME, new Completion(trigger) {
+                                            @Override
+                                            public void success() {
+                                                restf.echo(echoPath, new Completion(trigger) {
+                                                    @Override
+                                                    public void success() {
+                                                        trigger.next();
+                                                    }
+
+                                                    @Override
+                                                    public void fail(ErrorCode errorCode) {
+                                                        trigger.fail(errorCode);
+                                                    }
+                                                });
+                                            }
+
+                                            @Override
+                                            public void fail(ErrorCode errorCode) {
+                                                trigger.fail(errorCode);
+                                            }
+                                        });
+                                    } else {
+                                        trigger.fail(errorCode);
+                                    }
                                 }
                             });
                         }

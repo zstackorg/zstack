@@ -102,3 +102,43 @@ CREATE TABLE `NetworkRouterAreaRefVO` (
     CONSTRAINT `fkNetworkRouterAreaRefVOL3NetworkVO` FOREIGN KEY (`l3NetworkUuid`) REFERENCES `L3NetworkEO` (`uuid`) ON DELETE CASCADE,
     CONSTRAINT `fkNetworkRouterAreaRefVOVpcRouterVmVO` FOREIGN KEY (`vRouterUuid`) REFERENCES `VpcRouterVmVO` (`uuid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE INDEX idxVmUuid ON VmUsageVO(vmUuid) USING BTREE;
+
+DELIMITER $$
+CREATE PROCEDURE cleanExpireVmUsageVO()
+		BEGIN
+				DECLARE done INT DEFAULT FALSE;
+			  DECLARE vmUuid VARCHAR(32);
+				DECLARE name VARCHAR(255);
+				DECLARE accountUuid VARCHAR(32);
+				DECLARE cpuNum INT(10);
+				DECLARE state VARCHAR(64);
+				DECLARE memorySize BIGINT(20);
+				DECLARE rootVolumeSize BIGINT(20);
+			  DECLARE inventory Text;
+				DECLARE lastOpDate TIMESTAMP;
+				DEClARE cur CURSOR FOR SELECT v.vmUuid,v.name,v.accountUuid,v.state,v.cpuNum,v.memorySize,v.rootVolumeSize,v.inventory from VmUsageVO v
+								where v.id IN (select MAX(a.id) FROM VmUsageVO a GROUP BY a.vmUuid)
+								AND v.vmUuid NOT IN (select DISTINCT uuid from VmInstanceEO) AND v.state = 'Running';
+				DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+			  OPEN cur;
+				read_loop: LOOP
+						FETCH cur INTO vmUuid,name,accountUuid,state,cpuNum,memorySize,rootVolumeSize,inventory;
+						IF done THEN
+								LEAVE read_loop;
+						END IF;
+
+						INSERT zstack.VmUsageVO(vmUuid,name,accountUuid,state,cpuNum,memorySize,dateInLong,rootVolumeSize,inventory,lastOpDate,createDate)
+						VALUES (vmUuid,name,accountUuid,'Destroyed',cpuNum,memorySize,UNIX_TIMESTAMP(),rootVolumeSize,inventory,NOW(),NOW());
+
+				END LOOP;
+				CLOSE cur;
+				SELECT CURTIME();
+		END $$
+DELIMITER;
+
+call cleanExpireVmUsageVO();
+DROP PROCEDURE IF EXISTS cleanExpireVmUsageVO;
+
+

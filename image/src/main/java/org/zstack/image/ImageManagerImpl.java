@@ -18,7 +18,6 @@ import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.defer.Defer;
 import org.zstack.core.defer.Deferred;
 import org.zstack.core.errorcode.ErrorFacade;
-import org.zstack.core.notification.N;
 import org.zstack.core.thread.CancelablePeriodicTask;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
@@ -41,7 +40,6 @@ import org.zstack.header.image.ImageDeletionPolicyManager.ImageDeletionPolicy;
 import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
 import org.zstack.header.message.*;
 import org.zstack.header.rest.RESTFacade;
-import org.zstack.header.search.SearchOp;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageVO_;
@@ -54,13 +52,13 @@ import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.volume.*;
 import org.zstack.identity.AccountManager;
 import org.zstack.identity.QuotaUtil;
-import org.zstack.search.SearchQuery;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
 import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.function.Function;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
+import static org.zstack.core.Platform.*;
 
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
@@ -74,12 +72,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static org.zstack.core.Platform.*;
 import static org.zstack.core.progress.ProgressReportService.getTaskStage;
 import static org.zstack.core.progress.ProgressReportService.reportProgress;
 import static org.zstack.header.Constants.THREAD_CONTEXT_API;
 import static org.zstack.header.Constants.THREAD_CONTEXT_TASK_NAME;
-import static org.zstack.utils.CollectionDSL.*;
+import static org.zstack.utils.CollectionDSL.list;
 
 public class ImageManagerImpl extends AbstractService implements ImageManager, ManagementNodeReadyExtensionPoint,
         ReportQuotaExtensionPoint, ResourceOwnerPreChangeExtensionPoint {
@@ -161,12 +158,6 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
     private void handleApiMessage(Message msg) {
         if (msg instanceof APIAddImageMsg) {
             handle((APIAddImageMsg) msg);
-        } else if (msg instanceof APIListImageMsg) {
-            handle((APIListImageMsg) msg);
-        } else if (msg instanceof APISearchImageMsg) {
-            handle((APISearchImageMsg) msg);
-        } else if (msg instanceof APIGetImageMsg) {
-            handle((APIGetImageMsg) msg);
         } else if (msg instanceof APICreateRootVolumeTemplateFromRootVolumeMsg) {
             handle((APICreateRootVolumeTemplateFromRootVolumeMsg) msg);
         } else if (msg instanceof APICreateRootVolumeTemplateFromVolumeSnapshotMsg) {
@@ -458,35 +449,6 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
         handleCreateRootVolumeTemplateFromRootVolumeMsg(data, new APICreateRootVolumeTemplateFromRootVolumeEvent(msg.getId()));
     }
 
-    private void handle(APIGetImageMsg msg) {
-        SearchQuery<ImageInventory> sq = new SearchQuery(ImageInventory.class);
-        sq.addAccountAsAnd(msg);
-        sq.add("uuid", SearchOp.AND_EQ, msg.getUuid());
-        List<ImageInventory> invs = sq.list();
-        APIGetImageReply reply = new APIGetImageReply();
-        if (!invs.isEmpty()) {
-            reply.setInventory(JSONObjectUtil.toJsonString(invs.get(0)));
-        }
-        bus.reply(msg, reply);
-    }
-
-    private void handle(APISearchImageMsg msg) {
-        SearchQuery<ImageInventory> sq = SearchQuery.create(msg, ImageInventory.class);
-        sq.addAccountAsAnd(msg);
-        String content = sq.listAsString();
-        APISearchImageReply reply = new APISearchImageReply();
-        reply.setContent(content);
-        bus.reply(msg, reply);
-    }
-
-    private void handle(APIListImageMsg msg) {
-        List<ImageVO> vos = dbf.listAll(ImageVO.class);
-        List<ImageInventory> invs = ImageInventory.valueOf(vos);
-        APIListImageReply reply = new APIListImageReply();
-        reply.setInventories(invs);
-        bus.reply(msg, reply);
-    }
-
     private static boolean isUpload(final String url) {
         return url.startsWith("upload://");
     }
@@ -664,8 +626,8 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
                             @Override
                             public void run(MessageReply reply) {
                                 if (!reply.isSuccess()) {
-                                    N.New(ImageVO.class, imageUuid).warn_("failed to expunge the image[uuid:%s] on the backup storage[uuid:%s], will try it later. %s",
-                                            imageUuid, bsUuid, reply.getError());
+                                    logger.debug(String.format("failed to expunge the image[uuid:%s] on the backup storage[uuid:%s], will try it later. %s",
+                                            imageUuid, bsUuid, reply.getError()));
                                 }
                             }
                         });
@@ -1013,12 +975,12 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
                     }
                 }.execute();
 
-                N.New(ImageVO.class, imageUuid).info_("added image [name: %s, uuid: %s]", name, imageUuid);
+                logger.debug(String.format("added image [name: %s, uuid: %s]", name, imageUuid));
             }
 
             private void markFailure(ErrorCode reason) {
-                N.New(ImageVO.class, imageUuid).error_("upload image [name: %s, uuid: %s] failed: %s",
-                        name, imageUuid, reason.toString());
+                logger.error(String.format("upload image [name: %s, uuid: %s] failed: %s",
+                        name, imageUuid, reason.toString()));
 
                 // Note, the handler of ImageDeletionMsg will deal with storage capacity.
                 ImageDeletionMsg msg = new ImageDeletionMsg();

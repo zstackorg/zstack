@@ -83,7 +83,7 @@ CREATE TABLE `RouterAreaVO` (
     `areaId` VARCHAR(64) NOT NULL COMMENT 'area id 32bit with IPv4 address style',
     `type` VARCHAR(16) NOT NULL DEFAULT 'Standard',
     `authentication` VARCHAR(16) NOT NULL DEFAULT 'None',
-    `password` VARCHAR(8) DEFAULT NULL,
+    `password` VARCHAR(16) DEFAULT NULL,
     `keyId` int unsigned DEFAULT NULL,
     `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
     `createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',

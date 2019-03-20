@@ -34,7 +34,7 @@ public class UpdateVRouterOspfAreaAction extends AbstractAction {
     @Param(required = false, maxLength = 16, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String areaType;
 
-    @Param(required = false, maxLength = 8, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, maxLength = 16, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String password;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,255L}, noTrim = false)

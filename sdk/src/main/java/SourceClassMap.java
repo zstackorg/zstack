@@ -52,6 +52,8 @@ public class SourceClassMap {
 			put("org.zstack.cloudformation.template.struct.ResourceStruct", "org.zstack.sdk.ResourceStruct");
 			put("org.zstack.cloudformation.template.struct.ResourceType", "org.zstack.sdk.ResourceType");
 			put("org.zstack.core.config.GlobalConfigInventory", "org.zstack.sdk.GlobalConfigInventory");
+			put("org.zstack.core.config.resourceconfig.APIGetResourceBindableConfigReply$ResourceBindableConfigStruct", "org.zstack.sdk.ResourceBindableConfigStruct");
+			put("org.zstack.core.config.resourceconfig.ResourceConfigInventory", "org.zstack.sdk.ResourceConfigInventory");
 			put("org.zstack.core.errorcode.ElaborationCategory", "org.zstack.sdk.ElaborationCategory");
 			put("org.zstack.core.errorcode.ElaborationCheckResult", "org.zstack.sdk.ElaborationCheckResult");
 			put("org.zstack.core.errorcode.ElaborationContent", "org.zstack.sdk.ElaborationContent");
@@ -176,6 +178,7 @@ public class SourceClassMap {
 			put("org.zstack.header.storage.primary.ImageCacheInventory", "org.zstack.sdk.ImageCacheInventory");
 			put("org.zstack.header.storage.primary.PrimaryStorageHostStatus", "org.zstack.sdk.PrimaryStorageHostStatus");
 			put("org.zstack.header.storage.primary.PrimaryStorageInventory", "org.zstack.sdk.PrimaryStorageInventory");
+			put("org.zstack.header.storage.snapshot.BatchDeleteVolumeSnapshotStruct", "org.zstack.sdk.BatchDeleteVolumeSnapshotStruct");
 			put("org.zstack.header.storage.snapshot.VolumeSnapshotBackupStorageRefInventory", "org.zstack.sdk.VolumeSnapshotBackupStorageRefInventory");
 			put("org.zstack.header.storage.snapshot.VolumeSnapshotInventory", "org.zstack.sdk.VolumeSnapshotInventory");
 			put("org.zstack.header.storage.snapshot.VolumeSnapshotTree$SnapshotLeafInventory", "org.zstack.sdk.SnapshotLeafInventory");
@@ -323,7 +326,9 @@ public class SourceClassMap {
 			put("org.zstack.ticket.entity.TicketStatusHistoryInventory", "org.zstack.sdk.ticket.entity.TicketStatusHistoryInventory");
 			put("org.zstack.ticket.iam2.entity.IAM2TicketFlowCollectionInventory", "org.zstack.sdk.ticket.iam2.entity.IAM2TicketFlowCollectionInventory");
 			put("org.zstack.ticket.iam2.entity.IAM2TicketFlowInventory", "org.zstack.sdk.ticket.iam2.entity.IAM2TicketFlowInventory");
+			put("org.zstack.twoFactorAuthentication.TwoFactorAuthenticationInventory", "org.zstack.sdk.TwoFactorAuthenticationInventory");
 			put("org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretInventory", "org.zstack.sdk.TwoFactorAuthenticationSecretInventory");
+			put("org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretStatus", "org.zstack.sdk.TwoFactorAuthenticationSecretStatus");
 			put("org.zstack.usbDevice.UsbDeviceInventory", "org.zstack.sdk.UsbDeviceInventory");
 			put("org.zstack.usbDevice.UsbDeviceState", "org.zstack.sdk.UsbDeviceState");
 			put("org.zstack.v2v.V2VConversionHostInventory", "org.zstack.sdk.V2VConversionHostInventory");
@@ -419,6 +424,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.BaremetalNicInventory", "org.zstack.header.baremetal.network.BaremetalNicInventory");
 			put("org.zstack.sdk.BaremetalPxeServerInventory", "org.zstack.header.baremetal.pxeserver.BaremetalPxeServerInventory");
 			put("org.zstack.sdk.BaremetalVlanNicInventory", "org.zstack.header.baremetal.network.BaremetalVlanNicInventory");
+			put("org.zstack.sdk.BatchDeleteVolumeSnapshotStruct", "org.zstack.header.storage.snapshot.BatchDeleteVolumeSnapshotStruct");
 			put("org.zstack.sdk.CephBackupStorageInventory", "org.zstack.storage.ceph.backup.CephBackupStorageInventory");
 			put("org.zstack.sdk.CephBackupStorageMonInventory", "org.zstack.storage.ceph.backup.CephBackupStorageMonInventory");
 			put("org.zstack.sdk.CephPrimaryStorageInventory", "org.zstack.storage.ceph.primary.CephPrimaryStorageInventory");
@@ -558,6 +564,8 @@ public class SourceClassMap {
 			put("org.zstack.sdk.QuotaInventory", "org.zstack.header.identity.QuotaInventory");
 			put("org.zstack.sdk.QuotaUsage", "org.zstack.header.identity.Quota$QuotaUsage");
 			put("org.zstack.sdk.RemovalInstanceRuleInventory", "org.zstack.autoscaling.group.rule.RemovalInstanceRuleInventory");
+			put("org.zstack.sdk.ResourceBindableConfigStruct", "org.zstack.core.config.resourceconfig.APIGetResourceBindableConfigReply$ResourceBindableConfigStruct");
+			put("org.zstack.sdk.ResourceConfigInventory", "org.zstack.core.config.resourceconfig.ResourceConfigInventory");
 			put("org.zstack.sdk.ResourceInventory", "org.zstack.header.vo.ResourceInventory");
 			put("org.zstack.sdk.ResourceStackInventory", "org.zstack.header.cloudformation.ResourceStackInventory");
 			put("org.zstack.sdk.ResourceStruct", "org.zstack.cloudformation.template.struct.ResourceStruct");
@@ -602,7 +610,9 @@ public class SourceClassMap {
 			put("org.zstack.sdk.TagPatternInventory", "org.zstack.header.tag.TagPatternInventory");
 			put("org.zstack.sdk.TagPatternType", "org.zstack.header.tag.TagPatternType");
 			put("org.zstack.sdk.TaskProgressInventory", "org.zstack.header.core.progress.TaskProgressInventory");
+			put("org.zstack.sdk.TwoFactorAuthenticationInventory", "org.zstack.twoFactorAuthentication.TwoFactorAuthenticationInventory");
 			put("org.zstack.sdk.TwoFactorAuthenticationSecretInventory", "org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretInventory");
+			put("org.zstack.sdk.TwoFactorAuthenticationSecretStatus", "org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretStatus");
 			put("org.zstack.sdk.UsbDeviceInventory", "org.zstack.usbDevice.UsbDeviceInventory");
 			put("org.zstack.sdk.UsbDeviceState", "org.zstack.usbDevice.UsbDeviceState");
 			put("org.zstack.sdk.UsedIpInventory", "org.zstack.header.network.l3.UsedIpInventory");

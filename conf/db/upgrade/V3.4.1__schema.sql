@@ -22,7 +22,7 @@ CREATE TABLE `BillingVO` (
   `accountUuid` varchar(32) NOT NULL,
   `resourceUuid` varchar(32) NOT NULL,
   `resourceName` varchar(255),
-  `spending` bigint(20) unsigned NOT NULL,
+  `spending` double unsigned NOT NULL,
   `startTime` bigint(20) unsigned NOT NULL,
   `endTime` bigint(20) unsigned NOT NULL,
   PRIMARY KEY (`id`),
@@ -212,3 +212,5 @@ CREATE TABLE `PubIpVmNicBandwidthUsageHistoryVO` (
   KEY `idxPubIpVmNicBandwidthUsageVOaccountUuid` (`accountUuid`,`dateInLong`),
   KEY  `idxPubIpVmNicBandwidthUsageVOvmNicUuid` (`accountUuid`, `dateInLong`, `vmNicUuid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+INSERT INTO ResourceVO (`uuid`, `resourceName`, `resourceType`, `concreteResourceType`) SELECT t.uuid, t.resourceName, "PriceVO", "org.zstack.billing.PriceVO" FROM PriceVO t;

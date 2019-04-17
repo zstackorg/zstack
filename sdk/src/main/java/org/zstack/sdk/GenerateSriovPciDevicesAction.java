@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class GetPciDeviceSpecCandidatesAction extends AbstractAction {
+public class GenerateSriovPciDevicesAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class GetPciDeviceSpecCandidatesAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.GetPciDeviceSpecCandidatesResult value;
+        public org.zstack.sdk.GenerateVirtualPciDevicesResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,17 +25,14 @@ public class GetPciDeviceSpecCandidatesAction extends AbstractAction {
         }
     }
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.util.List clusterUuids;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String hostUuid;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vmInstanceUuid;
+    @Param(required = true, validValues = {"GPU_Video_Controller"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String deviceType;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.util.List types;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.Integer virtPartNum;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -52,6 +49,12 @@ public class GetPciDeviceSpecCandidatesAction extends AbstractAction {
     @Param(required = false)
     public String accessKeySecret;
 
+    @NonAPIParam
+    public long timeout = -1;
+
+    @NonAPIParam
+    public long pollingInterval = -1;
+
 
     private Result makeResult(ApiResult res) {
         Result ret = new Result();
@@ -60,8 +63,8 @@ public class GetPciDeviceSpecCandidatesAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.GetPciDeviceSpecCandidatesResult value = res.getResult(org.zstack.sdk.GetPciDeviceSpecCandidatesResult.class);
-        ret.value = value == null ? new org.zstack.sdk.GetPciDeviceSpecCandidatesResult() : value; 
+        org.zstack.sdk.GenerateVirtualPciDevicesResult value = res.getResult(org.zstack.sdk.GenerateVirtualPciDevicesResult.class);
+        ret.value = value == null ? new org.zstack.sdk.GenerateVirtualPciDevicesResult() : value; 
 
         return ret;
     }
@@ -90,11 +93,11 @@ public class GetPciDeviceSpecCandidatesAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "GET";
-        info.path = "/pci-device-specs/candidates";
+        info.httpMethod = "PUT";
+        info.path = "/hosts/{hostUuid}/actions";
         info.needSession = true;
-        info.needPoll = false;
-        info.parameterName = "";
+        info.needPoll = true;
+        info.parameterName = "generateSriovPciDevices";
         return info;
     }
 

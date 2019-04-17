@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class CreatePciDeviceSpecAction extends AbstractAction {
+public class UngenerateMdevDevicesAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class CreatePciDeviceSpecAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.CreatePciDeviceSpecResult value;
+        public org.zstack.sdk.UngenerateVirtualPciDevicesResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,35 +25,8 @@ public class CreatePciDeviceSpecAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String name;
-
-    @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String description;
-
-    @Param(required = true, maxLength = 4, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vendorId;
-
-    @Param(required = true, maxLength = 4, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String deviceId;
-
-    @Param(required = false, maxLength = 4, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String subvendorId;
-
-    @Param(required = false, maxLength = 4, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String subdeviceId;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String romContent;
-
-    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String romVersion;
-
-    @Param(required = false)
-    public java.lang.String resourceUuid;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.util.List tagUuids;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String pciDeviceUuid;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -84,8 +57,8 @@ public class CreatePciDeviceSpecAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.CreatePciDeviceSpecResult value = res.getResult(org.zstack.sdk.CreatePciDeviceSpecResult.class);
-        ret.value = value == null ? new org.zstack.sdk.CreatePciDeviceSpecResult() : value; 
+        org.zstack.sdk.UngenerateVirtualPciDevicesResult value = res.getResult(org.zstack.sdk.UngenerateVirtualPciDevicesResult.class);
+        ret.value = value == null ? new org.zstack.sdk.UngenerateVirtualPciDevicesResult() : value; 
 
         return ret;
     }
@@ -114,11 +87,11 @@ public class CreatePciDeviceSpecAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "POST";
-        info.path = "/pci-device/pci-device-specs";
+        info.httpMethod = "PUT";
+        info.path = "/pci-device/pci-devices/{pciDeviceUuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "params";
+        info.parameterName = "ungenerateMdevDevices";
         return info;
     }
 

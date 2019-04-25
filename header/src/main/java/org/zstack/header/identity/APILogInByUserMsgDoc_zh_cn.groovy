@@ -81,11 +81,20 @@ doc {
 					since "0.6"
 					
 				}
+				colume {
+					name "clientInfo"
+					enclosedIn ""
+					desc "客户端信息"
+					location "body"
+					type "Map"
+					optional true
+					since "3.5.0"
+				}
 			}
         }
 
         response {
-            clz APILogInReply.class
-        }
+			clz APILogInReply.class
+		}
     }
 }

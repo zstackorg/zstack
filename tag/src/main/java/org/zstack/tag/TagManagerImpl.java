@@ -647,6 +647,14 @@ public class TagManagerImpl extends AbstractService implements TagManager,
     }
 
     @Override
+    public List<String> filterSystemTags(List<String> systemTags, String resourceType) {
+        List<SystemTag> tags = resourceTypeSystemTagMap.get(resourceType);
+        return systemTags.stream()
+                .filter(it -> tags.stream().anyMatch(sys -> sys.isMatch(it)))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void installCreateMessageValidator(String resourceType, SystemTagCreateMessageValidator validator) {
         if (!resourceTypeClassMap.containsKey(resourceType)) {
             throw new CloudRuntimeException(String.format("cannot find resource type[%s] in tag system ", resourceType));

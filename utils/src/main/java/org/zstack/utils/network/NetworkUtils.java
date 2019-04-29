@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.zstack.utils.network.IPv6NetworkUtils.isIpv6Address;
+import static org.zstack.utils.network.IPv6NetworkUtils.*;
 
 public class NetworkUtils {
     private static final CLogger logger = Utils.getLogger(NetworkUtils.class);
@@ -784,6 +784,108 @@ public class NetworkUtils {
             return true;
         } else {
             return isIpv6Address(ip);
+        }
+    }
+
+    public static boolean isIpv4GroupAddress(String ip) {
+        if (isInRange(ip, "224.0.0.0", "240.255.255.255")) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isIpv4LocalAddress(String ip) {
+        if (isInRange(ip, "127.0.0.0", "127.255.255.255")) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isIpv4LinkLocalAddress(String ip) {
+        if (isInRange(ip, "169.254.0.0","169.254.255.255")) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isUnicastIPAddress(String ip) {
+        if (isIpv4Address(ip)) {
+            if (isIpv4GroupAddress(ip) || isIpv4LocalAddress(ip) || isIpv4LinkLocalAddress(ip)) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return isIpv6UnicastAddress(ip);
+        }
+    }
+
+    public static boolean isMulticastIPAddress(String ip) {
+        if (isIpv4Address(ip)) {
+            if (isIpv4GroupAddress(ip)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return isIpv6MulticastAddress(ip);
+        }
+    }
+
+    public static boolean isMulticastCidr(String cidr) {
+        try {
+            IPv6Network network6 = IPv6Network.fromString(cidr);
+            String formatCidr = network6.toString();
+            String formatAddress = formatCidr.split("/")[0];
+            IPv6Address address6 = IPv6Address.fromString(formatAddress);
+            if (address6.isMulticast()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            Pattern pattern = Pattern.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(\\d|[1-2]\\d|3[0-2]))$");
+            Matcher matcher = pattern.matcher(cidr);
+            if (!matcher.find()) {
+                return false;
+            }
+
+            SubnetUtils sub = new SubnetUtils(cidr);
+            String address = sub.getInfo().getAddress();
+            if (isIpv4GroupAddress(address)) {
+                return true;
+            } else {
+                return false;
+            }
+
+        }
+    }
+
+    public static boolean isUnicastCidr(String cidr) {
+        try {
+            IPv6Network network6 = IPv6Network.fromString(cidr);
+            String formatCidr = network6.toString();
+            String formatAddress = formatCidr.split("/")[0];
+            IPv6Address address6 = IPv6Address.fromString(formatAddress);
+            if (address6.isMulticast() || address6.isSiteLocal() || address6.isLinkLocal()) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (Exception e) {
+            Pattern pattern = Pattern.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(\\d|[1-2]\\d|3[0-2]))$");
+            Matcher matcher = pattern.matcher(cidr);
+            if (!matcher.find()) {
+                return false;
+            }
+
+            SubnetUtils sub = new SubnetUtils(cidr);
+            String address = sub.getInfo().getAddress();
+            if (isIpv4GroupAddress(address) || isIpv4LocalAddress(address) || isIpv4LinkLocalAddress(address)) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 }

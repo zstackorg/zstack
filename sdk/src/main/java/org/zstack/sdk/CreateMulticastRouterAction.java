@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class CreateVRouterOspfAreaAction extends AbstractAction {
+public class CreateMulticastRouterAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class CreateVRouterOspfAreaAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.CreateVRouterOspfAreaResult value;
+        public org.zstack.sdk.CreateMulticastRouterResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,20 +25,11 @@ public class CreateVRouterOspfAreaAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, maxLength = 64, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String areaId;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String vpcRouterVmUuid;
 
-    @Param(required = false, maxLength = 16, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String areaAuth;
-
-    @Param(required = false, maxLength = 16, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String areaType;
-
-    @Param(required = false, maxLength = 16, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String password;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,255L}, noTrim = false)
-    public java.lang.Integer keyId;
+    @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String description;
 
     @Param(required = false)
     public java.lang.String resourceUuid;
@@ -75,8 +66,8 @@ public class CreateVRouterOspfAreaAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.CreateVRouterOspfAreaResult value = res.getResult(org.zstack.sdk.CreateVRouterOspfAreaResult.class);
-        ret.value = value == null ? new org.zstack.sdk.CreateVRouterOspfAreaResult() : value; 
+        org.zstack.sdk.CreateMulticastRouterResult value = res.getResult(org.zstack.sdk.CreateMulticastRouterResult.class);
+        ret.value = value == null ? new org.zstack.sdk.CreateMulticastRouterResult() : value; 
 
         return ret;
     }
@@ -106,7 +97,7 @@ public class CreateVRouterOspfAreaAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/routerArea";
+        info.path = "/multicast/virtual-routers";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

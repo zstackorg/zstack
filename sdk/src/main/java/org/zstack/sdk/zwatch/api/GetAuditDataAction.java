@@ -3,6 +3,7 @@ package org.zstack.sdk.zwatch.api;
 import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
+import org.zstack.sdk.zwatch.datatype.AuditorType;
 
 public class GetAuditDataAction extends AbstractAction {
 
@@ -38,7 +39,7 @@ public class GetAuditDataAction extends AbstractAction {
     public java.util.List conditions;
 
     @Param(required = false, validValues = {"Login","Resource"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public org.zstack.sdk.zwatch.datatype.AuditsType auditsType;
+    public AuditorType auditsType;
 
     @Param(required = false)
     public java.util.List systemTags;

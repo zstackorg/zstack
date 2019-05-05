@@ -85,7 +85,7 @@ public class APILogInByUserMsg extends APISessionMessage implements APILoginAudi
         String clientBrowser = "";
         APILogInByUserMsg amsg = (APILogInByUserMsg) msg;
         Map<String, String> clientInfo = amsg.getClientInfo();
-        if (!clientInfo.isEmpty() && clientInfo != null) {
+        if (clientInfo != null && !clientInfo.isEmpty()) {
             clientIp = StringUtils.isNotEmpty(clientInfo.get("clientIp")) ? clientInfo.get("clientIp") : "";
             clientBrowser = StringUtils.isNotEmpty(clientInfo.get("clientBrowser")) ? clientInfo.get("clientBrowser") : "";
         }

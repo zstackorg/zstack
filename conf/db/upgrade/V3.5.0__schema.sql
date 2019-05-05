@@ -5,6 +5,7 @@ CREATE TABLE `MulticastRouterVO` (
     `uuid` VARCHAR(32) NOT NULL UNIQUE,
     `vpcRouterUuid` VARCHAR(32) NOT NULL,
     `description` VARCHAR(2048) DEFAULT NULL,
+    `state` VARCHAR(32) NOT NULL,
     `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
     `createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
     CONSTRAINT fkMultiCastRouterVOVpcRouterVmVO FOREIGN KEY (vpcRouterUuid) REFERENCES VpcRouterVmVO (uuid) ON DELETE CASCADE,

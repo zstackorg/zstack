@@ -39,7 +39,7 @@ public class GetAuditDataAction extends AbstractAction {
     public java.util.List conditions;
 
     @Param(required = false, validValues = {"Login","Resource"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public AuditorType auditsType;
+    public AuditorType auditorType;
 
     @Param(required = false)
     public java.util.List systemTags;

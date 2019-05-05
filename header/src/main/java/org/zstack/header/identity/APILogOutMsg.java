@@ -53,7 +53,7 @@ public class APILogOutMsg extends APISessionMessage implements APILoginAuditor {
         String clientBrowser = "";
         APILogOutMsg amsg = (APILogOutMsg) msg;
         Map<String, String> clientInfo = amsg.getClientInfo();
-        if (!clientInfo.isEmpty()) {
+        if (clientInfo != null && !clientInfo.isEmpty()) {
             clientIp = StringUtils.isNotEmpty(clientInfo.get("clientIp")) ? clientInfo.get("clientIp") : "";
             clientBrowser = StringUtils.isNotEmpty(clientInfo.get("clientBrowser")) ? clientInfo.get("clientBrowser") : "";
         }

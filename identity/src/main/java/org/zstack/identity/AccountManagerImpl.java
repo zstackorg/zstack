@@ -373,7 +373,12 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
 
     private void handle(APILogOutMsg msg) {
         APILogOutReply reply = new APILogOutReply();
-        msg.setSession(sessions.get(msg.getSessionUuid()));
+        SessionInventory session = sessions.get(msg.getSessionUuid());
+        if (session == null) {
+            SessionVO svo = dbf.findByUuid(msg.getSessionUuid(), SessionVO.class);
+            session = svo == null ? null : SessionInventory.valueOf(svo);
+        }
+        msg.setSession(session);
         logOutSession(msg.getSessionUuid());
         bus.reply(msg, reply);
     }

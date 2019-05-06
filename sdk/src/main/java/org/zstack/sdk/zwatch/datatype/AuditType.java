@@ -1,6 +1,6 @@
 package org.zstack.sdk.zwatch.datatype;
 
-public enum AuditorType {
+public enum AuditType {
     Login,
     Resource
 }

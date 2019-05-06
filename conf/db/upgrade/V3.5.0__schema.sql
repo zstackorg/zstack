@@ -1,4 +1,4 @@
-ALTER TABLE `UsbDeviceVO` ADD COLUMN `attachType` varchar(32) DEFAULT "PassThrough";
+ALTER TABLE `UsbDeviceVO` ADD COLUMN `attachType` varchar(32);
 
 DELIMITER $$
 CREATE PROCEDURE setDefaultUsbAttachType()

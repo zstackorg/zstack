@@ -76,6 +76,8 @@ public class APILogInByLdapMsg extends APISessionMessage implements APILoginAudi
         APILogInByLdapMsg msg = new APILogInByLdapMsg();
         msg.setUid("ou=Employee,uid=test");
         msg.setPassword("password");
+        msg.setCaptchaUuid("3bb4e611b10e32cfaaa7fb4b1e3515ac");
+        msg.setVerifyCode("test");
         return msg;
     }
 

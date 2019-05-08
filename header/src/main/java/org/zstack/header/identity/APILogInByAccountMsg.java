@@ -82,10 +82,10 @@ public class APILogInByAccountMsg extends APISessionMessage implements APILoginA
 
     public static APILogInByAccountMsg __example__() {
         APILogInByAccountMsg msg = new APILogInByAccountMsg();
-
         msg.setAccountName("test");
         msg.setPassword("password");
-
+        msg.setCaptchaUuid("39bd748906ad301793c64f688dc197a9");
+        msg.setVerifyCode("test");
         return msg;
     }
 

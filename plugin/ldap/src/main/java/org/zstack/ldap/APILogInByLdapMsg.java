@@ -23,7 +23,7 @@ import java.util.Map;
 public class APILogInByLdapMsg extends APISessionMessage implements APILoginAuditor {
     @APIParam
     private String uid;
-    @APIParam
+    @APIParam(password = true)
     private String password;
     @APIParam(required = false)
     private String verifyCode;

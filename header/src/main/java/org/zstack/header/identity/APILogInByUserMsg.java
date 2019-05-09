@@ -24,7 +24,7 @@ public class APILogInByUserMsg extends APISessionMessage implements APILoginAudi
     private String accountName;
     @APIParam
     private String userName;
-    @APIParam
+    @APIParam(password = true)
     private String password;
     @APIParam(required = false)
     private Map<String, String> clientInfo;

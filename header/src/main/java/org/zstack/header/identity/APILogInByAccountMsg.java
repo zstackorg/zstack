@@ -20,7 +20,7 @@ import java.util.Map;
 public class APILogInByAccountMsg extends APISessionMessage implements APILoginAuditor {
     @APIParam
     private String accountName;
-    @APIParam
+    @APIParam(password = true)
     private String password;
     @APIParam(required = false)
     private String accountType;

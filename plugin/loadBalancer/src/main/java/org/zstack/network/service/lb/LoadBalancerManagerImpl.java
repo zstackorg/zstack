@@ -177,6 +177,7 @@ public class LoadBalancerManagerImpl extends AbstractService implements LoadBala
                     public void run(FlowTrigger trigger, Map data) {
                         ModifyVipAttributesStruct struct = new ModifyVipAttributesStruct();
                         struct.setUseFor(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING);
+                        struct.setServiceUuid(vo.getUuid());
                         Vip v = new Vip(vip.getUuid());
                         v.setStruct(struct);
                         v.acquire(new Completion(trigger) {
@@ -198,6 +199,7 @@ public class LoadBalancerManagerImpl extends AbstractService implements LoadBala
                         LoadBalancerVO vo = (LoadBalancerVO)data.get(LoadBalancerConstants.Param.LOAD_BALANCER_VO);
                         ModifyVipAttributesStruct struct = new ModifyVipAttributesStruct();
                         struct.setUseFor(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING);
+                        struct.setServiceUuid(vo.getUuid());
                         Vip v = new Vip(vip.getUuid());
                         v.setStruct(struct);
                         v.release(new Completion(trigger) {
@@ -698,7 +700,15 @@ public class LoadBalancerManagerImpl extends AbstractService implements LoadBala
 
     @Override
     public ServiceReference getServiceReference(String vipUuid) {
-        long count = Q.New(LoadBalancerVO.class).eq(LoadBalancerVO_.vipUuid, vipUuid).count();
+        List<String> uuids = SQL.New("select lb.uuid" +
+                " from LoadBalancerVO lb, LoadBalancerListenerVmNicRefVO ref, LoadBalancerListenerVO listener" +
+                " where lb.vipUuid = :vipUuid and lb.uuid != listener.uuid" +
+                " and listener.uuid = ref.listenerUuid").param("vipUuid", vipUuid).list();
+
+        long count = 0;
+        if (uuids != null && ! uuids.isEmpty()) {
+            count = new HashSet<>(uuids).size();
+        }
         return new VipGetServiceReferencePoint.ServiceReference(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING, count);
     }
 }

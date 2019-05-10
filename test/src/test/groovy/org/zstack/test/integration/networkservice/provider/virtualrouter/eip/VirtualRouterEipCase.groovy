@@ -7,16 +7,13 @@ import org.zstack.header.network.service.NetworkServiceL3NetworkRefVO
 import org.zstack.header.network.service.NetworkServiceL3NetworkRefVO_
 import org.zstack.header.vm.VmNicVO
 import org.zstack.header.vm.VmNicVO_
-import org.zstack.network.service.eip.EipConstant
 import org.zstack.network.service.eip.EipVO
+import org.zstack.network.service.vip.VipNetworkServicesRefVO
+import org.zstack.network.service.vip.VipNetworkServicesRefVO_
 import org.zstack.network.service.vip.VipVO
 import org.zstack.network.service.virtualrouter.VirtualRouterCommands
 import org.zstack.network.service.virtualrouter.VirtualRouterConstant
-import org.zstack.sdk.EipInventory
-import org.zstack.sdk.L3NetworkInventory
-import org.zstack.sdk.VirtualRouterVmInventory
-import org.zstack.sdk.VmInstanceInventory
-import org.zstack.sdk.VmNicInventory
+import org.zstack.sdk.*
 import org.zstack.test.integration.networkservice.provider.NetworkServiceProviderTest
 import org.zstack.test.integration.networkservice.provider.virtualrouter.VirtualRouterNetworkServiceEnv
 import org.zstack.testlib.*
@@ -25,7 +22,6 @@ import org.zstack.utils.function.Function
 import org.zstack.utils.gson.JSONObjectUtil
 
 import javax.persistence.Tuple
-
 /**
  * Created by xing5 on 2017/3/7.
  */
@@ -108,7 +104,7 @@ class VirtualRouterEipCase extends SubCase {
         VipVO vip = dbFindByUuid(eip.vipUuid, VipVO.class)
         // the vip has not created on backend
         assert vip.serviceProvider == null
-        assert vip.useFor == null
+        assert Q.New(VipNetworkServicesRefVO.class).eq(VipNetworkServicesRefVO_.vipUuid, vip.uuid).count() == 0
     }
 
     void testVirtualRouterDHCP() {

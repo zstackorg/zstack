@@ -69,9 +69,6 @@ public class VipVO extends ResourceVO implements OwnedByAccount {
     private String serviceProvider;
 
     @Column
-    private String useFor;
-
-    @Column
     private String usedIpUuid;
 
     @OneToMany(fetch = FetchType.EAGER)
@@ -143,14 +140,6 @@ public class VipVO extends ResourceVO implements OwnedByAccount {
 
     public void setServiceProvider(String serviceProvider) {
         this.serviceProvider = serviceProvider;
-    }
-
-    public String getUseFor() {
-        return useFor;
-    }
-
-    public void setUseFor(String useFor) {
-        this.useFor = useFor;
     }
 
     public Timestamp getCreateDate() {

@@ -7,6 +7,7 @@ public class ModifyVipAttributesStruct {
     private String serviceProvider;
     private boolean isServiceProvider;
     private String useFor;
+    private String serviceUuid;
     private boolean isUserFor;
     private String peerL3NetworkUuid;
     private boolean isPeerL3NetworkUuid;
@@ -55,6 +56,14 @@ public class ModifyVipAttributesStruct {
     public void setUseFor(String useFor) {
         this.useFor = useFor;
         isUserFor = true;
+    }
+
+    public String getServiceUuid() {
+        return serviceUuid;
+    }
+
+    public void setServiceUuid(String serviceUuid) {
+        this.serviceUuid = serviceUuid;
     }
 
     public String getPeerL3NetworkUuid() {

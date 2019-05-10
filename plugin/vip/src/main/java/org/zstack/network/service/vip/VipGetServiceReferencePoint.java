@@ -1,8 +1,5 @@
 package org.zstack.network.service.vip;
 
-import org.zstack.utils.RangeSet;
-import org.zstack.utils.VipUseForList;
-
 public interface VipGetServiceReferencePoint {
     public final class ServiceReference{
         String useFor;
@@ -30,6 +27,6 @@ public interface VipGetServiceReferencePoint {
         }
     }
 
-    /* this api will return the rules(except serviceUuid) count bound to this vip */
+    /* this api will return the active rules(except serviceUuid) count bound to this vip */
     ServiceReference getServiceReference(String vipUuid);
 }

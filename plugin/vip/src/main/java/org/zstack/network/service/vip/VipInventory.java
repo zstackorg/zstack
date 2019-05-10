@@ -1,5 +1,6 @@
 package org.zstack.network.service.vip;
 
+import org.zstack.core.db.Q;
 import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
@@ -10,6 +11,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -124,7 +126,6 @@ public class VipInventory implements Serializable {
         inv.setLastOpDate(vo.getLastOpDate());
         inv.setNetmask(vo.getNetmask());
         inv.setPrefixLen(vo.getPrefixLen());
-        inv.setUseFor(vo.getUseFor());
         inv.setUuid(vo.getUuid());
         inv.setState(vo.getState().toString());
         inv.setUsedIpUuid(vo.getUsedIpUuid());
@@ -132,6 +133,15 @@ public class VipInventory implements Serializable {
             inv.setPeerL3NetworkUuids(vo.getPeerL3NetworkRefs().stream()
                     .map(ref -> ref.getL3NetworkUuid())
                     .collect(Collectors.toList()));
+        }
+
+        List<String> services = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType)
+                .eq(VipNetworkServicesRefVO_.vipUuid, vo.getUuid()).listValues();
+        List<String> types = new ArrayList<>(new HashSet<>(services));
+        if(types == null || types.isEmpty()) {
+            inv.setUseFor(null);
+        } else {
+            inv.setUseFor(String.join(",", types));
         }
         return inv;
     }

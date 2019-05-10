@@ -11,7 +11,6 @@ public class VipVO_ extends ResourceVO_ {
     public static volatile SingularAttribute<VipVO, String> name;
     public static volatile SingularAttribute<VipVO, String> description;
     public static volatile SingularAttribute<VipVO, String> serviceProvider;
-    public static volatile SingularAttribute<VipVO, String> useFor;
     public static volatile SingularAttribute<VipVO, String> l3NetworkUuid;
     public static volatile SingularAttribute<VipVO, String> ipRangeUuid;
     public static volatile SingularAttribute<VipVO, String> ip;

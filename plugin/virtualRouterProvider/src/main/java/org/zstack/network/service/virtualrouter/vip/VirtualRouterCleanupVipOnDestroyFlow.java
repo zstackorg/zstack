@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
+import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.header.core.Completion;
@@ -16,9 +17,7 @@ import org.zstack.header.message.MessageReply;
 import org.zstack.network.service.vip.*;
 import org.zstack.network.service.virtualrouter.VirtualRouterConstant;
 import org.zstack.network.service.virtualrouter.VirtualRouterConstant.Param;
-import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.VipUseForList;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
@@ -70,9 +69,9 @@ public class VirtualRouterCleanupVipOnDestroyFlow extends NoRollbackFlow {
         while (it.hasNext()){
             VirtualRouterVipVO vvipVO = it.next();
             VipVO vip = dbf.findByUuid(vvipVO.getUuid(), VipVO.class);
-            if (vip != null && vip.getUseFor() != null){
-                VipUseForList useForList = new VipUseForList(vip.getUseFor());
-                if(useForList.isIncluded(VirtualRouterConstant.SNAT_NETWORK_SERVICE_TYPE)) {
+            List<String> useFor = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType).eq(VipNetworkServicesRefVO_.vipUuid, vvipVO.getUuid()).listValues();
+            if (vip != null && useFor != null && !useFor.isEmpty()){
+                if(useFor.contains(VirtualRouterConstant.SNAT_NETWORK_SERVICE_TYPE)) {
                     vips.add(vip);
                 }
             }

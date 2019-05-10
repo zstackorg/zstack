@@ -27,8 +27,6 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.network.l3.L3NetworkVO;
-import org.zstack.network.service.portforwarding.PortForwardingConstant;
-import org.zstack.network.service.vip.ModifyVipAttributesStruct;
 import org.zstack.header.network.service.NetworkServiceProviderType;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
@@ -40,24 +38,21 @@ import org.zstack.network.service.virtualrouter.*;
 import org.zstack.network.service.virtualrouter.VirtualRouterCommands.AgentCommand;
 import org.zstack.network.service.virtualrouter.VirtualRouterCommands.AgentResponse;
 import org.zstack.network.service.virtualrouter.vip.VirtualRouterVipBackend;
-import org.zstack.network.service.virtualrouter.vip.VirtualRouterVipVO;
-import org.zstack.network.service.virtualrouter.vip.VirtualRouterVipVO_;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
+import org.zstack.utils.VipUseForList;
 import org.zstack.utils.function.Function;
 import org.zstack.utils.logging.CLogger;
-import org.zstack.utils.VipUseForList;
-
-import static java.util.Arrays.asList;
-import static org.zstack.core.Platform.argerr;
-import static org.zstack.core.Platform.operr;
 
 import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
+import static org.zstack.core.Platform.argerr;
+import static org.zstack.core.Platform.operr;
 import static org.zstack.utils.CollectionDSL.list;
 
 /**
@@ -590,6 +585,7 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
     private void acquireVip(final VirtualRouterVmInventory vr, final LoadBalancerStruct struct, final List<VmNicInventory> nics, final Completion completion) {
         ModifyVipAttributesStruct vipStruct = new ModifyVipAttributesStruct();
         vipStruct.setUseFor(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING);
+        vipStruct.setServiceUuid(struct.getLb().getUuid());
         NetworkServiceProviderType providerType = nwServiceMgr.getTypeOfNetworkServiceProviderForService(vr.getGuestL3Networks().get(0),
                 LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE);
         vipStruct.setServiceProvider(providerType.toString());
@@ -601,7 +597,6 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
 
         new While<>(guestL3NetworkUuids).all((guestL3NetworkUuid, completion1) -> {
             vipStruct.setPeerL3NetworkUuid(guestL3NetworkUuid);
-
             Vip v = new Vip(struct.getLb().getVipUuid());
             v.setStruct(vipStruct);
             v.acquire(new Completion(completion1) {
@@ -684,6 +679,7 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
                     public void run(final FlowTrigger trigger, Map data) {
                         ModifyVipAttributesStruct vipStruct = new ModifyVipAttributesStruct();
                         vipStruct.setUseFor(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING);
+                        vipStruct.setServiceUuid(struct.getLb().getUuid());
                         NetworkServiceProviderType providerType = nwServiceMgr.getTypeOfNetworkServiceProviderForService(vr.getGuestL3Networks().get(0),
                                 LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE);
                         vipStruct.setServiceProvider(providerType.toString());
@@ -728,6 +724,7 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
 
                         ModifyVipAttributesStruct vipStruct = new ModifyVipAttributesStruct();
                         vipStruct.setUseFor(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING);
+                        vipStruct.setServiceUuid(struct.getLb().getUuid());
                         Vip v = new Vip(vip.getUuid());
                         v.setStruct(vipStruct);
                         v.release(new Completion(trigger) {
@@ -792,8 +789,8 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
         VmNicInventory nic = nics.get(0);
         final L3NetworkInventory l3 = L3NetworkInventory.valueOf(dbf.findByUuid(nic.getL3NetworkUuid(), L3NetworkVO.class));
         final VipInventory vip = VipInventory.valueOf(dbf.findByUuid(struct.getLb().getVipUuid(), VipVO.class));
-
-        VipUseForList useForList = new VipUseForList(vip.getUseFor());
+        List<String> useFor = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType).eq(VipNetworkServicesRefVO_.vipUuid, struct.getLb().getVipUuid()).listValues();
+        VipUseForList useForList = new VipUseForList(useFor);
         if (!useForList.isIncluded(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING)) {
             logger.warn(String.format("the vip[uuid:%s, name:%s, ip:%s, useFor: %s] is not for load balancer", vip.getUuid(),
                             vip.getName(), vip.getIp(), vip.getUseFor()));
@@ -815,7 +812,7 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
                     public void run(FlowTrigger trigger, Map data) {
                         ModifyVipAttributesStruct vipStruct = new ModifyVipAttributesStruct();
                         vipStruct.setUseFor(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING);
-
+                        vipStruct.setServiceUuid(struct.getLb().getUuid());
                         Set<String> guestL3NetworkUuids = nics.stream()
                                 .map(VmNicInventory::getL3NetworkUuid)
                                 .collect(Collectors.toSet());
@@ -868,6 +865,7 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
 
                         ModifyVipAttributesStruct vipStruct = new ModifyVipAttributesStruct();
                         vipStruct.setUseFor(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING);
+                        vipStruct.setServiceUuid(struct.getLb().getUuid());
                         Vip v = new Vip(vip.getUuid());
                         v.setStruct(vipStruct);
                         v.release(new Completion(trigger) {
@@ -1017,6 +1015,7 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
                         public void run(final FlowTrigger trigger, Map data) {
                             ModifyVipAttributesStruct vipStruct = new ModifyVipAttributesStruct();
                             vipStruct.setUseFor(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING);
+                            vipStruct.setServiceUuid(struct.getLb().getUuid());
                             NetworkServiceProviderType providerType = nwServiceMgr.getTypeOfNetworkServiceProviderForService(vr.getGuestL3Networks().get(0),
                                     LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE);
                             vipStruct.setServiceProvider(providerType.toString());
@@ -1079,6 +1078,7 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
 
                             ModifyVipAttributesStruct vipStruct = new ModifyVipAttributesStruct();
                             vipStruct.setUseFor(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING);
+                            vipStruct.setServiceUuid(struct.getLb().getUuid());
                             Vip v = new Vip(vip.getUuid());
                             v.setStruct(vipStruct);
                             v.release(new Completion(trigger) {

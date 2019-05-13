@@ -286,7 +286,7 @@ public class VipBase {
         });
     }
 
-    protected void releaseVip(ModifyVipAttributesStruct s, Boolean reLeaseServices, Completion completion) {
+    protected void releaseVip(ModifyVipAttributesStruct s, Boolean releaseServices, Completion completion) {
 
         refresh();
         List<String> services = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType)
@@ -300,10 +300,16 @@ public class VipBase {
 
         /* s == null is called from VipDeleteMsg, all service has been released */
         if ((s != null) && (!releaseCheckModifyVipAttributeStruct(s))){
-            if (s.getUseFor() != null && reLeaseServices) {
-                delServicesRef(s.getServiceUuid(),s.getUseFor());
+            try {
+                if (s.getUseFor() != null && releaseServices) {
+                    delServicesRef(s.getServiceUuid(),s.getUseFor());
+                }
+                if (s.isPeerL3NetworkUuid() && s.isServiceProvider()) {
+                    deletePeerL3NetworkUuid(s.getPeerL3NetworkUuid());
+                }
+            } catch (CloudRuntimeException e) {
+                throw new OperationFailureException(operr(e.getMessage()));
             }
-
             /* no need to remove vip from backend */
             completion.success();
             return;
@@ -315,7 +321,7 @@ public class VipBase {
             for (VipCleanupExtensionPoint ext : pluginRgty.getExtensionList(VipCleanupExtensionPoint.class)) {
                 ext.cleanupVip(self.getUuid());
             }
-            if (s != null && s.getUseFor() != null && reLeaseServices) {
+            if (s != null && s.getUseFor() != null && releaseServices) {
                 delServicesRef(s.getServiceUuid(),s.getUseFor());
             }
             completion.success();
@@ -338,7 +344,7 @@ public class VipBase {
             public void success() {
                 logger.debug(String.format("successfully released vip[uuid:%s, name:%s, ip:%s] on service[%s]",
                         self.getUuid(), self.getName(), self.getIp(), self.getServiceProvider()));
-                if (reLeaseServices) {
+                if (releaseServices) {
                     clearServicesRefs();
                 }
                 cleanInDB();
@@ -412,9 +418,6 @@ public class VipBase {
             public void success() {
                 logger.debug(String.format("successfully acquired vip[uuid:%s, name:%s, ip:%s] on service[%s]",
                         self.getUuid(), self.getName(), self.getIp(), s.getServiceProvider()));
-
-                addPeerL3NetworkUuid(s.getPeerL3NetworkUuid());
-
                 completion.success();
             }
 
@@ -803,7 +806,18 @@ public class VipBase {
 
         if (self.getPeerL3NetworkRefs().stream()
                 .anyMatch(ref -> ref.getL3NetworkUuid().equals(peerL3NetworkUuid))) {
-            return true;
+            /*
+            * check if there are services to use the l3
+            * */
+            Boolean used = false;
+            for (VipGetServiceReferencePoint ext : pluginRgty.getExtensionList(VipGetServiceReferencePoint.class)) {
+                VipGetServiceReferencePoint.ServiceReference service = ext.getServicePeerL3Reference(self.getUuid(), peerL3NetworkUuid);
+                if (service.count > 0) {
+                    used = true;
+                }
+            }
+
+            return !used;
         }
 
         return false;

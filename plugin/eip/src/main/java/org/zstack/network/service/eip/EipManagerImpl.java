@@ -860,51 +860,29 @@ public class EipManagerImpl extends AbstractService implements EipManager, VipRe
                             trigger.next();
                         }
                     });
+                }
 
-                    flow(new NoRollbackFlow() {
-                        @Override
-                        public void run(FlowTrigger trigger, Map data) {
-                            ModifyVipAttributesStruct mstruct = new ModifyVipAttributesStruct();
-                            mstruct.setUseFor(EipConstant.EIP_NETWORK_SERVICE_TYPE);
-                            mstruct.setServiceUuid(struct.getEip().getUuid());
-                            Vip vip = new Vip(struct.getVip().getUuid());
-                            vip.setStruct(mstruct);
-                            vip.release(new Completion(completion) {
-                                @Override
-                                public void success() {
-                                completion.success();
-                            }
-
-                                @Override
-                                public void fail(ErrorCode errorCode) {
-                                completion.fail(errorCode);
-                            }
-                            });
-                        }
-                    });
-                } else {
-                    flow(new NoRollbackFlow() {
-                        @Override
-                        public void run(FlowTrigger trigger, Map data) {
-                            ModifyVipAttributesStruct mstruct = new ModifyVipAttributesStruct();
-                            mstruct.setUseFor(EipConstant.EIP_NETWORK_SERVICE_TYPE);
-                            mstruct.setServiceUuid(struct.getEip().getUuid());
-                            Vip vip = new Vip(struct.getVip().getUuid());
-                            vip.setStruct(mstruct);
-                            vip.stop(new Completion(completion) {
-                                @Override
-                                public void success() {
+                flow(new NoRollbackFlow() {
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        ModifyVipAttributesStruct mstruct = new ModifyVipAttributesStruct();
+                        mstruct.setUseFor(EipConstant.EIP_NETWORK_SERVICE_TYPE);
+                        mstruct.setServiceUuid(struct.getEip().getUuid());
+                        Vip vip = new Vip(struct.getVip().getUuid());
+                        vip.setStruct(mstruct);
+                        vip.stop(new Completion(completion) {
+                            @Override
+                            public void success() {
                                     completion.success();
                                 }
 
-                                @Override
-                                public void fail(ErrorCode errorCode) {
+                            @Override
+                            public void fail(ErrorCode errorCode) {
                                     completion.fail(errorCode);
                                 }
-                            });
-                        }
-                    });
-                }
+                        });
+                    }
+                });
 
                 done(new FlowDoneHandler(completion) {
                     @Override
@@ -1361,6 +1339,12 @@ public class EipManagerImpl extends AbstractService implements EipManager, VipRe
 
     @Override
     public ServiceReference getServiceReference(String vipUuid) {
+        long count = Q.New(EipVO.class).eq(EipVO_.vipUuid, vipUuid).notNull(EipVO_.vmNicUuid).count();
+        return new VipGetServiceReferencePoint.ServiceReference(EipConstant.EIP_NETWORK_SERVICE_TYPE, count);
+    }
+
+    @Override
+    public ServiceReference getServicePeerL3Reference(String vipUuid, String peerL3Uuid) {
         long count = Q.New(EipVO.class).eq(EipVO_.vipUuid, vipUuid).notNull(EipVO_.vmNicUuid).count();
         return new VipGetServiceReferencePoint.ServiceReference(EipConstant.EIP_NETWORK_SERVICE_TYPE, count);
     }

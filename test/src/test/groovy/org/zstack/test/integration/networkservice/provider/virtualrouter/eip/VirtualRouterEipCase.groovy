@@ -8,9 +8,7 @@ import org.zstack.header.network.service.NetworkServiceL3NetworkRefVO_
 import org.zstack.header.vm.VmNicVO
 import org.zstack.header.vm.VmNicVO_
 import org.zstack.network.service.eip.EipVO
-import org.zstack.network.service.vip.VipNetworkServicesRefVO
-import org.zstack.network.service.vip.VipNetworkServicesRefVO_
-import org.zstack.network.service.vip.VipVO
+import org.zstack.network.service.vip.*
 import org.zstack.network.service.virtualrouter.VirtualRouterCommands
 import org.zstack.network.service.virtualrouter.VirtualRouterConstant
 import org.zstack.sdk.*
@@ -22,6 +20,7 @@ import org.zstack.utils.function.Function
 import org.zstack.utils.gson.JSONObjectUtil
 
 import javax.persistence.Tuple
+
 /**
  * Created by xing5 on 2017/3/7.
  */
@@ -104,7 +103,8 @@ class VirtualRouterEipCase extends SubCase {
         VipVO vip = dbFindByUuid(eip.vipUuid, VipVO.class)
         // the vip has not created on backend
         assert vip.serviceProvider == null
-        assert Q.New(VipNetworkServicesRefVO.class).eq(VipNetworkServicesRefVO_.vipUuid, vip.uuid).count() == 0
+        assert Q.New(VipPeerL3NetworkRefVO.class).eq(VipPeerL3NetworkRefVO_.vipUuid, vip.uuid).count() == 0
+        assert Q.New(VipNetworkServicesRefVO.class).eq(VipNetworkServicesRefVO_.vipUuid, vip.uuid).count() == 1
     }
 
     void testVirtualRouterDHCP() {

@@ -29,4 +29,7 @@ public interface VipGetServiceReferencePoint {
 
     /* this api will return the active rules(except serviceUuid) count bound to this vip */
     ServiceReference getServiceReference(String vipUuid);
+
+    /*this api will return the nic count with peer L3 bound to this vip*/
+    ServiceReference getServicePeerL3Reference(String vipUuid, String peerL3Uuid);
 }

@@ -1023,7 +1023,7 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
                 });
 
                 flow(new NoRollbackFlow() {
-                    String __name__ = "release-vip-on-backend";
+                    String __name__ = "remove-l3-from-vip";
 
                     boolean s = false;
 
@@ -1190,6 +1190,15 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
     @Override
     public ServiceReference getServiceReference(String vipUuid) {
         long count = Q.New(PortForwardingRuleVO.class).eq(PortForwardingRuleVO_.vipUuid, vipUuid).notNull(PortForwardingRuleVO_.vmNicUuid).count();
+        return new VipGetServiceReferencePoint.ServiceReference(PortForwardingConstant.PORTFORWARDING_NETWORK_SERVICE_TYPE, count);
+    }
+
+    @Override
+    public ServiceReference getServicePeerL3Reference(String vipUuid, String peerL3Uuid) {
+        long count = SQL.New("select count(*) from VmNicVO nic, PortForwardingRuleVO pf " +
+            "where nic.uuid = pf.vmNicUuid and pf.vipUuid = :vipuuid and nic.l3NetworkUuid = :l3uuid")
+                .param("vipuuid",vipUuid).param("l3uuid", peerL3Uuid).find();
+
         return new VipGetServiceReferencePoint.ServiceReference(PortForwardingConstant.PORTFORWARDING_NETWORK_SERVICE_TYPE, count);
     }
 }

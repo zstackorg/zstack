@@ -1189,16 +1189,23 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
 
     @Override
     public ServiceReference getServiceReference(String vipUuid) {
-        long count = Q.New(PortForwardingRuleVO.class).eq(PortForwardingRuleVO_.vipUuid, vipUuid).notNull(PortForwardingRuleVO_.vmNicUuid).count();
-        return new VipGetServiceReferencePoint.ServiceReference(PortForwardingConstant.PORTFORWARDING_NETWORK_SERVICE_TYPE, count);
+        List<String> uuids = Q.New(PortForwardingRuleVO.class).select(PortForwardingRuleVO_.uuid)
+                .eq(PortForwardingRuleVO_.vipUuid, vipUuid).listValues();
+        if (uuids == null) {
+            uuids = new ArrayList<>();
+        }
+        return new VipGetServiceReferencePoint.ServiceReference(PortForwardingConstant.PORTFORWARDING_NETWORK_SERVICE_TYPE, uuids.size(), uuids);
     }
 
     @Override
     public ServiceReference getServicePeerL3Reference(String vipUuid, String peerL3Uuid) {
-        long count = SQL.New("select count(*) from VmNicVO nic, PortForwardingRuleVO pf " +
+        List<String> uuids = SQL.New("select distinct pf.uuid from VmNicVO nic, PortForwardingRuleVO pf " +
             "where nic.uuid = pf.vmNicUuid and pf.vipUuid = :vipuuid and nic.l3NetworkUuid = :l3uuid")
-                .param("vipuuid",vipUuid).param("l3uuid", peerL3Uuid).find();
+                .param("vipuuid",vipUuid).param("l3uuid", peerL3Uuid).list();
 
-        return new VipGetServiceReferencePoint.ServiceReference(PortForwardingConstant.PORTFORWARDING_NETWORK_SERVICE_TYPE, count);
+        if (uuids == null) {
+            uuids = new ArrayList<>();
+        }
+        return new VipGetServiceReferencePoint.ServiceReference(PortForwardingConstant.PORTFORWARDING_NETWORK_SERVICE_TYPE, uuids.size(), uuids);
     }
 }

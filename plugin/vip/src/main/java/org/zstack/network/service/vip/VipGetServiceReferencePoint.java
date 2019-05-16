@@ -1,13 +1,25 @@
 package org.zstack.network.service.vip;
 
+import java.util.List;
+
 public interface VipGetServiceReferencePoint {
     public final class ServiceReference{
         String useFor;
         long    count;
+        List<String> uuids;
 
-        public ServiceReference(String useFor, long count) {
+        public ServiceReference(String useFor, long count, List<String> uuids) {
             this.useFor = useFor;
             this.count = count;
+            this.uuids = uuids;
+        }
+
+        public List<String> getUuids() {
+            return uuids;
+        }
+
+        public void setUuids(List<String> uuids) {
+            this.uuids = uuids;
         }
 
         public String getUseFor() {
@@ -27,7 +39,8 @@ public interface VipGetServiceReferencePoint {
         }
     }
 
-    /* this api will return the active rules(except serviceUuid) count bound to this vip */
+    /*how many networks attached*/
+    /* this api will return the active peerL3 count bound to this vip */
     ServiceReference getServiceReference(String vipUuid);
 
     /*this api will return the nic count with peer L3 bound to this vip*/

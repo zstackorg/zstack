@@ -700,22 +700,39 @@ public class LoadBalancerManagerImpl extends AbstractService implements LoadBala
 
     @Override
     public ServiceReference getServiceReference(String vipUuid) {
-        long count = SQL.New("select count(*)" +
-                " from LoadBalancerVO lb, LoadBalancerListenerVmNicRefVO ref, LoadBalancerListenerVO listener" +
+        long count = SQL.New("select distinct count(nic.l3NetworkUuid)" +
+                " from LoadBalancerVO lb, LoadBalancerListenerVmNicRefVO ref, LoadBalancerListenerVO listener, VmNicVO nic" +
                 " where lb.vipUuid = :vipUuid and lb.uuid = listener.loadBalancerUuid" +
-                " and listener.uuid = ref.listenerUuid").param("vipUuid", vipUuid).find();
-
-        return new VipGetServiceReferencePoint.ServiceReference(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING, count);
+                " and listener.uuid = ref.listenerUuid and ref.status = 'Active' and nic.uuid = ref.vmNicUuid")
+                        .param("vipUuid", vipUuid).find();
+        List<String> uuids = SQL.New("select distinct lb.uuid" +
+                " from LoadBalancerVO lb, LoadBalancerListenerVmNicRefVO ref, LoadBalancerListenerVO listener, VmNicVO nic" +
+                " where lb.vipUuid = :vipUuid and lb.uuid = listener.loadBalancerUuid" +
+                " and listener.uuid = ref.listenerUuid and ref.status = 'Active' and nic.uuid = ref.vmNicUuid")
+                                .param("vipUuid", vipUuid).list();
+        if (uuids == null || uuids.isEmpty()) {
+            return new VipGetServiceReferencePoint.ServiceReference(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING, count, new ArrayList<>());
+        }
+        return new VipGetServiceReferencePoint.ServiceReference(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING, count, uuids);
     }
 
     @Override
     public ServiceReference getServicePeerL3Reference(String vipUuid, String peerL3Uuid) {
-        long count = SQL.New("select count(*)" +
+        long count = SQL.New("select distinct count(nic.l3NetworkUuid)" +
                 " from LoadBalancerVO lb, LoadBalancerListenerVmNicRefVO ref, LoadBalancerListenerVO listener, VmNicVO nic" +
-                " where lb.vipUuid = :vipUuid and lb.uuid = listener.loadBalancerUuid and ref.status = 'Active'" +
+                " where lb.vipUuid = :vipUuid and lb.uuid = listener.loadBalancerUuid " +
                 " and listener.uuid = ref.listenerUuid and nic.uuid = ref.vmNicUuid and nic.l3NetworkUuid = :l3uuid")
                                 .param("vipUuid", vipUuid).param("l3uuid", peerL3Uuid).find();
 
-        return new VipGetServiceReferencePoint.ServiceReference(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING, count);
+        List<String> uuids = SQL.New("select distinct nic.l3NetworkUuid" +
+                " from LoadBalancerVO lb, LoadBalancerListenerVmNicRefVO ref, LoadBalancerListenerVO listener, VmNicVO nic" +
+                " where lb.vipUuid = :vipUuid and lb.uuid = listener.loadBalancerUuid " +
+                " and listener.uuid = ref.listenerUuid and nic.uuid = ref.vmNicUuid and nic.l3NetworkUuid = :l3uuid")
+                                .param("vipUuid", vipUuid).param("l3uuid", peerL3Uuid).list();
+
+        if (uuids == null || uuids.isEmpty()) {
+            return new VipGetServiceReferencePoint.ServiceReference(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING, count, new ArrayList<>());
+        }
+        return new VipGetServiceReferencePoint.ServiceReference(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING, count, uuids);
     }
 }

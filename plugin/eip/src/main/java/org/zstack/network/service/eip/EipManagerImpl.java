@@ -845,6 +845,30 @@ public class EipManagerImpl extends AbstractService implements EipManager, VipRe
                     }
                 });
 
+                flow(new NoRollbackFlow() {
+                    String __name__ = "remove-l3network-from-vip";
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        ModifyVipAttributesStruct mstruct = new ModifyVipAttributesStruct();
+                        mstruct.setUseFor(EipConstant.EIP_NETWORK_SERVICE_TYPE);
+                        mstruct.setServiceUuid(struct.getEip().getUuid());
+                        mstruct.setPeerL3NetworkUuid(nic.getL3NetworkUuid());
+                        Vip vip = new Vip(struct.getVip().getUuid());
+                        vip.setStruct(mstruct);
+                        vip.stop(new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                trigger.fail(errorCode);
+                            }
+                        });
+                    }
+                });
+
                 if (updateDb) {
                     flow(new NoRollbackFlow() {
                         String __name__ = "udpate-eip";
@@ -861,28 +885,6 @@ public class EipManagerImpl extends AbstractService implements EipManager, VipRe
                         }
                     });
                 }
-
-                flow(new NoRollbackFlow() {
-                    @Override
-                    public void run(FlowTrigger trigger, Map data) {
-                        ModifyVipAttributesStruct mstruct = new ModifyVipAttributesStruct();
-                        mstruct.setUseFor(EipConstant.EIP_NETWORK_SERVICE_TYPE);
-                        mstruct.setServiceUuid(struct.getEip().getUuid());
-                        Vip vip = new Vip(struct.getVip().getUuid());
-                        vip.setStruct(mstruct);
-                        vip.stop(new Completion(completion) {
-                            @Override
-                            public void success() {
-                                    completion.success();
-                                }
-
-                            @Override
-                            public void fail(ErrorCode errorCode) {
-                                    completion.fail(errorCode);
-                                }
-                        });
-                    }
-                });
 
                 done(new FlowDoneHandler(completion) {
                     @Override
@@ -1339,13 +1341,22 @@ public class EipManagerImpl extends AbstractService implements EipManager, VipRe
 
     @Override
     public ServiceReference getServiceReference(String vipUuid) {
-        long count = Q.New(EipVO.class).eq(EipVO_.vipUuid, vipUuid).notNull(EipVO_.vmNicUuid).count();
-        return new VipGetServiceReferencePoint.ServiceReference(EipConstant.EIP_NETWORK_SERVICE_TYPE, count);
+        List<String> uuids = Q.New(EipVO.class).select(EipVO_.uuid).eq(EipVO_.vipUuid, vipUuid).notNull(EipVO_.vmNicUuid).listValues();
+        if (uuids == null || uuids.isEmpty()) {
+            return new VipGetServiceReferencePoint.ServiceReference(EipConstant.EIP_NETWORK_SERVICE_TYPE, 0, new ArrayList<>());
+        }
+        return new VipGetServiceReferencePoint.ServiceReference(EipConstant.EIP_NETWORK_SERVICE_TYPE, uuids.size(), uuids);
     }
 
     @Override
     public ServiceReference getServicePeerL3Reference(String vipUuid, String peerL3Uuid) {
-        long count = Q.New(EipVO.class).eq(EipVO_.vipUuid, vipUuid).notNull(EipVO_.vmNicUuid).count();
-        return new VipGetServiceReferencePoint.ServiceReference(EipConstant.EIP_NETWORK_SERVICE_TYPE, count);
+        List<String> uuids = SQL.New("select eip.uuid from EipVO eip, VmNicVO nic where eip.vipUuid = :vipUuid " +
+            " and eip.vmNicUuid = nic.uuid and nic.l3NetworkUuid = :peerL3Uuid")
+           .param("vipUuid", vipUuid).param("peerL3Uuid", peerL3Uuid).list();
+
+        if (uuids == null || uuids.isEmpty()) {
+            return new VipGetServiceReferencePoint.ServiceReference(EipConstant.EIP_NETWORK_SERVICE_TYPE, 0, new ArrayList<>());
+        }
+        return new VipGetServiceReferencePoint.ServiceReference(EipConstant.EIP_NETWORK_SERVICE_TYPE, uuids.size(), uuids);
     }
 }

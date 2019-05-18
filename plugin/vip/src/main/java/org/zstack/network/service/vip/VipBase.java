@@ -155,7 +155,7 @@ public class VipBase {
         if (s.isPeerL3NetworkUuid()) {
             try {
                 if (s.isServiceProvider()) {
-                    addPeerL3NetworkUuid(s.getPeerL3NetworkUuid());
+                    s.getPeerL3NetworkUuids().forEach(peer -> addPeerL3NetworkUuid(peer));
                 }
             } catch (CloudRuntimeException e) {
                 throw new OperationFailureException(operr(e.getMessage()));
@@ -170,6 +170,40 @@ public class VipBase {
         }
 
         return s.isPeerL3NetworkUuid() && s.isServiceProvider();
+    }
+
+    protected boolean CheckModifyVipAttributeStructWithoutReleaseService( ModifyVipAttributesStruct s) {
+        List<String> services = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType)
+                                 .eq(VipNetworkServicesRefVO_.vipUuid, self.getUuid()).listValues();
+        if (services == null || services.isEmpty()){
+            /*there are no any services using this vip*/
+            return false;
+        }
+
+        if (s.isUserFor() && !services.contains(s.getUseFor())) {
+            /*the service using this vip has been deleted. don't delete repeat*/
+            return false;
+        }
+
+        if ( services.contains(NetworkServiceType.SNAT.toString())) {
+            /* snat is bound to router public interface, it is created automatically,
+             * so it should be deleted automatically, but don't need to remove from backend */
+            return false;
+        }
+
+        int activeServices = 0;
+        for (VipGetServiceReferencePoint ext : pluginRgty.getExtensionList(VipGetServiceReferencePoint.class)) {
+            VipGetServiceReferencePoint.ServiceReference service = ext.getServiceReference(self.getUuid());
+            activeServices += service.count ;
+        }
+
+        /*the vip is active in this service, in another word, there are at least one nic/l3network to attach
+             * with the vip */
+        int deleting = 0;
+        if (s.getPeerL3NetworkUuids() != null) {
+            deleting = s.getPeerL3NetworkUuids().size();
+        }
+        return activeServices <= deleting;
     }
 
     protected boolean releaseCheckModifyVipAttributeStruct( ModifyVipAttributesStruct s) {
@@ -187,11 +221,12 @@ public class VipBase {
 
         if (services.size() == 1) {
             if (s.isUserFor() && s.getUseFor().equals(NetworkServiceType.SNAT.toString())) {
-                 /* snat is bound to router public interface, it is created automatically,
+                /* snat is bound to router public interface, it is created automatically,
                  * so it should be deleted automatically, but don't need to remove from backend */
-                 dbf.remove(self);
+                dbf.remove(self);
                 return false;
             }
+
             return true;
         }
 
@@ -201,15 +236,25 @@ public class VipBase {
             return false;
         }
 
-        int activeServices = 0;
+        long activeNetworks = 0;
+        long activeServices = 0;
         for (VipGetServiceReferencePoint ext : pluginRgty.getExtensionList(VipGetServiceReferencePoint.class)) {
             VipGetServiceReferencePoint.ServiceReference service = ext.getServiceReference(self.getUuid());
-            activeServices += service.count ;
+            activeNetworks += service.count;
+            activeServices += service.uuids.size();
         }
 
-        /*the vip is active in this service, in another word, there are at least one nic to attach
-             * with the vip */
-        return activeServices == 0;
+        if (activeServices > 1) {
+            return false;
+        }
+        /*the vip is active in this service, in another word, there are at least one peerL3network to attach
+         * with the vip */
+        //return activeServices == 0;
+        int deleting = 0;
+        if (s.getPeerL3NetworkUuids() != null) {
+            deleting = s.getPeerL3NetworkUuids().size();
+        }
+        return activeNetworks <= deleting;
     }
 
     private void handle(ReleaseVipMsg msg) {
@@ -299,13 +344,14 @@ public class VipBase {
         }
 
         /* s == null is called from VipDeleteMsg, all service has been released */
-        if ((s != null) && (!releaseCheckModifyVipAttributeStruct(s))){
+        if ((s != null) && !releaseServices && (!CheckModifyVipAttributeStructWithoutReleaseService(s)) ||
+                (s != null) && releaseServices && (!releaseCheckModifyVipAttributeStruct(s))) {
             try {
                 if (s.getUseFor() != null && releaseServices) {
                     delServicesRef(s.getServiceUuid(),s.getUseFor());
                 }
                 if (s.isPeerL3NetworkUuid() && s.isServiceProvider()) {
-                    deletePeerL3NetworkUuid(s.getPeerL3NetworkUuid());
+                    s.getPeerL3NetworkUuids().forEach(peer -> deletePeerL3Network(peer));
                 }
             } catch (CloudRuntimeException e) {
                 throw new OperationFailureException(operr(e.getMessage()));
@@ -427,7 +473,7 @@ public class VipBase {
                     delServicesRef(s.getServiceUuid(),s.getUseFor());
                 }
 
-                deletePeerL3NetworkUuid(s.getPeerL3NetworkUuid());
+                s.getPeerL3NetworkUuids().forEach(peer -> deletePeerL3Network(peer));
                 completion.fail(errorCode);
             }
         });
@@ -797,7 +843,7 @@ public class VipBase {
         return true;
     }
 
-    public Boolean checkPeerL3Deleteable(String peerL3NetworkUuid) {
+    private Boolean checkPeerL3Deleteable(String peerL3NetworkUuid) {
         refresh();
 
         if (self.getPeerL3NetworkRefs() == null || self.getPeerL3NetworkRefs().isEmpty()) {
@@ -809,15 +855,17 @@ public class VipBase {
             /*
             * check if there are services to use the l3
             * */
-            Boolean used = false;
+            int useCount = 0;
+            int uuidCount = 0;
             for (VipGetServiceReferencePoint ext : pluginRgty.getExtensionList(VipGetServiceReferencePoint.class)) {
                 VipGetServiceReferencePoint.ServiceReference service = ext.getServicePeerL3Reference(self.getUuid(), peerL3NetworkUuid);
-                if (service.count > 0) {
-                    used = true;
-                }
+                uuidCount += service.uuids.size();
+                useCount += service.count ;
             }
 
-            return !used;
+            if ( uuidCount <= 1) {
+                return useCount <= 1;
+            }
         }
 
         return false;
@@ -846,11 +894,14 @@ public class VipBase {
                 peerL3NetworkUuid, self.getUuid()));
     }
 
-    public void deletePeerL3NetworkUuid(String peerL3NetworkUuid) {
-        if (checkPeerL3Deleteable(peerL3NetworkUuid) == false) {
-            return;
+    private void deletePeerL3Network(String peerL3NetworkUuid) {
+        if (checkPeerL3Deleteable(peerL3NetworkUuid)) {
+            deletePeerL3NetworkUuid(peerL3NetworkUuid);
         }
+    }
 
+    public void deletePeerL3NetworkUuid(String peerL3NetworkUuid) {
+        refresh();
         VipPeerL3NetworkRefVO vo = Q.New(VipPeerL3NetworkRefVO.class)
                 .eq(VipPeerL3NetworkRefVO_.vipUuid, self.getUuid())
                 .eq(VipPeerL3NetworkRefVO_.l3NetworkUuid, peerL3NetworkUuid)

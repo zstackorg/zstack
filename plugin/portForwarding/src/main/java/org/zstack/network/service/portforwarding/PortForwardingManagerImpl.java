@@ -1029,6 +1029,11 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
+                        if (!struct.isReleaseVmNicInfoWhenDetaching()) {
+                            /*vm stop case, don't release vip*/
+                            trigger.next();
+                            return;
+                        }
                         ModifyVipAttributesStruct vipStruct = new ModifyVipAttributesStruct();
                         vipStruct.setUseFor(PortForwardingConstant.PORTFORWARDING_NETWORK_SERVICE_TYPE);
                         vipStruct.setServiceUuid(struct.getRule().getUuid());
@@ -1059,8 +1064,6 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
                             vo.setVmNicUuid(null);
                             vo.setGuestIp(null);
                             dbf.updateAndRefresh(vo);
-                            /*miao zhanyong to be done, check if there is the PF rule with this vip and no nic,
-                            if no other any serices, stop vip */
                         }
 
                         completion.success();
@@ -1190,7 +1193,7 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
     @Override
     public ServiceReference getServiceReference(String vipUuid) {
         List<String> uuids = Q.New(PortForwardingRuleVO.class).select(PortForwardingRuleVO_.uuid)
-                .eq(PortForwardingRuleVO_.vipUuid, vipUuid).listValues();
+                .eq(PortForwardingRuleVO_.vipUuid, vipUuid).notNull(PortForwardingRuleVO_.vmNicUuid).listValues();
         if (uuids == null) {
             uuids = new ArrayList<>();
         }

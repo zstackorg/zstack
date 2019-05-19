@@ -191,19 +191,24 @@ public class VipBase {
             return false;
         }
 
-        int activeServices = 0;
+        long activeNetworks = 0;
+        long activeServices = 0;
         for (VipGetServiceReferencePoint ext : pluginRgty.getExtensionList(VipGetServiceReferencePoint.class)) {
             VipGetServiceReferencePoint.ServiceReference service = ext.getServiceReference(self.getUuid());
-            activeServices += service.count ;
+            activeServices += service.uuids.size();
+            activeNetworks += service.count;
         }
 
+        if (activeServices > 1) {
+            return false;
+        }
         /*the vip is active in this service, in another word, there are at least one nic/l3network to attach
              * with the vip */
         int deleting = 0;
         if (s.getPeerL3NetworkUuids() != null) {
             deleting = s.getPeerL3NetworkUuids().size();
         }
-        return activeServices <= deleting;
+        return activeNetworks <= deleting;
     }
 
     protected boolean releaseCheckModifyVipAttributeStruct( ModifyVipAttributesStruct s) {

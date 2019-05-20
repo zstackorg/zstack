@@ -1,5 +1,6 @@
 package org.zstack.network.service.vip;
 
+import org.zstack.header.vo.EntityGraph;
 import org.zstack.header.vo.ForeignKey;
 import org.zstack.header.vo.ForeignKey.ReferenceOption;
 
@@ -12,6 +13,11 @@ import java.sql.Timestamp;
  **/
 @Entity
 @Table
+@EntityGraph(
+        parents = {
+                @EntityGraph.Neighbour(type = VipVO.class, myField = "vipUuid", targetField = "uuid")
+        }
+)
 public class VipNetworkServicesRefVO {
     @Id
     @Column

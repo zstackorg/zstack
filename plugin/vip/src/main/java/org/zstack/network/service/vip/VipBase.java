@@ -195,7 +195,7 @@ public class VipBase {
         long activeServices = 0;
         for (VipGetServiceReferencePoint ext : pluginRgty.getExtensionList(VipGetServiceReferencePoint.class)) {
             VipGetServiceReferencePoint.ServiceReference service = ext.getServiceReference(self.getUuid());
-            activeServices += service.uuids.size();
+            activeServices += service.serviceUids.size();
             activeNetworks += service.count;
         }
 
@@ -246,7 +246,7 @@ public class VipBase {
         for (VipGetServiceReferencePoint ext : pluginRgty.getExtensionList(VipGetServiceReferencePoint.class)) {
             VipGetServiceReferencePoint.ServiceReference service = ext.getServiceReference(self.getUuid());
             activeNetworks += service.count;
-            activeServices += service.uuids.size();
+            activeServices += service.serviceUids.size();
         }
 
         if (activeServices > 1) {
@@ -864,7 +864,7 @@ public class VipBase {
             int uuidCount = 0;
             for (VipGetServiceReferencePoint ext : pluginRgty.getExtensionList(VipGetServiceReferencePoint.class)) {
                 VipGetServiceReferencePoint.ServiceReference service = ext.getServicePeerL3Reference(self.getUuid(), peerL3NetworkUuid);
-                uuidCount += service.uuids.size();
+                uuidCount += service.serviceUids.size();
                 useCount += service.count ;
             }
 

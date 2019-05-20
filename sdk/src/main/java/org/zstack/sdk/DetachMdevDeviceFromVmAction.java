@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class UpdatePciDeviceSpecAction extends AbstractAction {
+public class DetachMdevDeviceFromVmAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class UpdatePciDeviceSpecAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.UpdatePciDeviceSpecResult value;
+        public org.zstack.sdk.DetachMdevDeviceFromVmResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -26,25 +26,10 @@ public class UpdatePciDeviceSpecAction extends AbstractAction {
     }
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String uuid;
+    public java.lang.String mdevDeviceUuid;
 
-    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String name;
-
-    @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String description;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String romContent;
-
-    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String romVersion;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public boolean abandonSpecRom = false;
-
-    @Param(required = false, validValues = {"Enabled","Disabled"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String state;
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String vmInstanceUuid;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -75,8 +60,8 @@ public class UpdatePciDeviceSpecAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.UpdatePciDeviceSpecResult value = res.getResult(org.zstack.sdk.UpdatePciDeviceSpecResult.class);
-        ret.value = value == null ? new org.zstack.sdk.UpdatePciDeviceSpecResult() : value; 
+        org.zstack.sdk.DetachMdevDeviceFromVmResult value = res.getResult(org.zstack.sdk.DetachMdevDeviceFromVmResult.class);
+        ret.value = value == null ? new org.zstack.sdk.DetachMdevDeviceFromVmResult() : value; 
 
         return ret;
     }
@@ -105,11 +90,11 @@ public class UpdatePciDeviceSpecAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "PUT";
-        info.path = "/pci-device/pci-device-specs/{uuid}/actions";
+        info.httpMethod = "DELETE";
+        info.path = "/mdev-device/mdev-devices/{mdevDeviceUuid}/vm-instances/{vmInstanceUuid}";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "updatePciDeviceSpec";
+        info.parameterName = "";
         return info;
     }
 

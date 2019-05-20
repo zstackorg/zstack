@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class UpdatePciDeviceSpecAction extends AbstractAction {
+public class UpdateMdevDeviceSpecAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class UpdatePciDeviceSpecAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.UpdatePciDeviceSpecResult value;
+        public org.zstack.sdk.UpdateMdevDeviceSpecResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -33,15 +33,6 @@ public class UpdatePciDeviceSpecAction extends AbstractAction {
 
     @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String description;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String romContent;
-
-    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String romVersion;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public boolean abandonSpecRom = false;
 
     @Param(required = false, validValues = {"Enabled","Disabled"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String state;
@@ -75,8 +66,8 @@ public class UpdatePciDeviceSpecAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.UpdatePciDeviceSpecResult value = res.getResult(org.zstack.sdk.UpdatePciDeviceSpecResult.class);
-        ret.value = value == null ? new org.zstack.sdk.UpdatePciDeviceSpecResult() : value; 
+        org.zstack.sdk.UpdateMdevDeviceSpecResult value = res.getResult(org.zstack.sdk.UpdateMdevDeviceSpecResult.class);
+        ret.value = value == null ? new org.zstack.sdk.UpdateMdevDeviceSpecResult() : value; 
 
         return ret;
     }
@@ -106,10 +97,10 @@ public class UpdatePciDeviceSpecAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/pci-device/pci-device-specs/{uuid}/actions";
+        info.path = "/mdev-device/mdev-device-specs/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "updatePciDeviceSpec";
+        info.parameterName = "updateMdevDeviceSpec";
         return info;
     }
 

@@ -23,7 +23,7 @@ public class VipUseForList {
         useForList = new ArrayList<>();
     }
 
-    public VipUseForList(List<String> useFor) {
+    public VipUseForList(Collection<String> useFor) {
         if (useFor != null) {
             useForList = new ArrayList<>(new HashSet<>(useFor));
         } else {

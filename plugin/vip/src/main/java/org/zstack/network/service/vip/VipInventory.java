@@ -1,6 +1,5 @@
 package org.zstack.network.service.vip;
 
-import org.zstack.core.db.Q;
 import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
@@ -11,7 +10,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +41,8 @@ import java.util.stream.Collectors;
                 foreignKey = "l3NetworkUuid", expandedInventoryKey = "uuid"),
         @ExpandedQuery(expandedField = "peerL3Network", inventoryClass = VipPeerL3NetworkRefInventory.class,
                 foreignKey = "uuid", expandedInventoryKey = "vipUuid"),
+        @ExpandedQuery(expandedField = "NetworkServicesRef", inventoryClass = VipNetworkServicesRefInventory.class,
+                foreignKey = "uuid", expandedInventoryKey = "vipUuid")
 })
 public class VipInventory implements Serializable {
     /**
@@ -97,6 +97,11 @@ public class VipInventory implements Serializable {
      * @desc uuid of l3Network this vip used for. For example, when vip is used as Eip, the guest network is the peer network
      */
     private List<String> peerL3NetworkUuids;
+
+    /**
+     * @desc services this vip used for.
+     */
+    private List<VipNetworkServicesRefInventory> servicesRefs;
     /**
      * @desc service name this vip used for. For example, PortForwarding
      */
@@ -135,13 +140,11 @@ public class VipInventory implements Serializable {
                     .collect(Collectors.toList()));
         }
 
-        List<String> services = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType)
-                .eq(VipNetworkServicesRefVO_.vipUuid, vo.getUuid()).listValues();
-        List<String> types = new ArrayList<>(new HashSet<>(services));
-        if(types == null || types.isEmpty()) {
-            inv.setUseFor(null);
-        } else {
-            inv.setUseFor(String.join(",", types));
+       inv.setServicesRefs(VipNetworkServicesRefInventory.valueOf(vo.getServicesRefs()));
+
+        if(vo.getServicesRefs() != null && !vo.getServicesRefs().isEmpty()) {
+            inv.setUseFor(String.join(",", vo.getServicesRefs().stream()
+                    .map(ref -> ref.getServiceType()).collect(Collectors.toList())));
         }
         return inv;
     }
@@ -191,6 +194,14 @@ public class VipInventory implements Serializable {
 
     public void setServiceProvider(String serviceProvider) {
         this.serviceProvider = serviceProvider;
+    }
+
+    public List<VipNetworkServicesRefInventory> getServicesRefs() {
+        return servicesRefs;
+    }
+
+    public void setServicesRefs(List<VipNetworkServicesRefInventory> servicesRefs) {
+        this.servicesRefs = servicesRefs;
     }
 
     public String getUseFor() {

@@ -6,20 +6,20 @@ public interface VipGetServiceReferencePoint {
     public final class ServiceReference{
         String useFor;
         long    count;
-        List<String> uuids;
+        List<String> serviceUids;
 
-        public ServiceReference(String useFor, long count, List<String> uuids) {
+        public ServiceReference(String useFor, long peerL3Count, List<String> serviceUids) {
             this.useFor = useFor;
-            this.count = count;
-            this.uuids = uuids;
+            this.count = peerL3Count;
+            this.serviceUids = serviceUids;
         }
 
         public List<String> getUuids() {
-            return uuids;
+            return serviceUids;
         }
 
-        public void setUuids(List<String> uuids) {
-            this.uuids = uuids;
+        public void setUuids(List<String> serviceUids) {
+            this.serviceUids = serviceUids;
         }
 
         public String getUseFor() {

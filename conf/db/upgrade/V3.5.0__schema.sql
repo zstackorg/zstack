@@ -16,5 +16,3 @@ INSERT INTO VipNetworkServicesRefVO (`uuid`, `serviceType`, `vipUuid`, `lastOpDa
 INSERT INTO VipNetworkServicesRefVO (`uuid`, `serviceType`, `vipUuid`, `lastOpDate`, `createDate`) SELECT s.uuid, "IPsec", s.vipUuid, s.createDate, s.createDate  FROM IPsecConnectionVO s;
 INSERT INTO VipNetworkServicesRefVO (`uuid`, `serviceType`, `vipUuid`, `lastOpDate`, `createDate`) SELECT s.uuid, "Eip", s.vipUuid, s.createDate, s.createDate  FROM EipVO s;
 INSERT INTO VipNetworkServicesRefVO (`uuid`, `serviceType`, `vipUuid`, `lastOpDate`, `createDate`) SELECT s.uuid, "SNAT", s.uuid, current_timestamp(), current_timestamp()  FROM VirtualRouterVipVO s;
-
-ALTER TABLE `zstack`.`VipVO` DROP COLUMN `useFor`;

@@ -140,12 +140,8 @@ public class VipInventory implements Serializable {
                     .collect(Collectors.toList()));
         }
 
-       inv.setServicesRefs(VipNetworkServicesRefInventory.valueOf(vo.getServicesRefs()));
-
-        if(vo.getServicesRefs() != null && !vo.getServicesRefs().isEmpty()) {
-            inv.setUseFor(String.join(",", vo.getServicesRefs().stream()
-                    .map(ref -> ref.getServiceType()).collect(Collectors.toList())));
-        }
+        inv.setServicesRefs(VipNetworkServicesRefInventory.valueOf(vo.getServicesRefs()));
+        inv.setUseFor(vo.getUseFor());
         return inv;
     }
 

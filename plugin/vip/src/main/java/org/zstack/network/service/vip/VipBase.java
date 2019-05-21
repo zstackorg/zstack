@@ -44,9 +44,10 @@ import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static org.zstack.core.Platform.operr;
 import static org.zstack.core.Platform.err;
+import static org.zstack.core.Platform.operr;
 
 /**
  * Created by xing5 on 2016/11/19.
@@ -172,9 +173,7 @@ public class VipBase {
         return s.isPeerL3NetworkUuid() && s.isServiceProvider();
     }
 
-    protected boolean CheckModifyVipAttributeStructWithoutReleaseService( ModifyVipAttributesStruct s) {
-        List<String> services = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType)
-                                 .eq(VipNetworkServicesRefVO_.vipUuid, self.getUuid()).listValues();
+    protected boolean CheckModifyVipAttributeStructWithoutReleaseService( ModifyVipAttributesStruct s, List<String> services) {
         if (services == null || services.isEmpty()){
             /*there are no any services using this vip*/
             return false;
@@ -211,9 +210,7 @@ public class VipBase {
         return activeNetworks <= deleting;
     }
 
-    protected boolean releaseCheckModifyVipAttributeStruct( ModifyVipAttributesStruct s) {
-        List<String> services = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType)
-                                 .eq(VipNetworkServicesRefVO_.vipUuid, self.getUuid()).listValues();
+    protected boolean releaseCheckModifyVipAttributeStruct( ModifyVipAttributesStruct s, List<String> services) {
         if (services == null || services.isEmpty()){
             /*there are no any services using this vip*/
             return false;
@@ -339,18 +336,18 @@ public class VipBase {
     protected void releaseVip(ModifyVipAttributesStruct s, Boolean releaseServices, Completion completion) {
 
         refresh();
-        List<String> services = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType)
-                                 .eq(VipNetworkServicesRefVO_.vipUuid, self.getUuid()).listValues();
-        if (services == null || services.isEmpty()){
+
+        if (self.getServicesRefs() == null || self.getServicesRefs().isEmpty()){
             /*there are no any services using this vip*/
             /* no need to remove vip from backend */
             completion.success();
             return;
         }
 
+        List<String> services = self.getServicesRefs().stream().map(VipNetworkServicesRefVO::getServiceType).collect(Collectors.toList());
         /* s == null is called from VipDeleteMsg, all service has been released */
-        if ((s != null) && !releaseServices && (!CheckModifyVipAttributeStructWithoutReleaseService(s)) ||
-                (s != null) && releaseServices && (!releaseCheckModifyVipAttributeStruct(s))) {
+        if ((s != null) && !releaseServices && (!CheckModifyVipAttributeStructWithoutReleaseService(s, services)) ||
+                (s != null) && releaseServices && (!releaseCheckModifyVipAttributeStruct(s, services))) {
             try {
                 if (s.getUseFor() != null && releaseServices) {
                     delServicesRef(s.getServiceUuid(),s.getUseFor());
@@ -576,8 +573,8 @@ public class VipBase {
 
     protected void deleteVip(Completion completion) {
         refresh();
-        List<String> services = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType)
-                                 .eq(VipNetworkServicesRefVO_.vipUuid, self.getUuid()).listValues();
+        Set<String> services = self.getServicesTypes();
+
         if(services == null || services.isEmpty()){
             /*there are no any services using this vip*/
             dbf.remove(self);
@@ -626,7 +623,7 @@ public class VipBase {
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        List<String> types = new ArrayList<>(new HashSet<>(services));
+                        List<String> types = new ArrayList<>(services);
                         Iterator<String> it = types.iterator();
                         releaseServicesOnVip(it, trigger);
                     }
@@ -704,11 +701,10 @@ public class VipBase {
 
     protected void handle(APIDeleteVipMsg msg) {
         final APIDeleteVipEvent evt = new APIDeleteVipEvent(msg.getId());
-
+        refresh();
         /* virtual router public nic vip can not be deleted */
-        List<String> services = Q.New(VipNetworkServicesRefVO.class).select(VipNetworkServicesRefVO_.serviceType)
-                                 .eq(VipNetworkServicesRefVO_.vipUuid, self.getUuid()).listValues();
-        if(services!= null && services.contains(VipUseForList.SNAT_NETWORK_SERVICE_TYPE)){
+        Set<String> services = self.getServicesTypes();
+        if(services != null && services.contains( VipUseForList.SNAT_NETWORK_SERVICE_TYPE)) {
             evt.setError(operr("Vip [uuid %s, ip %s] of router public interface can not be deleted", self.getUuid(), self.getIp()));
             bus.publish(evt);
             return;
@@ -941,6 +937,16 @@ public class VipBase {
         vipRef.setServiceType(type);
         vipRef.setVipUuid(self.getUuid());
         dbf.persist(vipRef);
+        Set<String> types = self.getServicesTypes();
+        if (  types == null ) {
+            self.setUseFor(type);
+            self = dbf.updateAndRefresh(self);
+        } else if (!types.contains(type)) {
+            types.add(type);
+            self.setUseFor(new VipUseForList(types).toString());
+            self = dbf.updateAndRefresh(self);
+        }
+
         logger.debug(String.format("add the servicesRef [type:%s:uuid:%s] with vip[uuid:%s]",
                 type, uuid, self.getUuid()));
     }
@@ -955,6 +961,16 @@ public class VipBase {
         }
 
         dbf.remove(vipRef);
+        refresh();
+        Set<String> types = self.getServicesTypes();
+        if (  types == null ) {
+            self.setUseFor(null);
+            self = dbf.updateAndRefresh(self);
+        } else if (!types.contains(type)) {
+            self.setUseFor(new VipUseForList(types).toString());
+            self = dbf.updateAndRefresh(self);
+        }
+
         logger.debug(String.format("delete the servicesRef [type:%s:uuid:%s] with vip[uuid:%s]",
                 type, uuid, self.getUuid()));
     }
@@ -963,6 +979,9 @@ public class VipBase {
         List<VipNetworkServicesRefVO> vipRefs = Q.New(VipNetworkServicesRefVO.class).eq(VipNetworkServicesRefVO_.vipUuid, self.getUuid()).list();
         if (vipRefs != null && !vipRefs.isEmpty()) {
             dbf.removeCollection(vipRefs, VipNetworkServicesRefVO.class);
+            self.setUseFor(null);
+            self.setServicesRefs(null);
+            self = dbf.updateAndRefresh(self);
         }
         logger.debug(String.format("clear the servicesRefs with vip[uuid:%s]",self.getUuid()));
     }

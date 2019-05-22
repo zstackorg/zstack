@@ -284,8 +284,11 @@ public class SourceClassMap {
 			put("org.zstack.pciDevice.PciDeviceType", "org.zstack.sdk.PciDeviceType");
 			put("org.zstack.pciDevice.specification.mdev.MdevDeviceSpecInventory", "org.zstack.sdk.MdevDeviceSpecInventory");
 			put("org.zstack.pciDevice.specification.mdev.MdevDeviceSpecState", "org.zstack.sdk.MdevDeviceSpecState");
+			put("org.zstack.pciDevice.specification.mdev.PciDeviceMdevSpecRefInventory", "org.zstack.sdk.PciDeviceMdevSpecRefInventory");
+			put("org.zstack.pciDevice.specification.mdev.VmInstanceMdevDeviceSpecRefInventory", "org.zstack.sdk.VmInstanceMdevDeviceSpecRefInventory");
 			put("org.zstack.pciDevice.specification.pci.PciDeviceSpecInventory", "org.zstack.sdk.PciDeviceSpecInventory");
 			put("org.zstack.pciDevice.specification.pci.PciDeviceSpecState", "org.zstack.sdk.PciDeviceSpecState");
+			put("org.zstack.pciDevice.specification.pci.VmInstancePciDeviceSpecRefInventory", "org.zstack.sdk.VmInstancePciDeviceSpecRefInventory");
 			put("org.zstack.pciDevice.virtual.PciDeviceVirtStatus", "org.zstack.sdk.PciDeviceVirtStatus");
 			put("org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceInventory", "org.zstack.sdk.MdevDeviceInventory");
 			put("org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceState", "org.zstack.sdk.MdevDeviceState");
@@ -562,6 +565,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.OssBucketProperty", "org.zstack.header.aliyun.oss.OssBucketProperty");
 			put("org.zstack.sdk.Pagination", "org.zstack.billing.Pagination");
 			put("org.zstack.sdk.PciDeviceInventory", "org.zstack.pciDevice.PciDeviceInventory");
+			put("org.zstack.sdk.PciDeviceMdevSpecRefInventory", "org.zstack.pciDevice.specification.mdev.PciDeviceMdevSpecRefInventory");
 			put("org.zstack.sdk.PciDeviceMetaData", "org.zstack.pciDevice.PciDeviceMetaData");
 			put("org.zstack.sdk.PciDeviceMetaDataEntry", "org.zstack.pciDevice.PciDeviceMetaDataEntry");
 			put("org.zstack.sdk.PciDeviceMetaDataOperator", "org.zstack.pciDevice.PciDeviceMetaDataEntry$PciDeviceMetaDataOperator");
@@ -675,6 +679,8 @@ public class SourceClassMap {
 			put("org.zstack.sdk.VirtualRouterVmInventory", "org.zstack.network.service.virtualrouter.VirtualRouterVmInventory");
 			put("org.zstack.sdk.VmCdRomInventory", "org.zstack.header.vm.cdrom.VmCdRomInventory");
 			put("org.zstack.sdk.VmInstanceInventory", "org.zstack.header.vm.VmInstanceInventory");
+			put("org.zstack.sdk.VmInstanceMdevDeviceSpecRefInventory", "org.zstack.pciDevice.specification.mdev.VmInstanceMdevDeviceSpecRefInventory");
+			put("org.zstack.sdk.VmInstancePciDeviceSpecRefInventory", "org.zstack.pciDevice.specification.pci.VmInstancePciDeviceSpecRefInventory");
 			put("org.zstack.sdk.VmNicBandwidthSpendingDetails", "org.zstack.billing.vmnic.VmNicBandwidthSpendingDetails");
 			put("org.zstack.sdk.VmNicInventory", "org.zstack.header.vm.VmNicInventory");
 			put("org.zstack.sdk.VmNicSecurityGroupRefInventory", "org.zstack.network.securitygroup.VmNicSecurityGroupRefInventory");

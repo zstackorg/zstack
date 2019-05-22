@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class GetMdevDeviceSpecCandidatesAction extends AbstractAction {
+public class QueryVmInstancePciDeviceSpecRefAction extends QueryAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class GetMdevDeviceSpecCandidatesAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.GetMdevDeviceSpecCandidatesResult value;
+        public org.zstack.sdk.QueryVmInstancePciDeviceSpecRefResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,32 +25,6 @@ public class GetMdevDeviceSpecCandidatesAction extends AbstractAction {
         }
     }
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.util.List clusterUuids;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String hostUuid;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vmInstanceUuid;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.util.List types;
-
-    @Param(required = false)
-    public java.util.List systemTags;
-
-    @Param(required = false)
-    public java.util.List userTags;
-
-    @Param(required = false)
-    public String sessionId;
-
-    @Param(required = false)
-    public String accessKeyId;
-
-    @Param(required = false)
-    public String accessKeySecret;
 
 
     private Result makeResult(ApiResult res) {
@@ -60,8 +34,8 @@ public class GetMdevDeviceSpecCandidatesAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.GetMdevDeviceSpecCandidatesResult value = res.getResult(org.zstack.sdk.GetMdevDeviceSpecCandidatesResult.class);
-        ret.value = value == null ? new org.zstack.sdk.GetMdevDeviceSpecCandidatesResult() : value; 
+        org.zstack.sdk.QueryVmInstancePciDeviceSpecRefResult value = res.getResult(org.zstack.sdk.QueryVmInstancePciDeviceSpecRefResult.class);
+        ret.value = value == null ? new org.zstack.sdk.QueryVmInstancePciDeviceSpecRefResult() : value; 
 
         return ret;
     }
@@ -91,7 +65,7 @@ public class GetMdevDeviceSpecCandidatesAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/mdev-device-specs/candidates";
+        info.path = "/vm-instances/{vmInstanceUuid}/pci-device-specs";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

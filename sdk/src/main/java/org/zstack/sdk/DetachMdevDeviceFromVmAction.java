@@ -91,7 +91,7 @@ public class DetachMdevDeviceFromVmAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "DELETE";
-        info.path = "/mdev-device/mdev-devices/{mdevDeviceUuid}/vm-instances/{vmInstanceUuid}";
+        info.path = "/mdev-devices/{mdevDeviceUuid}/vm-instances/{vmInstanceUuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "";

@@ -705,7 +705,7 @@ public class LoadBalancerManagerImpl extends AbstractService implements LoadBala
         List<String> l3Uuids = SQL.New("select nic.l3NetworkUuid" +
                 " from LoadBalancerVO lb, LoadBalancerListenerVmNicRefVO ref, LoadBalancerListenerVO listener, VmNicVO nic" +
                 " where lb.vipUuid = :vipUuid and lb.uuid = listener.loadBalancerUuid" +
-                " and listener.uuid = ref.listenerUuid and ref.status = 'Active' and nic.uuid = ref.vmNicUuid")
+                " and listener.uuid = ref.listenerUuid and ref.status != 'Pending' and nic.uuid = ref.vmNicUuid")
                         .param("vipUuid", vipUuid).list();
         if (l3Uuids != null && !l3Uuids.isEmpty()) {
             count = l3Uuids.stream().collect(Collectors.toSet()).size();
@@ -713,7 +713,7 @@ public class LoadBalancerManagerImpl extends AbstractService implements LoadBala
         List<String> uuids = SQL.New("select distinct lb.uuid" +
                 " from LoadBalancerVO lb, LoadBalancerListenerVmNicRefVO ref, LoadBalancerListenerVO listener, VmNicVO nic" +
                 " where lb.vipUuid = :vipUuid and lb.uuid = listener.loadBalancerUuid" +
-                " and listener.uuid = ref.listenerUuid and ref.status = 'Active' and nic.uuid = ref.vmNicUuid")
+                " and listener.uuid = ref.listenerUuid and ref.status != 'Pending' and nic.uuid = ref.vmNicUuid")
                                 .param("vipUuid", vipUuid).list();
 
         return new VipGetServiceReferencePoint.ServiceReference(LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING, count, uuids == null?new ArrayList<>() : uuids);

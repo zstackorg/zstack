@@ -1164,8 +1164,8 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
 
                         /*remove the l3networks still attached*/
                         Set<String> vnicUuidsAttached = new HashSet<>();
-                        struct.getListeners().forEach(lb ->
-                                vnicUuidsAttached.addAll(lb.getVmNicRefs().stream().map(LoadBalancerListenerVmNicRefInventory::getVmNicUuid).collect(Collectors.toSet())));
+                        struct.getListeners().forEach(listenerRef ->
+                                vnicUuidsAttached.addAll(listenerRef.getVmNicRefs().stream().map(LoadBalancerListenerVmNicRefInventory::getVmNicUuid).collect(Collectors.toSet())));
                         if (vnicUuidsAttached != null &&  !vnicUuidsAttached.isEmpty()) {
                             List<String> l3Uuids = Q.New(VmNicVO.class).select(VmNicVO_.l3NetworkUuid).in(VmNicVO_.uuid, vnicUuidsAttached).listValues();
                             if (l3Uuids != null && !l3Uuids.isEmpty()) {
@@ -1295,8 +1295,8 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
 
                         /*remove the l3networks still attached*/
                         Set<String> vnicUuidsAttached = new HashSet<>();
-                        struct.getListeners().forEach(lb ->
-                                vnicUuidsAttached.addAll(lb.getVmNicRefs().stream().map(LoadBalancerListenerVmNicRefInventory::getVmNicUuid).collect(Collectors.toSet())));
+                        struct.getListeners().forEach(listenerRef ->
+                                vnicUuidsAttached.addAll(listenerRef.getVmNicRefs().stream().map(LoadBalancerListenerVmNicRefInventory::getVmNicUuid).collect(Collectors.toSet())));
                         if (vnicUuidsAttached != null &&  !vnicUuidsAttached.isEmpty()) {
                             List<String> l3Uuids = Q.New(VmNicVO.class).select(VmNicVO_.l3NetworkUuid).in(VmNicVO_.uuid, vnicUuidsAttached).listValues();
                             if (l3Uuids != null && !l3Uuids.isEmpty()) {

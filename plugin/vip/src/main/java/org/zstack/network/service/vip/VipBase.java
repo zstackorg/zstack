@@ -201,6 +201,7 @@ public class VipBase {
         if (activeServices > 1) {
             return false;
         }
+
         /*the vip is active in this service, in another word, there are at least one nic/l3network to attach
              * with the vip */
         int deleting = 0;

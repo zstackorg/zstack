@@ -65,7 +65,7 @@ public class QueryMdevDeviceAction extends QueryAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/mdev-device/mdev-devices";
+        info.path = "/mdev-devices";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

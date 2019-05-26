@@ -91,7 +91,7 @@ public class AttachMdevDeviceToVmAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/mdev-device/mdev-devices/{mdevDeviceUuid}/vm-instances/{vmInstanceUuid}";
+        info.path = "/mdev-devices/{mdevDeviceUuid}/vm-instances/{vmInstanceUuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

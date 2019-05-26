@@ -168,12 +168,12 @@ public class PciDeviceInventory  {
         return this.matchedPciDeviceOfferingRef;
     }
 
-    public java.util.List mdevSpecUuids;
-    public void setMdevSpecUuids(java.util.List mdevSpecUuids) {
-        this.mdevSpecUuids = mdevSpecUuids;
+    public java.util.List mdevSpecRefs;
+    public void setMdevSpecRefs(java.util.List mdevSpecRefs) {
+        this.mdevSpecRefs = mdevSpecRefs;
     }
-    public java.util.List getMdevSpecUuids() {
-        return this.mdevSpecUuids;
+    public java.util.List getMdevSpecRefs() {
+        return this.mdevSpecRefs;
     }
 
 }

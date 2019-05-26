@@ -7,4 +7,5 @@ public enum PciDeviceVirtStatus {
 	SRIOV_VIRTUALIZED,
 	VFIO_MDEV_VIRTUALIZED,
 	SRIOV_VIRTUAL,
+	UNKNOWN,
 }

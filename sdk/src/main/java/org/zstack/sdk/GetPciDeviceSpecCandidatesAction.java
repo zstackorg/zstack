@@ -91,7 +91,7 @@ public class GetPciDeviceSpecCandidatesAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/pci-device/pci-device-specs/candidates";
+        info.path = "/pci-device-specs/candidates";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

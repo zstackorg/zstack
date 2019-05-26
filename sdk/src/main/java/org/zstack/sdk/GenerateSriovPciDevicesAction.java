@@ -94,7 +94,7 @@ public class GenerateSriovPciDevicesAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/pci-device/hosts/{hostUuid}/actions";
+        info.path = "/hosts/{hostUuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "generateSriovPciDevices";

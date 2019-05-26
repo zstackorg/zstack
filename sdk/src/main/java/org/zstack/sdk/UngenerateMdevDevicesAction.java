@@ -88,7 +88,7 @@ public class UngenerateMdevDevicesAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/pci-device/pci-devices/{pciDeviceUuid}/actions";
+        info.path = "/pci-devices/{pciDeviceUuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "ungenerateMdevDevices";

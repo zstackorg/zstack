@@ -97,7 +97,7 @@ public class UpdateMdevDeviceAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/mdev-device/mdev-devices/{uuid}/actions";
+        info.path = "/mdev-devices/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "updateMdevDevice";

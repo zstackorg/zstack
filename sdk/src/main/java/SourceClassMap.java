@@ -392,6 +392,15 @@ public class SourceClassMap {
 			put("org.zstack.vmware.VCenterResourcePoolUsageInventory", "org.zstack.sdk.VCenterResourcePoolUsageInventory");
 			put("org.zstack.vpc.VpcRouterDnsInventory", "org.zstack.sdk.VpcRouterDnsInventory");
 			put("org.zstack.vpc.VpcRouterVmInventory", "org.zstack.sdk.VpcRouterVmInventory");
+			put("org.zstack.vpcfirewall.entity.ActionType", "org.zstack.sdk.ActionType");
+			put("org.zstack.vpcfirewall.entity.FirewallRuleState", "org.zstack.sdk.FirewallRuleState");
+			put("org.zstack.vpcfirewall.entity.PacketsForwardType", "org.zstack.sdk.PacketsForwardType");
+			put("org.zstack.vpcfirewall.entity.ProtocolType", "org.zstack.sdk.ProtocolType");
+			put("org.zstack.vpcfirewall.entity.VpcFirewallInventory", "org.zstack.sdk.VpcFirewallInventory");
+			put("org.zstack.vpcfirewall.entity.VpcFirewallRuleInventory", "org.zstack.sdk.VpcFirewallRuleInventory");
+			put("org.zstack.vpcfirewall.entity.VpcFirewallRuleSetInterfaceRefInventory", "org.zstack.sdk.VpcFirewallRuleSetInterfaceRefInventory");
+			put("org.zstack.vpcfirewall.entity.VpcFirewallRuleSetInventory", "org.zstack.sdk.VpcFirewallRuleSetInventory");
+			put("org.zstack.vpcfirewall.entity.VpcRouterInterfaceInventory", "org.zstack.sdk.VpcRouterInterfaceInventory");
 			put("org.zstack.vrouterRoute.VRouterRouteEntryAO", "org.zstack.sdk.VRouterRouteEntryAO");
 			put("org.zstack.vrouterRoute.VRouterRouteEntryInventory", "org.zstack.sdk.VRouterRouteEntryInventory");
 			put("org.zstack.vrouterRoute.VRouterRouteEntryType", "org.zstack.sdk.VRouterRouteEntryType");
@@ -431,6 +440,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.AccountInventory", "org.zstack.header.identity.AccountInventory");
 			put("org.zstack.sdk.AccountResourceRefInventory", "org.zstack.header.identity.AccountResourceRefInventory");
 			put("org.zstack.sdk.ActionStruct", "org.zstack.cloudformation.template.struct.ActionStruct");
+			put("org.zstack.sdk.ActionType", "org.zstack.vpcfirewall.entity.ActionType");
 			put("org.zstack.sdk.AddHostFromFileResult", "org.zstack.header.host.AddHostFromFileResult");
 			put("org.zstack.sdk.AddingNewVmRuleInventory", "org.zstack.autoscaling.group.rule.AddingNewVmRuleInventory");
 			put("org.zstack.sdk.AffinityGroupInventory", "org.zstack.header.affinitygroup.AffinityGroupInventory");
@@ -524,6 +534,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.ErrorCodeList", "org.zstack.header.errorcode.ErrorCodeList");
 			put("org.zstack.sdk.FiberChannelLunInventory", "org.zstack.storage.device.fibreChannel.FiberChannelLunInventory");
 			put("org.zstack.sdk.FiberChannelStorageInventory", "org.zstack.storage.device.fibreChannel.FiberChannelStorageInventory");
+			put("org.zstack.sdk.FirewallRuleState", "org.zstack.vpcfirewall.entity.FirewallRuleState");
 			put("org.zstack.sdk.FreeIpInventory", "org.zstack.header.network.l3.FreeIpInventory");
 			put("org.zstack.sdk.FusionstorBackupStorageInventory", "org.zstack.storage.fusionstor.backup.FusionstorBackupStorageInventory");
 			put("org.zstack.sdk.FusionstorBackupStorageMonInventory", "org.zstack.storage.fusionstor.backup.FusionstorBackupStorageMonInventory");
@@ -607,6 +618,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.NetworkServiceProviderInventory", "org.zstack.header.network.service.NetworkServiceProviderInventory");
 			put("org.zstack.sdk.OssBucketInventory", "org.zstack.header.aliyun.oss.OssBucketInventory");
 			put("org.zstack.sdk.OssBucketProperty", "org.zstack.header.aliyun.oss.OssBucketProperty");
+			put("org.zstack.sdk.PacketsForwardType", "org.zstack.vpcfirewall.entity.PacketsForwardType");
 			put("org.zstack.sdk.Pagination", "org.zstack.billing.Pagination");
 			put("org.zstack.sdk.PciDeviceBillingInventory", "org.zstack.billing.generator.pcidevice.PciDeviceBillingInventory");
 			put("org.zstack.sdk.PciDeviceInventory", "org.zstack.pciDevice.PciDeviceInventory");
@@ -637,6 +649,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.PrimaryStorageHostStatus", "org.zstack.header.storage.primary.PrimaryStorageHostStatus");
 			put("org.zstack.sdk.PrimaryStorageInventory", "org.zstack.header.storage.primary.PrimaryStorageInventory");
 			put("org.zstack.sdk.ProgressProperty", "org.zstack.header.aliyun.image.ProgressProperty");
+			put("org.zstack.sdk.ProtocolType", "org.zstack.vpcfirewall.entity.ProtocolType");
 			put("org.zstack.sdk.PubIpVipBandwidthInBillingInventory", "org.zstack.billing.generator.pubip.vip.PubIpVipBandwidthInBillingInventory");
 			put("org.zstack.sdk.PubIpVipBandwidthOutBillingInventory", "org.zstack.billing.generator.pubip.vip.PubIpVipBandwidthOutBillingInventory");
 			put("org.zstack.sdk.PubIpVipBandwidthSpending", "org.zstack.billing.vip.PubIpVipBandwidthSpending");
@@ -755,7 +768,12 @@ public class SourceClassMap {
 			put("org.zstack.sdk.VolumeSnapshotBackupStorageRefInventory", "org.zstack.header.storage.snapshot.VolumeSnapshotBackupStorageRefInventory");
 			put("org.zstack.sdk.VolumeSnapshotInventory", "org.zstack.header.storage.snapshot.VolumeSnapshotInventory");
 			put("org.zstack.sdk.VolumeSnapshotTreeInventory", "org.zstack.header.storage.snapshot.VolumeSnapshotTreeInventory");
+			put("org.zstack.sdk.VpcFirewallInventory", "org.zstack.vpcfirewall.entity.VpcFirewallInventory");
+			put("org.zstack.sdk.VpcFirewallRuleInventory", "org.zstack.vpcfirewall.entity.VpcFirewallRuleInventory");
+			put("org.zstack.sdk.VpcFirewallRuleSetInterfaceRefInventory", "org.zstack.vpcfirewall.entity.VpcFirewallRuleSetInterfaceRefInventory");
+			put("org.zstack.sdk.VpcFirewallRuleSetInventory", "org.zstack.vpcfirewall.entity.VpcFirewallRuleSetInventory");
 			put("org.zstack.sdk.VpcRouterDnsInventory", "org.zstack.vpc.VpcRouterDnsInventory");
+			put("org.zstack.sdk.VpcRouterInterfaceInventory", "org.zstack.vpcfirewall.entity.VpcRouterInterfaceInventory");
 			put("org.zstack.sdk.VpcRouterVmInventory", "org.zstack.vpc.VpcRouterVmInventory");
 			put("org.zstack.sdk.VpcUserVpnGatewayInventory", "org.zstack.header.hybrid.network.vpn.VpcUserVpnGatewayInventory");
 			put("org.zstack.sdk.VpcVirtualRouteEntryInventory", "org.zstack.header.aliyun.network.vrouter.VpcVirtualRouteEntryInventory");

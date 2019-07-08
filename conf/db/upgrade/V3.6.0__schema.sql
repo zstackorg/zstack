@@ -192,3 +192,13 @@ DROP PROCEDURE IF EXISTS upgradeIAM2ReadRole;
 
 # delete dirty project admin attributes in db
 delete from IAM2VirtualIDAttributeVO where name = '__ProjectAdmin__' and value not in (select uuid from IAM2ProjectVO);
+
+CREATE TABLE `IAM2OrganizationProjectRefVO` (
+`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+`projectUuid` varchar(32) NOT NULL,
+`organizationUuid` varchar(32) NOT NULL,
+`lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+`createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+PRIMARY KEY (`id`),
+UNIQUE KEY `projectUuid` (`projectUuid`)
+) ENGINE=InnoDB AUTO_INCREMENT=3624 DEFAULT CHARSET=utf8;

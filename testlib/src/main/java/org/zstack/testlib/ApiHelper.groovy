@@ -3203,6 +3203,33 @@ trait ApiHelper {
     }
 
 
+    def bootstrapMiniHost(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.BootstrapMiniHostAction.class) Closure c) {
+        def a = new org.zstack.sdk.BootstrapMiniHostAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
     def calculateAccountBillingSpending(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CalculateAccountBillingSpendingAction.class) Closure c) {
         def a = new org.zstack.sdk.CalculateAccountBillingSpendingAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
@@ -4312,6 +4339,33 @@ trait ApiHelper {
 
     def checkStackTemplateParameters(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CheckStackTemplateParametersAction.class) Closure c) {
         def a = new org.zstack.sdk.CheckStackTemplateParametersAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def checkVolumeSnapshotGroupAvailability(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CheckVolumeSnapshotGroupAvailabilityAction.class) Closure c) {
+        def a = new org.zstack.sdk.CheckVolumeSnapshotGroupAvailabilityAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -6769,6 +6823,33 @@ trait ApiHelper {
 
     def createVolumeSnapshot(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CreateVolumeSnapshotAction.class) Closure c) {
         def a = new org.zstack.sdk.CreateVolumeSnapshotAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def createVolumeSnapshotGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CreateVolumeSnapshotGroupAction.class) Closure c) {
+        def a = new org.zstack.sdk.CreateVolumeSnapshotGroupAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -10250,6 +10331,33 @@ trait ApiHelper {
     }
 
 
+    def deleteVolumeSnapshotGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.DeleteVolumeSnapshotGroupAction.class) Closure c) {
+        def a = new org.zstack.sdk.DeleteVolumeSnapshotGroupAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
     def deleteVpcIkeConfigLocal(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.DeleteVpcIkeConfigLocalAction.class) Closure c) {
         def a = new org.zstack.sdk.DeleteVpcIkeConfigLocalAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
@@ -11980,6 +12088,33 @@ trait ApiHelper {
 
     def getCandidateLdapEntryForBinding(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetCandidateLdapEntryForBindingAction.class) Closure c) {
         def a = new org.zstack.sdk.GetCandidateLdapEntryForBindingAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def getCandidateMiniHosts(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetCandidateMiniHostsAction.class) Closure c) {
+        def a = new org.zstack.sdk.GetCandidateMiniHostsAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -19958,6 +20093,35 @@ trait ApiHelper {
     }
 
 
+    def queryVolumeSnapshotGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryVolumeSnapshotGroupAction.class) Closure c) {
+        def a = new org.zstack.sdk.QueryVolumeSnapshotGroupAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+        a.conditions = a.conditions.collect { it.toString() }
+
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
     def queryVolumeSnapshotTree(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryVolumeSnapshotTreeAction.class) Closure c) {
         def a = new org.zstack.sdk.QueryVolumeSnapshotTreeAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
@@ -21627,6 +21791,33 @@ trait ApiHelper {
 
     def resumeVmInstance(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ResumeVmInstanceAction.class) Closure c) {
         def a = new org.zstack.sdk.ResumeVmInstanceAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def revertVmFromSnapshotGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.RevertVmFromSnapshotGroupAction.class) Closure c) {
+        def a = new org.zstack.sdk.RevertVmFromSnapshotGroupAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -23436,6 +23627,33 @@ trait ApiHelper {
 
     def ungenerateSriovPciDevices(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.UngenerateSriovPciDevicesAction.class) Closure c) {
         def a = new org.zstack.sdk.UngenerateSriovPciDevicesAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def ungroupVolumeSnapshotGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.UngroupVolumeSnapshotGroupAction.class) Closure c) {
+        def a = new org.zstack.sdk.UngroupVolumeSnapshotGroupAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templateConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>gc</category>
+        <name>orphanJobScanInterval</name>
+        <defaultValue>60</defaultValue>
+        <value>60</value>
+    </config>
+
+    <config>
+        <category>gc</category>
+        <name>orphanJobScanInterval</name>
+        <defaultValue>60</defaultValue>
+        <value>60</value>
+    </config>
+</templateConfig>

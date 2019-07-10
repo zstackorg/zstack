@@ -26,7 +26,16 @@ public class GetPciDeviceSpecCandidatesAction extends AbstractAction {
     }
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String type;
+    public java.util.List clusterUuids;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String hostUuid;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String vmInstanceUuid;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.util.List types;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -82,7 +91,7 @@ public class GetPciDeviceSpecCandidatesAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/pci-device/pci-device-specs/candidates";
+        info.path = "/pci-device-specs/candidates";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

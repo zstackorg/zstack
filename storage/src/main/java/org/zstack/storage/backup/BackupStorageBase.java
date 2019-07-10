@@ -459,7 +459,19 @@ public abstract class BackupStorageBase extends AbstractBackupStorage {
 
     private void handle(final APIGetTrashOnBackupStorageMsg msg) {
         APIGetTrashOnBackupStorageReply reply = new APIGetTrashOnBackupStorageReply();
-        reply.getStorageTrashSpecs().addAll(trash.getTrashList(self.getUuid(), trashLists).values());
+
+        List<TrashType> lists = msg.getTrashType() != null ? CollectionDSL.list(TrashType.valueOf(msg.getTrashType())) : trashLists;
+        Map<String, StorageTrashSpec> trashs = trash.getTrashList(self.getUuid(), lists);
+        if (msg.getResourceUuid() == null) {
+            reply.getStorageTrashSpecs().addAll(trash.getTrashList(self.getUuid(), trashLists).values());
+        } else {
+            trashs.values().forEach(t -> {
+                if (msg.getResourceUuid().equals(t.getResourceUuid()) && msg.getResourceType().equals(t.getResourceType())) {
+                    reply.getStorageTrashSpecs().add(t);
+                }
+            });
+        }
+
         bus.reply(msg, reply);
     }
 
@@ -472,9 +484,7 @@ public abstract class BackupStorageBase extends AbstractBackupStorage {
         }
 
         if (!trash.makeSureInstallPathNotUsed(spec)) {
-            logger.warn(String.format("%s is still in using by %s, only remove it from trash...", spec.getInstallPath(), spec.getResourceType()));
-            trash.removeFromDb(spec.getTrashId());
-            completion.success(result);
+            completion.fail(operr("%s is still in using by %s, cannot remove it from trash...", spec.getInstallPath(), spec.getResourceType()));
             return;
         }
         DeleteBitsOnBackupStorageMsg msg = new DeleteBitsOnBackupStorageMsg();
@@ -524,8 +534,7 @@ public abstract class BackupStorageBase extends AbstractBackupStorage {
         new While<>(trashs.entrySet()).all((t, coml) -> {
             StorageTrashSpec spec = t.getValue();
             if (!trash.makeSureInstallPathNotUsed(spec)) {
-                logger.warn(String.format("%s is still in using by %s, only remove it from trash...", spec.getInstallPath(), spec.getResourceType()));
-                trash.removeFromDb(spec.getTrashId());
+                errs.add(operr("%s is still in using by %s, cannot remove it from trash...", spec.getInstallPath(), spec.getResourceType()));
                 coml.done();
                 return;
             }

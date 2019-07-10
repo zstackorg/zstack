@@ -143,6 +143,8 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
 
     protected abstract void handle(AskInstallPathForNewSnapshotMsg msg);
 
+    protected abstract void handle(GetPrimaryStorageResourceLocationMsg msg);
+
     protected abstract void connectHook(ConnectParam param, Completion completion);
 
     protected abstract void pingHook(Completion completion);
@@ -161,7 +163,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
         return String.format("primaryStorage-%s", self.getUuid());
     }
 
-    protected static List<TrashType> trashLists = CollectionDSL.list(TrashType.MigrateVolume, TrashType.MigrateVolumeSnapshot, TrashType.RevertVolume, TrashType.VolumeSnapshot);
+    protected static List<TrashType> trashLists = CollectionDSL.list(TrashType.MigrateVolume, TrashType.MigrateVolumeSnapshot, TrashType.RevertVolume, TrashType.VolumeSnapshot, TrashType.ReimageVolume);
 
     protected void fireDisconnectedCanonicalEvent(ErrorCode reason) {
         PrimaryStorageCanonicalEvent.DisconnectedData data = new PrimaryStorageCanonicalEvent.DisconnectedData();
@@ -350,7 +352,9 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
             handle((GetVolumeSnapshotSizeOnPrimaryStorageMsg) msg);
         } else if ((msg instanceof CleanUpTrashOnPrimaryStorageMsg)) {
             handle((CleanUpTrashOnPrimaryStorageMsg) msg);
-        } else {
+        } else if ((msg instanceof GetPrimaryStorageResourceLocationMsg)) {
+            handle((GetPrimaryStorageResourceLocationMsg) msg);
+        } else  {
             bus.dealWithUnknownMessage(msg);
         }
     }
@@ -362,7 +366,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
 
             @Override
             public String getSyncSignature() {
-                return name;
+                return getSyncId();
             }
 
             @Override
@@ -534,7 +538,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
         thdf.chainSubmit(new ChainTask(completion) {
             @Override
             public String getSyncSignature() {
-                return String.format("reconnect-primary-storage-%s", self.getUuid());
+                return getSyncId();
             }
 
             @Override
@@ -578,7 +582,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
 
             @Override
             public String getName() {
-                return getSyncSignature();
+                return String.format("reconnect-primary-storage-%s", self.getUuid());
             }
         });
     }
@@ -737,7 +741,18 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
 
     private void handle(final APIGetTrashOnPrimaryStorageMsg msg) {
         APIGetTrashOnPrimaryStorageReply reply = new APIGetTrashOnPrimaryStorageReply();
-        reply.getStorageTrashSpecs().addAll(trash.getTrashList(self.getUuid(), trashLists).values());
+        List<TrashType> lists = msg.getTrashType() != null ? CollectionDSL.list(TrashType.valueOf(msg.getTrashType())) : trashLists;
+        Map<String, StorageTrashSpec> trashs = trash.getTrashList(self.getUuid(), lists);
+        if (msg.getResourceUuid() == null) {
+            reply.getStorageTrashSpecs().addAll(trash.getTrashList(self.getUuid(), trashLists).values());
+        } else {
+            trashs.values().forEach(t -> {
+                if (msg.getResourceUuid().equals(t.getResourceUuid()) && msg.getResourceType().equals(t.getResourceType())) {
+                    reply.getStorageTrashSpecs().add(t);
+                }
+            });
+        }
+
         bus.reply(msg, reply);
     }
 
@@ -754,9 +769,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
         }
 
         if (!trash.makeSureInstallPathNotUsed(spec)) {
-            logger.warn(String.format("%s is still in using by %s, only remove it from trash...", spec.getInstallPath(), spec.getResourceType()));
-            trash.removeFromDb(spec.getTrashId());
-            completion.success(result);
+            completion.fail(operr("%s is still in using by %s, cannot remove it from trash...", spec.getInstallPath(), spec.getResourceType()));
             return;
         }
         DeleteVolumeBitsOnPrimaryStorageMsg msg = new DeleteVolumeBitsOnPrimaryStorageMsg();
@@ -1068,25 +1081,44 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
 
     private void handle(APIUpdatePrimaryStorageMsg msg) {
         APIUpdatePrimaryStorageEvent evt = new APIUpdatePrimaryStorageEvent(msg.getId());
-        updatePrimaryStorage(msg, new ReturnValueCompletion<PrimaryStorageVO>(msg) {
+
+        thdf.chainSubmit(new ChainTask(msg) {
             @Override
-            public void success(PrimaryStorageVO vo) {
-                if (vo != null){
-                    self = dbf.updateAndRefresh(vo);
-                }
-                evt.setInventory(getSelfInventory());
-                bus.publish(evt);
+            public String getSyncSignature() {
+                return getSyncId();
             }
 
             @Override
-            public void fail(ErrorCode errorCode) {
-                evt.setError(errorCode);
-                bus.publish(evt);
+            public void run(SyncTaskChain chain) {
+                updatePrimaryStorage(msg, new ReturnValueCompletion<PrimaryStorageVO>(msg) {
+                    @Override
+                    public void success(PrimaryStorageVO vo) {
+                        if (vo != null){
+                            self = dbf.updateAndRefresh(vo);
+                        }
+                        evt.setInventory(getSelfInventory());
+                        bus.publish(evt);
+                        chain.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        evt.setError(errorCode);
+                        bus.publish(evt);
+                        chain.next();
+                    }
+                });
+            }
+
+            @Override
+            public String getName() {
+                return String.format("update-primary-storage-%s", self.getUuid());
             }
         });
     }
 
     protected boolean changeStatus(PrimaryStorageStatus status) {
+        self = dbf.reload(self);
         if (status == self.getStatus()) {
             return false;
         }
@@ -1109,35 +1141,22 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
     }
 
     protected void handle(APIReconnectPrimaryStorageMsg msg) {
-        thdf.chainSubmit(new ChainTask(msg) {
-            @Override
-            public String getSyncSignature() {
-                return getSyncId();
-            }
+        final APIReconnectPrimaryStorageEvent evt = new APIReconnectPrimaryStorageEvent(msg.getId());
 
+        ReconnectPrimaryStorageMsg rmsg = new ReconnectPrimaryStorageMsg();
+        rmsg.setPrimaryStorageUuid(msg.getPrimaryStorageUuid());
+        bus.makeTargetServiceIdByResourceUuid(rmsg, PrimaryStorageConstant.SERVICE_ID, rmsg.getPrimaryStorageUuid());
+        bus.send(rmsg, new CloudBusCallBack(msg) {
             @Override
-            public void run(SyncTaskChain chain) {
-                final APIReconnectPrimaryStorageEvent evt = new APIReconnectPrimaryStorageEvent(msg.getId());
-                doConnect(new ConnectParam(), new Completion(msg, chain) {
-                    @Override
-                    public void success() {
-                        evt.setInventory(getSelfInventory());
-                        bus.publish(evt);
-                        chain.next();
-                    }
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    evt.setError(reply.getError());
+                } else {
+                    self = dbf.reload(self);
+                    evt.setInventory(getSelfInventory());
+                }
 
-                    @Override
-                    public void fail(ErrorCode errorCode) {
-                        evt.setError(errorCode);
-                        bus.publish(evt);
-                        chain.next();
-                    }
-                });
-            }
-
-            @Override
-            public String getName() {
-                return "reconnect-primary-storage";
+                bus.publish(evt);
             }
         });
     }
@@ -1287,41 +1306,57 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
     protected void handle(APIChangePrimaryStorageStateMsg msg) {
         APIChangePrimaryStorageStateEvent evt = new APIChangePrimaryStorageStateEvent(msg.getId());
 
-        PrimaryStorageState currState = self.getState();
-        PrimaryStorageStateEvent event = PrimaryStorageStateEvent.valueOf(msg.getStateEvent());
-        PrimaryStorageState nextState = AbstractPrimaryStorage.getNextState(currState, event);
-
-        try {
-            extpEmitter.preChange(self, event);
-        } catch (PrimaryStorageException e) {
-            evt.setError(err(SysErrors.CHANGE_RESOURCE_STATE_ERROR, e.getMessage()));
-            bus.publish(evt);
-            return;
-        }
-
-        extpEmitter.beforeChange(self, event);
-        if (PrimaryStorageStateEvent.maintain == event) {
-            logger.warn(String.format("Primary Storage %s  will enter maintenance mode, ignore unknown status VMs", msg.getPrimaryStorageUuid()));
-            List<String> vmUuids = SQL.New("select vm.uuid from VmInstanceVO vm, VolumeVO vol" +
-                    " where vol.primaryStorageUuid =:uuid and vol.vmInstanceUuid = vm.uuid group by vm.uuid", String.class)
-                    .param("uuid", self.getUuid()).list();
-            if ( vmUuids.size() != 0 ) {
-                stopAllVms(vmUuids);
+        thdf.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return getSyncId();
             }
-        }
-        changeStateHook(event, nextState);
-        self.setState(nextState);
-        self = dbf.updateAndRefresh(self);
-        extpEmitter.afterChange(self, event, currState);
 
-        PrimaryStorageCanonicalEvent.PrimaryStorageStateChangedData data = new PrimaryStorageCanonicalEvent.PrimaryStorageStateChangedData();
-        data.setInventory(PrimaryStorageInventory.valueOf(self));
-        data.setPrimaryStorageUuid(self.getUuid());
-        data.setOldState(currState);
-        data.setNewState(nextState);
-        evt.setInventory(PrimaryStorageInventory.valueOf(self));
-        evtf.fire(PrimaryStorageCanonicalEvent.PRIMARY_STORAGE_STATE_CHANGED_PATH, data);
-        bus.publish(evt);
+            @Override
+            public void run(SyncTaskChain chain) {
+                PrimaryStorageState currState = self.getState();
+                PrimaryStorageStateEvent event = PrimaryStorageStateEvent.valueOf(msg.getStateEvent());
+                PrimaryStorageState nextState = AbstractPrimaryStorage.getNextState(currState, event);
+
+                try {
+                    extpEmitter.preChange(self, event);
+                } catch (PrimaryStorageException e) {
+                    evt.setError(err(SysErrors.CHANGE_RESOURCE_STATE_ERROR, e.getMessage()));
+                    bus.publish(evt);
+                    return;
+                }
+
+                extpEmitter.beforeChange(self, event);
+                if (PrimaryStorageStateEvent.maintain == event) {
+                    logger.warn(String.format("Primary Storage %s  will enter maintenance mode, ignore unknown status VMs", msg.getPrimaryStorageUuid()));
+                    List<String> vmUuids = SQL.New("select vm.uuid from VmInstanceVO vm, VolumeVO vol" +
+                            " where vol.primaryStorageUuid =:uuid and vol.vmInstanceUuid = vm.uuid group by vm.uuid", String.class)
+                            .param("uuid", self.getUuid()).list();
+                    if ( vmUuids.size() != 0 ) {
+                        stopAllVms(vmUuids);
+                    }
+                }
+                changeStateHook(event, nextState);
+                self.setState(nextState);
+                self = dbf.updateAndRefresh(self);
+                extpEmitter.afterChange(self, event, currState);
+
+                PrimaryStorageCanonicalEvent.PrimaryStorageStateChangedData data = new PrimaryStorageCanonicalEvent.PrimaryStorageStateChangedData();
+                data.setInventory(PrimaryStorageInventory.valueOf(self));
+                data.setPrimaryStorageUuid(self.getUuid());
+                data.setOldState(currState);
+                data.setNewState(nextState);
+                evt.setInventory(PrimaryStorageInventory.valueOf(self));
+                evtf.fire(PrimaryStorageCanonicalEvent.PRIMARY_STORAGE_STATE_CHANGED_PATH, data);
+                bus.publish(evt);
+                chain.next();
+            }
+
+            @Override
+            public String getName() {
+                return String.format("change-primary-storage-%s-state", self.getUuid());
+            }
+        });
     }
 
     protected void handle(APIDeletePrimaryStorageMsg msg) {

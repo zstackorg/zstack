@@ -12,6 +12,7 @@ import org.zstack.header.image.ImageVO
 import org.zstack.header.storage.backup.BackupStorageVO
 import org.zstack.header.storage.backup.StorageTrashSpec
 import org.zstack.sdk.BackupStorageInventory
+import org.zstack.sdk.CleanUpTrashOnBackupStorageAction
 import org.zstack.sdk.CleanUpTrashOnBackupStorageResult
 import org.zstack.sdk.GetTrashOnBackupStorageResult
 import org.zstack.sdk.ImageInventory
@@ -27,6 +28,8 @@ class BackupStorageTrashCase extends SubCase {
     ImageInventory image
     StorageTrashImpl trashMrg
     JsonLabelInventory label
+
+    String trashResourceUuid
 
     @Override
     void clean() {
@@ -62,7 +65,7 @@ class BackupStorageTrashCase extends SubCase {
                 backupStorageUuids = [bs.uuid]
                 format = ImageConstant.QCOW2_FORMAT_STRING
             } as ImageInventory
-            testCleanUpTrashOnlyDB()
+            testCleanUpTrashWhileUsing()
         }
     }
 
@@ -72,8 +75,8 @@ class BackupStorageTrashCase extends SubCase {
     }
 
     void createTrash() {
-        String resourceUuid = Platform.uuid
-        def spec = new StorageTrashSpec(resourceUuid, ImageVO.class.getSimpleName(), bs.uuid, BackupStorageVO.class.getSimpleName(),
+        trashResourceUuid = Platform.uuid
+        def spec = new StorageTrashSpec(trashResourceUuid, ImageVO.class.getSimpleName(), bs.uuid, BackupStorageVO.class.getSimpleName(),
                 "mock-installpath", 123456L)
         label = trashMrg.createTrash(TrashType.MigrateImage, spec) as JsonLabelInventory
 
@@ -82,7 +85,7 @@ class BackupStorageTrashCase extends SubCase {
         def s = JSONObjectUtil.toObject(label.labelValue, StorageTrashSpec.class)
         assert s.size == 123456L
         assert s.installPath == "mock-installpath"
-        assert s.resourceUuid == resourceUuid
+        assert s.resourceUuid == trashResourceUuid
         assert s.storageUuid == bs.uuid
         assert s.storageType == "BackupStorageVO"
         assert s.resourceType == "ImageVO"
@@ -93,11 +96,26 @@ class BackupStorageTrashCase extends SubCase {
             uuid = bs.uuid
         } as GetTrashOnBackupStorageResult
 
+        assertTrash(trashs)
+
+        trashs = getTrashOnBackupStorage {
+            delegate.uuid = bs.uuid
+            delegate.resourceType = "ImageVO"
+            delegate.resourceUuid = trashResourceUuid
+            delegate.trashType = "MigrateImage"
+        } as GetTrashOnBackupStorageResult
+
+        assertTrash(trashs)
+    }
+
+    void assertTrash(GetTrashOnBackupStorageResult trashs) {
         assert trashs.storageTrashSpecs.get(0).size == 123456L
         assert trashs.storageTrashSpecs.get(0).installPath == "mock-installpath"
         assert trashs.storageTrashSpecs.get(0).storageUuid == bs.uuid
         assert trashs.storageTrashSpecs.get(0).storageType == "BackupStorageVO"
         assert trashs.storageTrashSpecs.get(0).resourceType == "ImageVO"
+        assert trashs.storageTrashSpecs.get(0).resourceUuid == trashResourceUuid
+        assert trashs.storageTrashSpecs.get(0).trashType == "MigrateImage"
         assert trashs.storageTrashSpecs.get(0).trashId > 0
         assert trashs.storageTrashSpecs.get(0).createDate == label.createDate
     }
@@ -136,7 +154,7 @@ class BackupStorageTrashCase extends SubCase {
         assert trashs.storageTrashSpecs.size() == 0
     }
 
-    void testCleanUpTrashOnlyDB() {
+    void testCleanUpTrashWhileUsing() {
         def trashs = getTrashOnBackupStorage {
             uuid = bs.uuid
         } as GetTrashOnBackupStorageResult
@@ -150,19 +168,18 @@ class BackupStorageTrashCase extends SubCase {
             }
         }
 
-        def result = cleanUpTrashOnBackupStorage {
-            uuid = bs.uuid
-            trashId = label.id
-        } as CleanUpTrashOnBackupStorageResult
+        def action = new CleanUpTrashOnBackupStorageAction()
+        action.uuid = bs.uuid
+        action.trashId = label.id
+        action.sessionId = adminSession()
 
-        assert result.result != null
-        assert result.result.size == 0
-        assert result.result.resourceUuids.size() == 0
+        def result = action.call()
+        assert result.error != null
 
         trashs = getTrashOnBackupStorage {
             uuid = bs.uuid
         } as GetTrashOnBackupStorageResult
 
-        assert trashs.storageTrashSpecs.size() == count - 1
+        assert trashs.storageTrashSpecs.size() == count
     }
 }

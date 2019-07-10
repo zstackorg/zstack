@@ -11,6 +11,7 @@ import org.zstack.header.storage.snapshot.VolumeSnapshotVO
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO_
 import org.zstack.header.volume.VolumeVO
 import org.zstack.header.volume.VolumeVO_
+import org.zstack.sdk.CleanUpTrashOnPrimaryStorageAction
 import org.zstack.sdk.CleanUpTrashOnPrimaryStorageResult
 import org.zstack.sdk.DiskOfferingInventory
 import org.zstack.sdk.GetTrashOnPrimaryStorageResult
@@ -32,6 +33,8 @@ class PrimaryStorageTrashCase extends SubCase {
 
     VolumeInventory volume
     VolumeSnapshotInventory snapshot
+
+    String trashResourceUuid
 
     @Override
     void clean() {
@@ -73,7 +76,7 @@ class PrimaryStorageTrashCase extends SubCase {
                 name = "snapshot"
                 volumeUuid = volume.uuid
             } as VolumeSnapshotInventory
-            testCleanUpTrashOnlyDB()
+            testCleanUpTrashWhileUsing()
         }
     }
 
@@ -84,17 +87,17 @@ class PrimaryStorageTrashCase extends SubCase {
     }
 
     void createTrash() {
-        String resourceUuid = Platform.uuid
-        def spec = new StorageTrashSpec(resourceUuid, VolumeVO.class.getSimpleName(), ps.uuid, PrimaryStorageVO.class.getSimpleName(),
-                "mock-installpath-${resourceUuid}", 123456L)
+        trashResourceUuid = Platform.uuid
+        def spec = new StorageTrashSpec(trashResourceUuid, VolumeVO.class.getSimpleName(), ps.uuid, PrimaryStorageVO.class.getSimpleName(),
+                "mock-installpath-${trashResourceUuid}", 123456L)
         label = trashMrg.createTrash(TrashType.MigrateVolume, spec) as JsonLabelInventory
 
         assert label.resourceUuid == ps.uuid
         assert label.labelKey.startsWith(TrashType.MigrateVolume.toString())
         def s = JSONObjectUtil.toObject(label.labelValue, StorageTrashSpec.class)
         assert s.size == 123456L
-        assert s.installPath == "mock-installpath-${resourceUuid}"
-        assert s.resourceUuid == resourceUuid
+        assert s.installPath == "mock-installpath-${trashResourceUuid}"
+        assert s.resourceUuid == trashResourceUuid
         assert s.storageUuid == ps.uuid
         assert s.storageType == "PrimaryStorageVO"
         assert s.resourceType == "VolumeVO"
@@ -121,12 +124,25 @@ class PrimaryStorageTrashCase extends SubCase {
         def trashs = getTrashOnPrimaryStorage {
             uuid = ps.uuid
         } as GetTrashOnPrimaryStorageResult
+        assertTrash(trashs)
 
+        trashs = getTrashOnPrimaryStorage {
+            delegate.uuid = ps.uuid
+            delegate.resourceType = "VolumeVO"
+            delegate.resourceUuid = trashResourceUuid
+            delegate.trashType = "MigrateVolume"
+        } as GetTrashOnPrimaryStorageResult
+
+        assertTrash(trashs)
+    }
+
+    void assertTrash(GetTrashOnPrimaryStorageResult trashs) {
         assert trashs.storageTrashSpecs.get(0).size == 123456L
         assert trashs.storageTrashSpecs.get(0).installPath.startsWith("mock-installpath")
         assert trashs.storageTrashSpecs.get(0).storageUuid == ps.uuid
         assert trashs.storageTrashSpecs.get(0).storageType == "PrimaryStorageVO"
         assert trashs.storageTrashSpecs.get(0).resourceType == "VolumeVO"
+        assert trashs.storageTrashSpecs.get(0).trashType == "MigrateVolume"
         assert trashs.storageTrashSpecs.get(0).trashId > 0
         assert trashs.storageTrashSpecs.get(0).createDate == label.createDate
     }
@@ -166,12 +182,13 @@ class PrimaryStorageTrashCase extends SubCase {
     }
 
     // if installpath still in using (this situation usually caused by bug), then skip delete it
-    void testCleanUpTrashOnlyDB() {
+    void testCleanUpTrashWhileUsing() {
         def trashs = getTrashOnPrimaryStorage {
             uuid = ps.uuid
         } as GetTrashOnPrimaryStorageResult
 
         assert trashs.storageTrashSpecs.size() > 0
+        def count = trashs.storageTrashSpecs.size()
 
         trashs.storageTrashSpecs.each {
             def trash = it as org.zstack.sdk.StorageTrashSpec
@@ -182,18 +199,18 @@ class PrimaryStorageTrashCase extends SubCase {
             }
         }
 
-        def result = cleanUpTrashOnPrimaryStorage {
-            uuid = ps.uuid
-        } as CleanUpTrashOnPrimaryStorageResult
+        def action = new CleanUpTrashOnPrimaryStorageAction()
+        action.uuid = ps.uuid
+        action.sessionId = adminSession()
 
-        assert result.result != null
-        assert result.result.size == 0
-        assert result.result.resourceUuids.size() == 0
+        def result = action.call()
+
+        assert result.error != null
 
         trashs = getTrashOnPrimaryStorage {
             uuid = ps.uuid
         } as GetTrashOnPrimaryStorageResult
 
-        assert trashs.storageTrashSpecs.size() == 0
+        assert trashs.storageTrashSpecs.size() == count
     }
 }

@@ -64,7 +64,7 @@ doc {
 				column {
 					name "resourceUuid"
 					enclosedIn "params"
-					desc "数据云盘UUID。若指定，数据云盘会使用该字段值作为UUID。"
+					desc "数据云盘镜像UUID。若指定，数据云盘镜像会使用该字段值作为UUID。"
 					location "body"
 					type "String"
 					optional true

@@ -16,7 +16,7 @@ public class TemplateConfigVO {
     @Column
     private String category;
 
-    @Column
+    @Column(updatable=false)
     private String templateUuid;
 
     @Column

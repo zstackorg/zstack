@@ -13,6 +13,8 @@
         <class>org.zstack.core.job.JobQueueVO</class>
         <class>org.zstack.core.job.JobQueueEntryVO</class>
         <class>org.zstack.core.config.GlobalConfigVO</class>
+        <class>org.zstack.core.config.GlobalConfigTemplateVO</class>
+        <class>org.zstack.core.config.TemplateConfigVO</class>
         <class>org.zstack.resourceconfig.ResourceConfigVO</class>
         <class>org.zstack.header.scheduler.SchedulerVO</class>
         <class>org.zstack.header.scheduler.SchedulerJobVO</class>

@@ -8,9 +8,8 @@ import java.lang.annotation.Target;
  */
 @Target({java.lang.annotation.ElementType.FIELD})
 @Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
-public @interface GlobalConfigDef {
+public @interface TemplateConfigDef {
     Class type() default String.class;
     String defaultValue() default "";
-    String description() default "";
     String validatorRegularExpression() default "";
 }

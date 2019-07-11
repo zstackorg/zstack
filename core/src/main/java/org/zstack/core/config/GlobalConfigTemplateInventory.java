@@ -8,15 +8,15 @@ import java.util.Collection;
 import java.util.List;
 
 @PythonClassInventory
-@Inventory(mappingVOClass = TemplateVO.class)
-public class TemplateInventory {
+@Inventory(mappingVOClass = GlobalConfigTemplateVO.class)
+public class GlobalConfigTemplateInventory {
     private String uuid;
     private String name;
     private String type;
     private String description;
 
-    public static TemplateInventory valueOf(TemplateVO vo) {
-        TemplateInventory inv = new TemplateInventory();
+    public static GlobalConfigTemplateInventory valueOf(GlobalConfigTemplateVO vo) {
+        GlobalConfigTemplateInventory inv = new GlobalConfigTemplateInventory();
         inv.setUuid(vo.getUuid());
         inv.setName(vo.getName());
         inv.setType(vo.getType());
@@ -24,16 +24,16 @@ public class TemplateInventory {
         return inv;
     }
 
-    public static List<TemplateInventory> valueOf(Collection<TemplateVO> vos) {
-        List<TemplateInventory> invs = new ArrayList<TemplateInventory>();
-        for (TemplateVO vo : vos) {
+    public static List<GlobalConfigTemplateInventory> valueOf(Collection<GlobalConfigTemplateVO> vos) {
+        List<GlobalConfigTemplateInventory> invs = new ArrayList<GlobalConfigTemplateInventory>();
+        for (GlobalConfigTemplateVO vo : vos) {
             invs.add(valueOf(vo));
         }
         return invs;
     }
 
-    public static TemplateInventory valueOf(Template t) {
-        TemplateInventory inv = new TemplateInventory();
+    public static GlobalConfigTemplateInventory valueOf(GlobalConfigTemplate t) {
+        GlobalConfigTemplateInventory inv = new GlobalConfigTemplateInventory();
         inv.setUuid(t.getUuid());
         inv.setName(t.getName());
         inv.setType(t.getType());

@@ -7,10 +7,10 @@ import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
 
 @RestRequest(
-        path = "/template-configuration/{templateUuid}/{catetory}/{name}/actions",
+        path = "/template-configurations/{templateUuid}/{category}/{name}/actions",
         method = HttpMethod.PUT,
         isAction = true,
-        responseClass = APIUpdateGlobalConfigEvent.class
+        responseClass = APIUpdateTemplateConfigEvent.class
 )
 public class APIUpdateTemplateConfigMsg extends APIMessage {
     @APIParam
@@ -22,6 +22,9 @@ public class APIUpdateTemplateConfigMsg extends APIMessage {
     @APIParam
     private String value;
 
+    public String getIdentity() {
+        return TemplateConfig.produceIdentity(templateUuid, category, name);
+    }
     public String getTemplateUuid() {
         return templateUuid;
     }

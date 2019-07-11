@@ -66,6 +66,8 @@ public class SourceClassMap {
 			put("org.zstack.cloudformation.template.struct.ResourceStruct", "org.zstack.sdk.ResourceStruct");
 			put("org.zstack.cloudformation.template.struct.ResourceType", "org.zstack.sdk.ResourceType");
 			put("org.zstack.core.config.GlobalConfigInventory", "org.zstack.sdk.GlobalConfigInventory");
+			put("org.zstack.core.config.GlobalConfigTemplateInventory", "org.zstack.sdk.GlobalConfigTemplateInventory");
+			put("org.zstack.core.config.TemplateConfigInventory", "org.zstack.sdk.TemplateConfigInventory");
 			put("org.zstack.core.errorcode.ElaborationCategory", "org.zstack.sdk.ElaborationCategory");
 			put("org.zstack.core.errorcode.ElaborationCheckResult", "org.zstack.sdk.ElaborationCheckResult");
 			put("org.zstack.core.errorcode.ElaborationContent", "org.zstack.sdk.ElaborationContent");
@@ -531,6 +533,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.FusionstorPrimaryStorageMonInventory", "org.zstack.storage.fusionstor.primary.FusionstorPrimaryStorageMonInventory");
 			put("org.zstack.sdk.GarbageCollectorInventory", "org.zstack.core.gc.GarbageCollectorInventory");
 			put("org.zstack.sdk.GlobalConfigInventory", "org.zstack.core.config.GlobalConfigInventory");
+			put("org.zstack.sdk.GlobalConfigTemplateInventory", "org.zstack.core.config.GlobalConfigTemplateInventory");
 			put("org.zstack.sdk.HostDiskCapacity", "org.zstack.storage.primary.local.APIGetLocalStorageHostDiskCapacityReply$HostDiskCapacity");
 			put("org.zstack.sdk.HostInventory", "org.zstack.header.host.HostInventory");
 			put("org.zstack.sdk.HostIommuStateType", "org.zstack.pciDevice.HostIommuStateType");
@@ -704,6 +707,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.TagPatternInventory", "org.zstack.header.tag.TagPatternInventory");
 			put("org.zstack.sdk.TagPatternType", "org.zstack.header.tag.TagPatternType");
 			put("org.zstack.sdk.TaskProgressInventory", "org.zstack.header.core.progress.TaskProgressInventory");
+			put("org.zstack.sdk.TemplateConfigInventory", "org.zstack.core.config.TemplateConfigInventory");
 			put("org.zstack.sdk.TwoFactorAuthenticationInventory", "org.zstack.twoFactorAuthentication.TwoFactorAuthenticationInventory");
 			put("org.zstack.sdk.TwoFactorAuthenticationSecretInventory", "org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretInventory");
 			put("org.zstack.sdk.TwoFactorAuthenticationSecretStatus", "org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretStatus");

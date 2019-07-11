@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.EventCallback;
 import org.zstack.core.cloudbus.EventFacade;
-import org.zstack.core.config.TemplateConfigCanonicalEvents.UpdateEvent;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
@@ -39,6 +38,7 @@ public class TemplateConfig {
     private String name;
     private String category;
     private String templateUuid;
+    private String type;
     private String validatorRegularExpression;
     private String defaultValue;
     private volatile String value;
@@ -51,16 +51,6 @@ public class TemplateConfig {
     private TemplateConfigDef configDef;
 
     private static Map<String, String> propertiesMap = new HashMap<>();
-    static {
-        boolean noTrim = System.getProperty("DoNotTrimPropertyFile") != null;
-        for (final String name : System.getProperties().stringPropertyNames()) {
-            String value = System.getProperty(name);
-            if (!noTrim) {
-                value = value.trim();
-            }
-            propertiesMap.put(name, value);
-        }
-    }
 
     @Autowired
     private DatabaseFacade dbf;
@@ -76,6 +66,7 @@ public class TemplateConfig {
         return JSONObjectUtil.toJsonString(map(
                 e("name", name),
                 e("category", category),
+                e("type", type),
                 e("templateUuid", templateUuid),
                 e("defaultValue", defaultValue),
                 e("value", value),
@@ -88,9 +79,7 @@ public class TemplateConfig {
             // means String, no need to normalize
             return;
         }
-
-        // for bug: http://dev.zstack.io/browse/ZSTAC-8753
-        DebugUtils.Assert(value != null, String.format("value cannot be null, category: %s, name: %s", category, name));
+        DebugUtils.Assert(value != null, String.format("value cannot be null, category: %s, name: %s, templateUuid: %s", category, name, templateUuid));
 
         try {
             Class clz = Class.forName(type);
@@ -101,44 +90,38 @@ public class TemplateConfig {
         }
     }
 
-    public TemplateConfig(String category, String name) {
+    public TemplateConfig(String category, String name, String templateUuid) {
         this.category = category;
         this.name = name;
+        this.templateUuid = templateUuid;
     }
 
-    TemplateConfig() {
+    public TemplateConfig() {
     }
 
-    TemplateConfig copy(TemplateConfig g){
-        setName(g.getName());
-        setCategory(g.getCategory());
-        setDescription(g.getDescription());
-        setType(g.getType());
-        setValidatorRegularExpression(g.getValidatorRegularExpression());
-        setDefaultValue(g.getDefaultValue());
-        setValue(g.value());
-        setLinked(g.isLinked());
+    TemplateConfig copy(TemplateConfig t){
+        setName(t.getName());
+        setCategory(t.getCategory());
+        setType(t.getType());
+        setTemplateUuid(t.getTemplateUuid());
+        setValidatorRegularExpression(t.getValidatorRegularExpression());
+        setDefaultValue(t.getDefaultValue());
+        setValue(t.getValue());
+        setLinked(t.isLinked());
 
         validators = new ArrayList<>();
         updateExtensions = new ArrayList<>();
         localUpdateExtensions = new ArrayList<>();
         beforeUpdateExtensions = new ArrayList<>();
 
-        updateExtensions.addAll(g.getUpdateExtensions());
-        beforeUpdateExtensions.addAll(g.getBeforeUpdateExtensions());
-        localUpdateExtensions.addAll(g.getLocalUpdateExtensions());
-        validators.addAll(g.getValidators());
-        configDef = g.getConfigDef();
+        updateExtensions.addAll(t.getUpdateExtensions());
+        beforeUpdateExtensions.addAll(t.getBeforeUpdateExtensions());
+        localUpdateExtensions.addAll(t.getLocalUpdateExtensions());
+        validators.addAll(t.getValidators());
+        configDef = t.getConfigDef();
         return this;
     }
 
-    private String makeUpdateEventPath() {
-        return s(TemplateConfigCanonicalEvents.UPDATE_EVENT_PATH).formatByMap(map(
-                e("nodeUuid", Platform.getManagementServerId()),
-                e("category", category),
-                e("name", name)
-        ));
-    }
 
     public TemplateConfigVO reload() {
         SimpleQuery<TemplateConfigVO> q = dbf.createQuery(TemplateConfigVO.class);
@@ -183,14 +166,6 @@ public class TemplateConfig {
         this.category = category;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getType() {
         return type;
     }
@@ -215,16 +190,23 @@ public class TemplateConfig {
         this.defaultValue = defaultValue;
     }
 
-    public String value() {
+    public String getValue() {
         return value;
     }
 
-    void setValue(String value) {
-        this.value = value;
+    void setValue(String value) { this.value = value; }
+
+    public String getTemplateUuid() {
+        return templateUuid;
     }
 
+    public void setTemplateUuid(String templateUuid) {
+        this.templateUuid = templateUuid;
+    }
+
+
     public <T> T value(Class<T> clz) {
-        return TypeUtils.stringToValue(value(), clz);
+        return TypeUtils.stringToValue(getValue(), clz);
     }
 
     public <T> T defaultValue(Class<T> clz) {
@@ -235,30 +217,29 @@ public class TemplateConfig {
         TemplateConfig conf = new TemplateConfig();
         conf.setName(vo.getName());
         conf.setCategory(vo.getCategory());
+        conf.setTemplateUuid(vo.getTemplateUuid());
         conf.setDefaultValue(vo.getDefaultValue());
-        conf.setDescription(vo.getDescription());
         conf.setValue(vo.getValue());
         return conf;
     }
 
     public static TemplateConfig valueOf(TemplateConfig old) {
-        TemplateConfig ng = new TemplateConfig();
-        ng.setName(old.getName());
-        ng.setValue(old.value());
-        ng.setCategory(old.getCategory());
-        ng.setDescription(old.getDescription());
-        ng.setDefaultValue(old.getDefaultValue());
-        ng.setValidatorRegularExpression(old.getValidatorRegularExpression());
-        return ng;
+        TemplateConfig nt = new TemplateConfig();
+        nt.setName(old.getName());
+        nt.setValue(old.getValue());
+        nt.setCategory(old.getCategory());
+        nt.setDefaultValue(old.getDefaultValue());
+        nt.setValidatorRegularExpression(old.getValidatorRegularExpression());
+        return nt;
     }
 
     public TemplateConfigVO toVO() {
         TemplateConfigVO vo = new TemplateConfigVO();
         vo.setCategory(category);
         vo.setValue(value);
-        vo.setDescription(description);
         vo.setDefaultValue(defaultValue);
         vo.setName(name);
+        vo.setTemplateUuid(templateUuid);
         return vo;
     }
 
@@ -266,19 +247,19 @@ public class TemplateConfig {
         TemplateConfig conf = new TemplateConfig();
         conf.setName(c.getName());
         conf.setCategory(c.getCategory());
+        conf.setTemplateUuid(c.getTemplateUuid());
         conf.setDefaultValue(c.getDefaultValue());
-        conf.setDescription(c.getDescription());
         conf.setValue(c.getValue());
         conf.setType(c.getType());
         return conf;
     }
 
     public String getIdentity() {
-        return produceIdentity(category, name);
+        return produceIdentity(templateUuid, category, name);
     }
 
-    public static String produceIdentity(String category, String name) {
-        return String.format("%s.%s", category, name);
+    public static String produceIdentity(String templateUuid, String category, String name) {
+        return String.format("%s.%s.%s", templateUuid, category, name);
     }
 
     void validate() {
@@ -287,33 +268,8 @@ public class TemplateConfig {
 
     public void validate(String newValue) {
         for  (TemplateConfigValidatorExtensionPoint ext : validators) {
-            ext.validateTemplateConfig(category, name, value, newValue);
+            ext.validateTemplateConfig(templateUuid, category, name , value, newValue);
         }
-    }
-
-    void init() {
-        evtf.on(s(TemplateConfigCanonicalEvents.UPDATE_EVENT_PATH).formatByMap(map(
-                e("category", category),
-                e("name", name)
-        )), new EventCallback() {
-            @Override
-            public void run(Map tokens, Object data) {
-                String nodeUuid = (String) tokens.get("nodeUuid");
-                if (Platform.getManagementServerId().equals(nodeUuid)) {
-                    return;
-                }
-
-                String newValue = Q.New(TemplateConfigVO.class).select(TemplateConfigVO_.value)
-                        .eq(TemplateConfigVO_.category, category)
-                        .eq(TemplateConfigVO_.name, name)
-                        .findValue();
-                update(newValue, false);
-
-                UpdateEvent evt = (UpdateEvent)data;
-                logger.info(String.format("TemplateConfig[category: %s, name: %s] was updated in other management node[uuid:%s]," +
-                        "in line with that change, updated ours. %s --> %s", category, name, nodeUuid, evt.getOldValue(), value));
-            }
-        });
     }
 
     private void update(String newValue, boolean localUpdate) {
@@ -325,6 +281,7 @@ public class TemplateConfig {
         SimpleQuery<TemplateConfigVO> q = dbf.createQuery(TemplateConfigVO.class);
         q.add(TemplateConfigVO_.category, Op.EQ, category);
         q.add(TemplateConfigVO_.name, Op.EQ, name);
+        q.add(TemplateConfigVO_.templateUuid, Op.EQ, templateUuid);
         TemplateConfigVO vo = q.find();
         final TemplateConfig origin = valueOf(vo);
 
@@ -369,14 +326,8 @@ public class TemplateConfig {
             }
         }
 
-        if (localUpdate) {
-            UpdateEvent evt = new UpdateEvent();
-            evt.setOldValue(origin.value());
-            evt.setNewValue(newValue);
-            evtf.fire(makeUpdateEventPath(), evt);
-        }
 
-        logger.debug(String.format("updated global config[category:%s, name:%s]: %s to %s", category, name, origin.value(), value));
+        logger.debug(String.format("updated template config[templateUuid: %s, category:%s, name:%s]: %s to %s",templateUuid, category, name, origin.getValue(), value));
     }
 
     public void updateValue(Object val) {

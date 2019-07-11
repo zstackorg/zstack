@@ -10,15 +10,15 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 
-@AutoQuery(replyClass = APIQueryGlobalConfigReply.class, inventoryClass = GlobalConfigInventory.class)
+@AutoQuery(replyClass = APIQueryGlobalConfigTemplateReply.class, inventoryClass = GlobalConfigTemplateInventory.class)
 @Action(category = "configuration", names = {"read"})
 @RestRequest(
-        path = "/template-configuration",
+        path = "/template-configurations",
         method = HttpMethod.GET,
-        responseClass = APIQueryGlobalConfigReply.class
+        responseClass = APIQueryGlobalConfigTemplateReply.class
 )
 
-public class APIQueryTemplateMsg extends APIQueryMessage {
+public class APIQueryGlobalConfigTemplateMsg extends APIQueryMessage {
     public static List<String> __example__() {
         return asList();
     }

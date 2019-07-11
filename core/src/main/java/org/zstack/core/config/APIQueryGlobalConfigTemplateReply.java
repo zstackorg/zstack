@@ -7,20 +7,20 @@ import static java.util.Arrays.asList;
 
 
 @RestResponse(allTo = "inventories")
-public class APIQueryTemplateReply extends APIQueryReply {
-    private List<TemplateInventory> inventories;
+public class APIQueryGlobalConfigTemplateReply extends APIQueryReply {
+    private List<GlobalConfigTemplateInventory> inventories;
 
-    public List<TemplateInventory> getInventories() {
+    public List<GlobalConfigTemplateInventory> getInventories() {
         return inventories;
     }
 
-    public void setInventories(List<TemplateInventory> inventories) {
+    public void setInventories(List<GlobalConfigTemplateInventory> inventories) {
         this.inventories = inventories;
     }
 
-    public static APIQueryTemplateReply __example__() {
-        APIQueryTemplateReply reply = new APIQueryTemplateReply();
-        TemplateInventory inv = new TemplateInventory();
+    public static APIQueryGlobalConfigTemplateReply __example__() {
+        APIQueryGlobalConfigTemplateReply reply = new APIQueryGlobalConfigTemplateReply();
+        GlobalConfigTemplateInventory inv = new GlobalConfigTemplateInventory();
         inv.setUuid("reservedCapacity");
         inv.setName("scenes1");
         inv.setType("System");

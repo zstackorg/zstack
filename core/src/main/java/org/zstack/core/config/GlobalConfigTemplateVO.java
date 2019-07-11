@@ -4,9 +4,8 @@ import javax.persistence.*;
 
 @Entity
 @Table
-public class TemplateVO {
+public class GlobalConfigTemplateVO {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column
     private String uuid;
 
@@ -18,12 +17,6 @@ public class TemplateVO {
 
     @Column
     private String description;
-
-    @Column
-    private String defaultValue;
-
-    @Column
-    private String value;
 
     public String getUuid() {
         return uuid;
@@ -49,28 +42,12 @@ public class TemplateVO {
 
     public void setDescription(String description) { this.description = description; }
 
-    public String getDefaultValue() {
-        return defaultValue;
-    }
 
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public TemplateVO toTemplate() {
-        TemplateVO t = new TemplateVO();
+    public GlobalConfigTemplateVO toTemplate() {
+        GlobalConfigTemplateVO t = new GlobalConfigTemplateVO();
         t.setUuid(this.getUuid());
         t.setName(this.getName());
         t.setType(this.getType());
-        t.setValue(this.getValue());
         t.setDescription(this.getDescription());
         return t;
     }

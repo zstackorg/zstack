@@ -15,6 +15,7 @@ class BeanConstructor {
             "DatabaseFacade.xml",
             "JobQueueFacade.xml",
             "GlobalConfigFacade.xml",
+            "TemplateConfigFacade.xml",
             "resourceConfig.xml",
             "ProgressBar.xml",
             "RESTFacade.xml",

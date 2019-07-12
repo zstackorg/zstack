@@ -94,7 +94,7 @@ public class UpdateFlowCollectorAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/flowMeter/collector/{uuid}/actions";
+        info.path = "/flowmeters/collectors/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "updateFlowCollector";

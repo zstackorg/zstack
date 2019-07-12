@@ -91,7 +91,7 @@ public class RemoveVRouterNetworksFromFlowMeterAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "DELETE";
-        info.path = "/flowMeter/networks";
+        info.path = "/flowmeters/networks";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "";

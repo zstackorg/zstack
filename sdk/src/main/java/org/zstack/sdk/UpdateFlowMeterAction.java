@@ -28,14 +28,17 @@ public class UpdateFlowMeterAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 
-    @Param(required = false, maxLength = 4, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, validValues = {"V5","V9"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String version;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,2147483647L}, noTrim = false)
-    public java.lang.Integer sample;
+    public java.lang.Long sample;
 
     @Param(required = false, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String name;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,3600L}, noTrim = false)
+    public java.lang.Long expireInterval;
 
     @Param(required = false, maxLength = 128, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String description;
@@ -100,7 +103,7 @@ public class UpdateFlowMeterAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/flowMeter/{uuid}/actions";
+        info.path = "/flowmeters/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "updateFlowMeter";

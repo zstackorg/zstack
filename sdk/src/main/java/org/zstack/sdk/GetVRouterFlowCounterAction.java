@@ -82,7 +82,7 @@ public class GetVRouterFlowCounterAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/flowMeter/{vRouterUuid}/counter";
+        info.path = "/flowmeters/{vRouterUuid}/counter";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

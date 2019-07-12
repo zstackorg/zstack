@@ -100,7 +100,7 @@ public class AddVRouterNetworksToFlowMeterAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/flowMeter/{flowMeterUuid}/router/{vRouterUuid}/addnetworks";
+        info.path = "/flowmeters/{flowMeterUuid}/router/{vRouterUuid}/addnetworks";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

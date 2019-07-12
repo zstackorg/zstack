@@ -65,7 +65,7 @@ public class QueryFlowCollectorAction extends QueryAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/flowMeter/collector";
+        info.path = "/flowmeters/collectors";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

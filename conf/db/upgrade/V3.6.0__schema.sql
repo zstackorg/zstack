@@ -6,8 +6,8 @@ CREATE TABLE `VpcFirewallVO` (
   `vpcUuid` varchar(32) NOT NULL,
   PRIMARY KEY (`uuid`),
   UNIQUE KEY `uuid` (`uuid`) USING BTREE,
-  KEY `fkFirewallVOVmInstanceEO` (`vpcUuid`),
-  CONSTRAINT `fkFirewallVOVmInstanceEO` FOREIGN KEY (`vpcUuid`) REFERENCES `VmInstanceEO` (`uuid`) ON DELETE CASCADE
+  KEY `fkFirewallVOVirtualRouterVMVO` (`vpcUuid`),
+  CONSTRAINT `fkFirewallVOVirtualRouterVMVO` FOREIGN KEY (`vpcUuid`) REFERENCES `VirtualRouterVmVO` (`uuid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `VpcFirewallRuleSetVO` (

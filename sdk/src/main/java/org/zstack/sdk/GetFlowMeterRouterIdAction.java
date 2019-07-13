@@ -82,7 +82,7 @@ public class GetFlowMeterRouterIdAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/flowMeter/{vRouterUuid}/routerid";
+        info.path = "/flowmeters/{vRouterUuid}/routerid";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

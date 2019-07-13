@@ -106,7 +106,7 @@ public class CreateFlowCollectorAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/flowMeter/{flowMeterUuid}/collector";
+        info.path = "/flowmeters/{flowMeterUuid}/collectors";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

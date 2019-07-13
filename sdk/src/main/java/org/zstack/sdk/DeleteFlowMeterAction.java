@@ -91,7 +91,7 @@ public class DeleteFlowMeterAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "DELETE";
-        info.path = "/flowMeter/{uuid}";
+        info.path = "/flowmeters/{uuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "";

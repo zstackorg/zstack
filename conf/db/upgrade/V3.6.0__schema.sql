@@ -1,7 +1,7 @@
 CREATE TABLE `FlowMeterVO` (
     `uuid` VARCHAR(32) NOT NULL UNIQUE COMMENT 'flow meter uuid' ,
-    `name` VARCHAR(32) DEFAULT NULL ,
-    `description` VARCHAR(128) DEFAULT NULL ,
+    `name` VARCHAR(32) DEFAULT "" ,
+    `description` VARCHAR(128) DEFAULT "" ,
     `version` VARCHAR(16) DEFAULT 'V5',
     `type` VARCHAR(16) DEFAULT 'NetFlow',
     `sample` int unsigned DEFAULT 1,
@@ -13,8 +13,8 @@ CREATE TABLE `FlowMeterVO` (
 CREATE TABLE `FlowCollectorVO` (
     `uuid` VARCHAR(32) NOT NULL UNIQUE COMMENT 'flow collector uuid' ,
     `flowMeterUuid` VARCHAR(32) NOT NULL,
-    `name` VARCHAR(32) DEFAULT NULL ,
-    `description` VARCHAR(128) DEFAULT NULL ,
+    `name` VARCHAR(32) DEFAULT "" ,
+    `description` VARCHAR(128) DEFAULT "" ,
     `server` VARCHAR(64) NOT NULL,
     `port` VARCHAR(16) DEFAULT '2055',
     `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,

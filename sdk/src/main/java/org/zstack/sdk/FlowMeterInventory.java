@@ -36,20 +36,20 @@ public class FlowMeterInventory  {
         return this.description;
     }
 
-    public java.lang.Integer sample;
-    public void setSample(java.lang.Integer sample) {
+    public java.lang.Long sample;
+    public void setSample(java.lang.Long sample) {
         this.sample = sample;
     }
-    public java.lang.Integer getSample() {
+    public java.lang.Long getSample() {
         return this.sample;
     }
 
-    public java.lang.Integer sendInterval;
-    public void setSendInterval(java.lang.Integer sendInterval) {
-        this.sendInterval = sendInterval;
+    public java.lang.Long expireInterval;
+    public void setExpireInterval(java.lang.Long expireInterval) {
+        this.expireInterval = expireInterval;
     }
-    public java.lang.Integer getSendInterval() {
-        return this.sendInterval;
+    public java.lang.Long getExpireInterval() {
+        return this.expireInterval;
     }
 
     public java.lang.String version;

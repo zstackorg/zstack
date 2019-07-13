@@ -25,10 +25,10 @@ public class CreateFlowMeterAction extends AbstractAction {
         }
     }
 
-    @Param(required = false, maxLength = 4, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, validValues = {"V5","V9"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String version;
 
-    @Param(required = true, maxLength = 8, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = true, validValues = {"NetFlow","sFlow"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String type;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,2147483647L}, noTrim = false)
@@ -115,7 +115,7 @@ public class CreateFlowMeterAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/flowMeter";
+        info.path = "/flowmeters";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

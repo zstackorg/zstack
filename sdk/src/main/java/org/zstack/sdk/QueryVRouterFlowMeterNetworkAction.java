@@ -65,7 +65,7 @@ public class QueryVRouterFlowMeterNetworkAction extends QueryAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/flowMeter/network/";
+        info.path = "/flowmeters/networks";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

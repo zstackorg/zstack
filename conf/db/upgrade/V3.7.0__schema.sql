@@ -1,0 +1,1 @@
+CREATE INDEX idxLongJobVOapiId ON LongJobVO (apiId);

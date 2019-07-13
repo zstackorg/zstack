@@ -717,7 +717,7 @@ public class Platform {
         ErrorCodeElaboration elaboration = StringSimilarity.findSimilary(description);
         if (elaboration != null) {
             String formatStr = elaboration.getFormatSrcError();
-            if (StringSimilarity.matched(elaboration, description)) {
+            if (StringSimilarity.matched(elaboration)) {
                 insertLogError(formatStr, elaboration, true);
                 return elaboration;
             } else {
@@ -730,11 +730,11 @@ public class Platform {
 
     private static List<Enum> excludeCode = CollectionDSL.list(SysErrors.INTERNAL, SysErrors.OPERATION_ERROR, SysErrors.INVALID_ARGUMENT_ERROR, SysErrors.TIMEOUT);
 
-    private static ErrorCodeElaboration elaborate(Enum errCode, String description,  String details) {
-        ErrorCodeElaboration elaboration = StringSimilarity.findSimilary(details);
+    private static ErrorCodeElaboration elaborate(Enum errCode, String description,  String details, Object...args) {
+        ErrorCodeElaboration elaboration = StringSimilarity.findSimilary(details, args);
         if (elaboration != null) {
             String formatStr = elaboration.getFormatSrcError();
-            if (StringSimilarity.matched(elaboration, details)) {
+            if (StringSimilarity.matched(elaboration)) {
                 insertLogError(formatStr, elaboration, true);
                 return elaboration;
             } else {
@@ -772,11 +772,11 @@ public class Platform {
         if (CoreGlobalProperty.ENABLE_ELABORATION) {
             try {
                 long start = System.currentTimeMillis();
-                ErrorCodeElaboration ela = elaborate(errCode, result.getDescription(), fmt);
+                ErrorCodeElaboration ela = elaborate(errCode, result.getDescription(), fmt, args);
                 long end = System.currentTimeMillis();
                 if (ela != null) {
                     result.setElaboration(StringSimilarity.formatElaboration(ela, args));
-                    result.setMessages(new ErrorCodeElaboration(ela.getMessage_en(), ela.getMessage_cn()));
+                    result.setMessages(new ErrorCodeElaboration(ela.getMessage_en(), ela.getMessage_cn(), args));
                     result.setCost(String.valueOf(end-start) + "ms");
                 }
             } catch (Throwable e) {

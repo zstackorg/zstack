@@ -207,7 +207,7 @@ public class ElaborationManagerImpl extends AbstractService {
                             categories.put(f, err.getCategory());
                         } else {
                             if (!categories.get(f).equals(err.getCategory())) {
-                                results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.NotSameCategoriesInFile.toString()));
+                                results.add(new ElaborationCheckResult(f, null, String.format(ElaborationFailedReason.NotSameCategoriesInFile.toString() + ", category: %s", f)));
                             }
                         }
                     }
@@ -304,7 +304,7 @@ public class ElaborationManagerImpl extends AbstractService {
 
         vos.forEach(vo -> {
             ErrorCodeElaboration e = StringSimilarity.findSimilary(vo.getErrorInfo());
-            if (!StringSimilarity.matched(e, vo.getErrorInfo())) {
+            if (!StringSimilarity.matched(e)) {
                 reply.getInventories().add(ElaborationInventory.valueOf(vo));
             }
         });
@@ -413,7 +413,7 @@ public class ElaborationManagerImpl extends AbstractService {
 
         if (msg.getRegex() != null) {
             ErrorCodeElaboration e = StringSimilarity.findSimilary(msg.getRegex());
-            if (StringSimilarity.matched(e, msg.getRegex())) {
+            if (StringSimilarity.matched(e)) {
                 if (msg.getCategory() != null && msg.getCategory().equals(e.getCategory())) {
                     reply.getContents().add(new ElaborationContent(e));
                 } else if (msg.getCategory() == null){

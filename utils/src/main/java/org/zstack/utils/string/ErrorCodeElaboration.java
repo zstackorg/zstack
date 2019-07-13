@@ -24,9 +24,9 @@ public class ErrorCodeElaboration {
     public ErrorCodeElaboration() {
     }
 
-    public ErrorCodeElaboration(String en, String cn) {
-        message_en = en;
-        message_cn = cn;
+    public ErrorCodeElaboration(String en, String cn, Object...args) {
+        message_en = String.format(en, args);
+        message_cn = String.format(cn, args);
     }
 
     public ErrorCodeElaboration(ErrorCodeElaboration other) {

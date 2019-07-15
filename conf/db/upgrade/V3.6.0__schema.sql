@@ -26,6 +26,7 @@ CREATE TABLE `FlowCollectorVO` (
 CREATE TABLE `FlowRouterVO` (
     `uuid` VARCHAR(32) NOT NULL UNIQUE COMMENT 'logic flow router uuid for vrouterHA' ,
     `systemID` int unsigned DEFAULT 0,
+    `type` VARCHAR(16) NOT NULL DEFAULT 'normal' COMMENT 'router ha type' ,
     PRIMARY KEY (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

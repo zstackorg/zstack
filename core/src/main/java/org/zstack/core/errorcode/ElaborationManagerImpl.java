@@ -207,7 +207,7 @@ public class ElaborationManagerImpl extends AbstractService {
                             categories.put(f, err.getCategory());
                         } else {
                             if (!categories.get(f).equals(err.getCategory())) {
-                                results.add(new ElaborationCheckResult(f, null, String.format(ElaborationFailedReason.NotSameCategoriesInFile.toString() + ", category: %s", f)));
+                                results.add(new ElaborationCheckResult(f, null, ElaborationFailedReason.NotSameCategoriesInFile.toString()));
                             }
                         }
                     }

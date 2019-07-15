@@ -12,7 +12,7 @@
     "category": "VM",
     "code": "1001",
     "method": "regex",
-    "regex": "unable to allocate hosts; due to pagination is enabled, there might be several allocation failures happened before; the error list is .*no Enabled hosts found in the [[0-9]*] candidate hosts.*",
+    "regex": "unable to allocate hosts; due to pagination is enabled, there might be several allocation failures happened before; the error list is \\[\\{no Enabled hosts found in the \\[[0-9]*] candidate hosts}]",
     "message_cn": "找不到合适的host来启动vm, 因为满足分配条件的%1$s个hosts都不处于Enable状态",
     "message_en": "unable to allocate hosts, because the %1$s hosts which satisfied to allocate are not in Enable status"
   },
@@ -20,7 +20,7 @@
     "category": "VM",
     "code": "1002",
     "method": "regex",
-    "regex": "unable to allocate hosts; due to pagination is enabled, there might be several allocation failures happened before; the error list is .*no Connected hosts found in the [[0-9]*] candidate hosts.*",
+    "regex": "unable to allocate hosts; due to pagination is enabled, there might be several allocation failures happened before; the error list is \\[\\{no Connected hosts found in the \\[[0-9]*] candidate hosts}]",
     "message_cn": "找不到合适的host来启动vm, 因为满足分配条件的%1$s个hosts都不处于Connected状态",
     "message_en": "unable to allocate hosts, because the %1$s hosts which satisfied to allocate are not in Connected status"
   },
@@ -28,7 +28,7 @@
     "category": "VM",
     "code": "1003",
     "method": "regex",
-    "regex": "unable to allocate hosts; due to pagination is enabled, there might be several allocation failures happened before; the error list is .*no Connected hosts found in the [[0-9]*] candidate hosts having the hypervisor type [.*].*",
+    "regex": "unable to allocate hosts; due to pagination is enabled, there might be several allocation failures happened before; the error list is \\[\\{no Connected hosts found in the \\[[0-9]*] candidate hosts having the hypervisor type \\[.*]}]",
     "message_cn": "找不到合适的host来启动vm, 因为满足分配条件的%1$s个hosts都不是%2$s的虚拟化类型",
     "message_en": "unable to allocate hosts, because the %1$s hosts which satisfied to allocate are not %2$s hypervisor type"
   },

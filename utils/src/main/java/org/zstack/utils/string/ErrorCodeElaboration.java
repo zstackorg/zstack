@@ -25,8 +25,13 @@ public class ErrorCodeElaboration {
     }
 
     public ErrorCodeElaboration(String en, String cn, Object...args) {
-        message_en = String.format(en, args);
-        message_cn = String.format(cn, args);
+        if (args != null) {
+            message_en = String.format(en, args);
+            message_cn = String.format(cn, args);
+        } else {
+            message_en = en;
+            message_cn = cn;
+        }
     }
 
     public ErrorCodeElaboration(ErrorCodeElaboration other) {

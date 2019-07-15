@@ -771,13 +771,20 @@ public class Platform {
         ErrorCode result = errf.instantiateErrorCode(errCode, details, cause);
         if (CoreGlobalProperty.ENABLE_ELABORATION) {
             try {
-                long start = System.currentTimeMillis();
-                ErrorCodeElaboration ela = elaborate(errCode, result.getDescription(), fmt, args);
-                long end = System.currentTimeMillis();
-                if (ela != null) {
-                    result.setElaboration(StringSimilarity.formatElaboration(ela, args));
-                    result.setMessages(new ErrorCodeElaboration(ela.getMessage_en(), ela.getMessage_cn(), args));
-                    result.setCost(String.valueOf(end-start) + "ms");
+                ErrorCode coreError = cause == null ? getCoreError(result) : getCoreError(cause);
+                if (coreError.getElaboration() != null) {
+                    result.setCost(coreError.getCost());
+                    result.setElaboration(coreError.getElaboration());
+                    result.setMessages(coreError.getMessages());
+                } else {
+                    long start = System.currentTimeMillis();
+                    ErrorCodeElaboration ela = elaborate(errCode, result.getDescription(), fmt, args);
+                    if (ela != null) {
+                        long end = System.currentTimeMillis();
+                        result.setCost(String.valueOf(end-start) + "ms");
+                        result.setElaboration(StringSimilarity.formatElaboration(ela, args));
+                        result.setMessages(new ErrorCodeElaboration(ela.getMessage_en(), ela.getMessage_cn(), args));
+                    }
                 }
             } catch (Throwable e) {
                 logger.warn("exception happened when found elaboration");
@@ -786,6 +793,14 @@ public class Platform {
         }
 
         return result;
+    }
+
+    private static ErrorCode getCoreError(ErrorCode result) {
+        if (result.getCause() == null) {
+            return result;
+        } else {
+            return getCoreError(result.getCause());
+        }
     }
 
     public static ErrorCode inerr(String fmt, Object...args) {

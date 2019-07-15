@@ -1,9 +1,10 @@
 CREATE TABLE `VpcFirewallVO` (
   `uuid` varchar(32) NOT NULL,
+  `description` varchar(2048) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `vpcUuid` varchar(32) NOT NULL,
   `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
   `createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `description` varchar(2048) DEFAULT NULL,
-  `vpcUuid` varchar(32) NOT NULL,
   PRIMARY KEY (`uuid`),
   UNIQUE KEY `uuid` (`uuid`) USING BTREE,
   KEY `fkFirewallVOVirtualRouterVMVO` (`vpcUuid`),

@@ -47,19 +47,19 @@ class RegexElaborationCase extends SubCase {
     }
 
     void testElaboration3() {
-        def err = Platform.operr("unable to allocate hosts; due to pagination is enabled, there might be several allocation failures happened before; the error list is [{no host having cpu %s, memory %s found}]", 4, 8589934592) as ErrorCode
+        def err = Platform.operr("no host having cpu %s, memory %s found", 4, 8589934592) as ErrorCode
         assert err.messages != null
         assert err.messages.message_cn == "找不到合适的host来启动vm, 因为可以用于分配vm的host都没有足够的资源: cpu [4], 内存 [8589934592]"
     }
 
     void testElaboration4() {
-        def err = Platform.operr("unable to allocate hosts; due to pagination is enabled, there might be several allocation failures happened before; the error list is [{no Connected hosts found in the [%s] candidate hosts having the hypervisor type [%s]}]", 4, "KVM") as ErrorCode
+        def err = Platform.operr("no Connected hosts found in the [%s] candidate hosts having the hypervisor type [%s]", 4, "KVM") as ErrorCode
         assert err.messages != null
         assert err.messages.message_cn == "找不到合适的host来启动vm, 因为满足分配条件的4个hosts都不是KVM的虚拟化类型"
     }
 
     void testElaboration5() {
-        def err = Platform.operr("unable to allocate hosts; due to pagination is enabled, there might be several allocation failures happened before; the error list is [{no Connected hosts found in the [%s] candidate hosts}]", 2) as ErrorCode
+        def err = Platform.operr("no Connected hosts found in the [%s] candidate hosts", 2) as ErrorCode
         assert err.messages != null
         assert err.messages.message_cn == "找不到合适的host来启动vm, 因为满足分配条件的2个hosts都不处于Connected状态"
     }

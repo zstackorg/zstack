@@ -53,6 +53,21 @@ public class ErrorCodeElaboration {
         method = other.method;
     }
 
+    public ErrorCodeElaboration addElaborationMessage(ErrorCodeElaboration other) {
+        if (message_en != null) {
+            message_en = message_en + "," + other.message_en;
+        } else {
+            message_en = other.message_en;
+        }
+
+        if (message_cn != null) {
+            message_cn = message_cn + "," + other.message_cn;
+        } else {
+            message_cn = other.message_cn;
+        }
+        return this;
+    }
+
     public String getCategory() {
         return category;
     }

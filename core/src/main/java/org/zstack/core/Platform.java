@@ -22,10 +22,7 @@ import org.zstack.core.statemachine.StateMachineImpl;
 import org.zstack.header.Component;
 import org.zstack.header.core.StaticInit;
 import org.zstack.header.core.encrypt.ENCRYPT;
-import org.zstack.header.errorcode.ElaborationVO;
-import org.zstack.header.errorcode.ElaborationVO_;
-import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.SysErrors;
+import org.zstack.header.errorcode.*;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.vo.BaseResource;
 import org.zstack.utils.*;
@@ -769,14 +766,35 @@ public class Platform {
             }
         }
         ErrorCode result = errf.instantiateErrorCode(errCode, details, cause);
+        // start to generate elaboration...
         if (CoreGlobalProperty.ENABLE_ELABORATION) {
             try {
                 ErrorCode coreError = cause == null ? getCoreError(result) : getCoreError(cause);
+                // use the core cause as elaboration if it existed
                 if (coreError.getElaboration() != null) {
                     result.setCost(coreError.getCost());
                     result.setElaboration(coreError.getElaboration());
                     result.setMessages(coreError.getMessages());
-                } else {
+                } else if (cause instanceof ErrorCodeList && ((ErrorCodeList) cause).getCauses() != null) {
+                    // suppose elaborations are existed in causes...
+                    ErrorCodeList errList = (ErrorCodeList)cause;
+                    String costs = null;
+                    String elas = null;
+                    ErrorCodeElaboration messages = null;
+                    for (ErrorCode c: errList.getCauses()) {
+                        ErrorCode lcError = getCoreError(c);
+                        if (lcError.getElaboration() != null) {
+                            costs = costs == null ? lcError.getCost() : addTwoCosts(costs, lcError.getCost());
+                            elas = elas == null ? lcError.getElaboration() : String.join(",", elas, lcError.getElaboration());
+                            messages = messages == null ? lcError.getMessages() : messages.addElaborationMessage(lcError.getMessages());
+                        }
+                    }
+                    result.setCost(costs);
+                    result.setElaboration(elas);
+                    result.setMessages(messages);
+                }
+
+                if (result.getElaboration() == null) {
                     long start = System.currentTimeMillis();
                     ErrorCodeElaboration ela = elaborate(errCode, result.getDescription(), fmt, args);
                     if (ela != null) {
@@ -793,6 +811,12 @@ public class Platform {
         }
 
         return result;
+    }
+
+    private static String addTwoCosts(String origin, String increase) {
+        Long c1 = Long.valueOf(origin.substring(0, origin.length() - 2).trim());
+        Long c2 = Long.valueOf(increase.substring(0, increase.length() - 2).trim());
+        return String.valueOf(c1 + c2) + "ms";
     }
 
     private static ErrorCode getCoreError(ErrorCode result) {

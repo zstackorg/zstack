@@ -5,12 +5,15 @@ import org.zstack.core.db.Q
 import org.zstack.header.errorcode.ElaborationVO
 import org.zstack.header.errorcode.ElaborationVO_
 import org.zstack.header.errorcode.ErrorCode
+import org.zstack.header.errorcode.ErrorCodeList
 import org.zstack.header.identity.IdentityErrors
 import org.zstack.sdk.ElaborationInventory
 import org.zstack.sdk.GetElaborationCategoriesResult
 import org.zstack.sdk.GetElaborationsResult
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
+
+import static org.zstack.core.Platform.operr
 /**
  * Created by mingjian.deng on 2018/11/28.*/
 class ElaborationCase extends SubCase {
@@ -41,13 +44,14 @@ class ElaborationCase extends SubCase {
             testRefreshElaboration()
             testElaborationWithLongName()
             testElaborationWithUnknownFormatConversion()
+            testErrorList()
         }
     }
 
     void testElaborationWithLongName() {
         def err = Platform.operr("host[uuid:%s, name:%s] is in status[%s], cannot perform required operation", Platform.uuid, "long long long long long long long long long host name", "Connecting") as ErrorCode
         assert err.elaboration != null
-        assert err.elaboration.trim() == "错误信息: 物理机不能进行该操作\n可能原因: 物理机正处于[Connecting]状态,当前状态不允许进行该操作\n操作建议: 请等待物理机退出[Connecting]状态"
+        assert err.elaboration.trim() == "错误信息: 物理机[long long long long long long long long long host name]正处于[Connecting]状态, 当前状态不允许进行该操作\n可能原因: 物理机正处于[Connecting]状态,当前状态不允许进行该操作\n操作建议: 请等待物理机退出[Connecting]状态"
     }
 
     void testElaboration() {
@@ -165,5 +169,17 @@ class ElaborationCase extends SubCase {
         assert err.details == "%!s(int=0) %!s(bytes.readOp=0)"
         def missed = Q.New(ElaborationVO.class).eq(ElaborationVO_.errorInfo, "%!s(int=0) %!s(bytes.readOp=0)").find() as ElaborationVO
         assert !missed.matched
+    }
+
+    void testErrorList() {
+        def list = new ArrayList<ErrorCode>()
+        def err1 = operr("host[uuid:%s, name:%s] is in state[%s], cannot perform required operation", Platform.uuid, "host-1", "Maintenance") as ErrorCode
+        def err2 = operr("host[uuid:%s, name:%s] is in state[%s], cannot perform required operation", Platform.uuid, "host-2", "Maintenance") as ErrorCode
+
+        list.addAll([err1, err2])
+        def errlist = new ErrorCodeList().causedBy(list)
+
+        def err = operr(errlist, "unable to commit backup storage because: %s", err1.details)
+        assert err.messages.message_cn == "物理机[host-1]正处于[Maintenance]状态, 当前状态不允许进行该操作,物理机[host-2]正处于[Maintenance]状态, 当前状态不允许进行该操作"
     }
 }

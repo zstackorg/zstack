@@ -36,7 +36,7 @@
     "category": "VM",
     "code": "1004",
     "method": "regex",
-    "regex": "no host having cpu [0-9]*, memory [0-9]* found",
+    "regex": "no host having cpu[0-9]*, memory[0-9]* found",
     "message_cn": "找不到合适的host来启动vm, 因为可以用于分配vm的host都没有足够的资源: cpu [%1$s], 内存 [%2$s]",
     "message_en": "unable to allocate hosts, because no hosts has enough resource: cpu [%1$s], memory [%2$s]"
   }

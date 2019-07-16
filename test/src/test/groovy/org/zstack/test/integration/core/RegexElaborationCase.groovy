@@ -48,9 +48,9 @@ class RegexElaborationCase extends SubCase {
     }
 
     void testElaboration3() {
-        def err = Platform.operr("no host having cpu %s, memory %s found", 4, 8589934592) as ErrorCode
+        def err = Platform.operr("no host having cpu%s, memory%s found", 4, 8589934592) as ErrorCode
         assert err.messages != null
-        assert err.messages.message_cn == "找不到合适的host来启动vm, 因为可以用于分配vm的host都没有足够的资源: cpu [4], 内存 [8589934592]"
+        assert err.messages.message_cn == "找不到合适的host来启动vm, 因为可以用于分配vm的host都没有足够的资源: cpu[4], 内存[8589934592]"
     }
 
     void testElaboration4() {

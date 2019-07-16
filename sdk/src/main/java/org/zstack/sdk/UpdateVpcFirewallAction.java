@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class CreateVpcFirewallAction extends AbstractAction {
+public class UpdateVpcFirewallAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class CreateVpcFirewallAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.CreateVpcFirewallResult value;
+        public org.zstack.sdk.UpdateVpcFirewallResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -26,19 +26,13 @@ public class CreateVpcFirewallAction extends AbstractAction {
     }
 
     @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vpcUuid;
+    public java.lang.String uuid;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String description;
 
-    @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String name;
-
-    @Param(required = false)
-    public java.lang.String resourceUuid;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.util.List tagUuids;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -69,8 +63,8 @@ public class CreateVpcFirewallAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.CreateVpcFirewallResult value = res.getResult(org.zstack.sdk.CreateVpcFirewallResult.class);
-        ret.value = value == null ? new org.zstack.sdk.CreateVpcFirewallResult() : value; 
+        org.zstack.sdk.UpdateVpcFirewallResult value = res.getResult(org.zstack.sdk.UpdateVpcFirewallResult.class);
+        ret.value = value == null ? new org.zstack.sdk.UpdateVpcFirewallResult() : value; 
 
         return ret;
     }
@@ -99,11 +93,11 @@ public class CreateVpcFirewallAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "POST";
-        info.path = "/vpcfirewall";
+        info.httpMethod = "PUT";
+        info.path = "/vpcfirewall/{uuid}";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "params";
+        info.parameterName = "updateVpcFirewall";
         return info;
     }
 

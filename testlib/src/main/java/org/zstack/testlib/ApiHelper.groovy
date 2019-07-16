@@ -26572,6 +26572,33 @@ trait ApiHelper {
     }
 
 
+    def updateVpcFirewall(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.UpdateVpcFirewallAction.class) Closure c) {
+        def a = new org.zstack.sdk.UpdateVpcFirewallAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
     def updateVpcUserVpnGateway(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.UpdateVpcUserVpnGatewayAction.class) Closure c) {
         def a = new org.zstack.sdk.UpdateVpcUserVpnGatewayAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid

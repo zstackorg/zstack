@@ -91,26 +91,20 @@ public class DesignatedHostAllocatorFlow extends AbstractHostAllocatorFlow {
         }
 
         if (candidates.isEmpty()) {
-            StringBuilder err = new StringBuilder("No host with ");
-            List<String> args = new ArrayList<>();
+            StringBuilder args = new StringBuilder();
             if (zoneUuid != null) {
-                args.add(zoneUuid);
-                err.append("zoneUuid=%s ");
+                args.append(String.format("zoneUuid=%s", zoneUuid));
             }
             if (clusterUuid != null) {
-                args.add(clusterUuid);
-                err.append("clusterUuid=%s ");
+                args.append(String.format("clusterUuid=%s", clusterUuid));
             }
             if (hostUuid != null) {
-                args.add(hostUuid);
-                err.append("uuid=%s ");
+                args.append(String.format("hostUuid=%s", hostUuid));
             }
             if (spec.getHypervisorType() != null) {
-                args.add(spec.getHypervisorType());
-                err.append("hypervisorType=%s ");
+                args.append(String.format("hypervisorType=%s", spec.getHypervisorType()));
             }
-            err.append("found");
-            fail(Platform.operr(err.toString(), args));
+            fail(Platform.operr("No host with %s found", args));
         } else {
             next(candidates);
         }

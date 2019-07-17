@@ -28,9 +28,6 @@ public class DeleteFirewallRuleSetAction extends AbstractAction {
     @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 
-    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vpcFirewallUuid;
-
     @Param(required = false)
     public java.lang.String deleteMode = "Permissive";
 

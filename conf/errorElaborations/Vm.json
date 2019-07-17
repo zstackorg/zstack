@@ -47,5 +47,13 @@
     "regex": "the vm.*, but the host is either not having enough CPU/memory or in the state\\[Enabled] or status\\[Connected] to start the vm",
     "message_cn": "找不到合适的host来启动vm, 因为主存储是localstorage的vm只能启动在host[%2$s]上，但这个host没有足够的cpu/memory资源，或不处于Enabled/Connected 状态",
     "message_en": "the vm using local primary storage, it can only be started on the host[%2$s], but the host is either not having enough cpu/memory, or in the Enabled/Connected status"
+  },
+  {
+    "category": "VM",
+    "code": "1006",
+    "method": "regex",
+    "regex": "after filtering, .* returns zero candidate host, it means: .*",
+    "message_cn": "创建云主机在[%1$s]这个过滤器后找不到满足条件的host了，这意味着 [%2$s]",
+    "message_en": "after filtering[%1$s] returns zero candidate host, it means: [%2$s]"
   }
 ]

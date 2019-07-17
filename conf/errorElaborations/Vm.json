@@ -55,5 +55,13 @@
     "regex": "after filtering, .* returns zero candidate host, it means: .*",
     "message_cn": "创建云主机在[%1$s]这个过滤器后找不到满足条件的host了，这意味着 [%2$s]",
     "message_en": "after filtering[%1$s] returns zero candidate host, it means: [%2$s]"
+  },
+  {
+    "category": "VM",
+    "code": "1007",
+    "method": "regex",
+    "regex": "No host with .* found",
+    "message_cn": "以下条件导致分配时没有可满足的host: %1$s",
+    "message_en": "No host with [%1$s] found"
   }
 ]

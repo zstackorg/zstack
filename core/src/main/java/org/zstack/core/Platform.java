@@ -833,7 +833,7 @@ public class Platform {
 
     // format error code from expand components
     public static ErrorCode experr(String fmt, String err, Object...args) {
-        return operr(fmt.replaceFirst("%s", err), args);
+        return operr(fmt, err, args);
     }
 
     public static ErrorCode operr(String fmt, Object...args) {

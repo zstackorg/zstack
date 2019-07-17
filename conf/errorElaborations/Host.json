@@ -55,5 +55,13 @@
     "regex": "shell command\\[sudo PYTHONPATH.*zstacklib-[0-9.]*tar.gz.*failed\n ret code: 1",
     "message_cn": "pip安装失败。因为pip安装文件不完整，或者pip版本不正确",
     "message_en": "pip install failed, pip install file broken"
+  },
+  {
+    "category": "HOST",
+    "code": "1006",
+    "method": "regex",
+    "regex": ".*can not update host\\[uuid:.*]which is connecting or creating, please wait.*",
+    "message_cn": "无法更新正在连接或创建的主机[uuid:%1$s]，请稍候",
+    "message_en": "can not update host[uuid:%1$s]which is connecting or creating, please wait"
   }
 ]

@@ -44,13 +44,6 @@ public class ObjectFactory {
         return new GlobalConfig();
     }
 
-    public GlobalConfigTemplate createGlobalConfigTemplate() {
-        return new GlobalConfigTemplate();
-    }
-    public TemplateConfig createTemplateConfig() {
-        return new TemplateConfig();
-    }
-
     /**
      * Create an instance of {@link GlobalConfig.Config }
      * 
@@ -58,13 +51,5 @@ public class ObjectFactory {
     public GlobalConfig.Config createGlobalConfigConfig() {
         return new GlobalConfig.Config();
     }
-    public GlobalConfigTemplate.Config createGlobalConfigTemplateConfig() {
-        return new GlobalConfigTemplate.Config();
-    }
-    public TemplateConfig.Config createTemplateConfigConfig() {
-        return new TemplateConfig.Config();
-    }
-
-
 
 }

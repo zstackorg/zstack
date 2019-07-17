@@ -14,7 +14,7 @@
         <description>Enable auto converge during live migration.</description>
         <defaultValue>false</defaultValue>
         <type>java.lang.Boolean</type>
-    </config>f
+    </config>
 
     <config>
         <category>kvm</category>

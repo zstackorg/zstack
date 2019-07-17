@@ -12,7 +12,6 @@ import org.zstack.core.cloudbus.CloudBusEventListener;
 import org.zstack.core.componentloader.ComponentLoader;
 import org.zstack.core.config.APIListGlobalConfigReply;
 import org.zstack.core.config.GlobalConfigInventory;
-import org.zstack.core.config.TemplateConfigInventory;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.db.SimpleQuery.Op;

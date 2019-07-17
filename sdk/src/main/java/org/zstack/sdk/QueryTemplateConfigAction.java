@@ -12,7 +12,7 @@ public class QueryTemplateConfigAction extends QueryAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.QueryGlobalConfigResult value;
+        public org.zstack.sdk.QueryTemplateConfigResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -34,8 +34,8 @@ public class QueryTemplateConfigAction extends QueryAction {
             return ret;
         }
         
-        org.zstack.sdk.QueryGlobalConfigResult value = res.getResult(org.zstack.sdk.QueryGlobalConfigResult.class);
-        ret.value = value == null ? new org.zstack.sdk.QueryGlobalConfigResult() : value; 
+        org.zstack.sdk.QueryTemplateConfigResult value = res.getResult(org.zstack.sdk.QueryTemplateConfigResult.class);
+        ret.value = value == null ? new org.zstack.sdk.QueryTemplateConfigResult() : value; 
 
         return ret;
     }
@@ -65,7 +65,7 @@ public class QueryTemplateConfigAction extends QueryAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/template-configurations/{templateUuid}/actions";
+        info.path = "/template-configurations/{templateUuid}";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

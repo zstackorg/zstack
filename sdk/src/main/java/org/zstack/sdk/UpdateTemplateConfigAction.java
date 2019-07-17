@@ -12,7 +12,7 @@ public class UpdateTemplateConfigAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.UpdateGlobalConfigResult value;
+        public org.zstack.sdk.UpdateTemplateConfigResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -66,8 +66,8 @@ public class UpdateTemplateConfigAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.UpdateGlobalConfigResult value = res.getResult(org.zstack.sdk.UpdateGlobalConfigResult.class);
-        ret.value = value == null ? new org.zstack.sdk.UpdateGlobalConfigResult() : value; 
+        org.zstack.sdk.UpdateTemplateConfigResult value = res.getResult(org.zstack.sdk.UpdateTemplateConfigResult.class);
+        ret.value = value == null ? new org.zstack.sdk.UpdateTemplateConfigResult() : value; 
 
         return ret;
     }
@@ -97,7 +97,7 @@ public class UpdateTemplateConfigAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/template-configuration/{templateUuid}/{category}/{name}/actions";
+        info.path = "/template-configurations/{templateUuid}/{category}/{name}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "updateTemplateConfig";

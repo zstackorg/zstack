@@ -12,7 +12,7 @@ public class ResetTemplateConfigAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.ResetGlobalConfigResult value;
+        public org.zstack.sdk.ResetTemplateConfigResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -26,7 +26,7 @@ public class ResetTemplateConfigAction extends AbstractAction {
     }
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String TemplateUuid;
+    public java.lang.String templateUuid;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -57,8 +57,8 @@ public class ResetTemplateConfigAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.ResetGlobalConfigResult value = res.getResult(org.zstack.sdk.ResetGlobalConfigResult.class);
-        ret.value = value == null ? new org.zstack.sdk.ResetGlobalConfigResult() : value; 
+        org.zstack.sdk.ResetTemplateConfigResult value = res.getResult(org.zstack.sdk.ResetTemplateConfigResult.class);
+        ret.value = value == null ? new org.zstack.sdk.ResetTemplateConfigResult() : value; 
 
         return ret;
     }
@@ -88,7 +88,7 @@ public class ResetTemplateConfigAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/template-configuration/{Templateuuid}/actions";
+        info.path = "/template-configurations/{templateUuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "resetTemplateConfig";

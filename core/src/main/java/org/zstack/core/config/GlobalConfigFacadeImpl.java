@@ -47,7 +47,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
     private PluginRegistry pluginRgty;
 
     private JAXBContext context;
-    public static Map<String, GlobalConfig> allConfig = new ConcurrentHashMap<>();
+    private Map<String, GlobalConfig> allConfig = new ConcurrentHashMap<>();
 
     private static final String CONFIG_FOLDER = "globalConfig";
     private static final String OTHER_CATEGORY = "Others";

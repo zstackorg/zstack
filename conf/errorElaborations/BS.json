@@ -2,7 +2,8 @@
   {
     "category": "BS",
     "code": "1001",
-    "regex": "certificate has expired or is not yet valid",
+    "method": "regex",
+    "regex": ".*certificate has expired or is not yet valid",
     "message_cn": "当前系统时间不在镜像仓库证书有效期内, 调整过镜像仓库服务器的系统时间，或者证书被修改",
     "message_en": "current System time has expired for imagestore certification, imagestore server system time or certification might be modified",
     "operation_cn": "检查镜像服务器系统时间，或重置镜像仓库证书",

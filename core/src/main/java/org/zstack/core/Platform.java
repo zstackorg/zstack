@@ -831,6 +831,11 @@ public class Platform {
         return err(SysErrors.INTERNAL, fmt, args);
     }
 
+    // format error code from expand components
+    public static ErrorCode experr(String fmt, String err, Object...args) {
+        return operr(fmt.replaceFirst("%s", err), args);
+    }
+
     public static ErrorCode operr(String fmt, Object...args) {
         return err(SysErrors.OPERATION_ERROR, fmt, args);
     }

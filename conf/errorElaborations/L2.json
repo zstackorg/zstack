@@ -3,7 +3,7 @@
     "category": "L2Network",
     "code": "1000",
     "regex": "There has been a L2VlanNetwork[uuid:%s, name:%s] attached to cluster[uuid:%s] that has physical interface[%s], vlan[%s]. Failed to attach L2VlanNetwork[uuid:%s]",
-    "message_cn": "L2(vlan)网络挂载失败，L2网络的物理接口[%4$s]已经被L2(vlan)网络[%2$s]挂载到集群上",
+    "message_cn": "L2VlanNetwork挂载失败，L2网络的物理接口[%4$s]已经被L2VlanNetwork网络[%2$s]挂载到集群上",
     "message_en": "L2VlanNetwork attached failed, the physical interface[%4$s] has already been attached to the cluster by L2VlanNetwork[%2$s]",
     "operation_cn": "请更换L2(vlan)网络的物理接口，或将该网络挂载到其它集群上",
     "operation_en": "Please change the L2 physical interface, or attach it to an other cluster",

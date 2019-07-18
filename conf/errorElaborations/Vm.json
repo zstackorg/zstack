@@ -79,5 +79,13 @@
     "regex": "The vm's root volume is on the local storage.* however, the host on which the root volume is has been deleted",
     "message_cn": "云主机的根盘在localstorage的主存储上,并且该根盘所在的host己经被删除",
     "message_en": "The vm's root volume is on the local storage. however, the host on which the root volume is has been deleted"
+  },
+  {
+    "category": "VM",
+    "code": "1010",
+    "method": "regex",
+    "regex": "no host having state=Enabled status=Connected.*found",
+    "message_cn": "找不到状态为Enabled/Connected的host",
+    "message_en": "no host having state=Enabled status=Connected found"
   }
 ]

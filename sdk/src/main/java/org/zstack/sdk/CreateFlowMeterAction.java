@@ -46,7 +46,7 @@ public class CreateFlowMeterAction extends AbstractAction {
     @Param(required = false, maxLength = 48, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String server;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1L,65535L}, noTrim = false)
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {1025L,65535L}, noTrim = false)
     public java.lang.Long port;
 
     @Param(required = false)

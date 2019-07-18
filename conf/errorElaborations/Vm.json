@@ -87,5 +87,21 @@
     "regex": "no host having state=Enabled status=Connected.*found",
     "message_cn": "找不到状态为Enabled/Connected的host",
     "message_en": "no host having state=Enabled status=Connected found"
+  },
+  {
+    "category": "VM",
+    "code": "1011",
+    "method": "regex",
+    "regex": "no host found in clusters that has attached to L2Networks which have L3Networks.*",
+    "message_cn": "这个L3网络所在的L2网络加载的所有集群中，都没有host",
+    "message_en": "no host found in clusters that has attached to L2Networks which have L3Networks"
+  },
+  {
+    "category": "VM",
+    "code": "1012",
+    "method": "regex",
+    "regex": "no host found in clusters which have attached to all primary storage .* volumes locate",
+    "message_cn": "与vm的volume所在的主存储所关联的所有集群中，都没有host",
+    "message_en": "no host found in clusters which have attached to all primary storage which the vm's volumes locate"
   }
 ]

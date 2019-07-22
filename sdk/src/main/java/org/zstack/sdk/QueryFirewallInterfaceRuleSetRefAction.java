@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class UpdateFirewallRuleSetAction extends AbstractAction {
+public class QueryFirewallInterfaceRuleSetRefAction extends QueryAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class UpdateFirewallRuleSetAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.UpdateFirewallRuleSetResult value;
+        public org.zstack.sdk.QueryFirewallInterfaceRuleSetRefResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,38 +25,6 @@ public class UpdateFirewallRuleSetAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String uuid;
-
-    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vpcFirewallUuid;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String description;
-
-    @Param(required = false, validValues = {"drop","accept","reject"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String actionType;
-
-    @Param(required = false)
-    public java.util.List systemTags;
-
-    @Param(required = false)
-    public java.util.List userTags;
-
-    @Param(required = false)
-    public String sessionId;
-
-    @Param(required = false)
-    public String accessKeyId;
-
-    @Param(required = false)
-    public String accessKeySecret;
-
-    @NonAPIParam
-    public long timeout = -1;
-
-    @NonAPIParam
-    public long pollingInterval = -1;
 
 
     private Result makeResult(ApiResult res) {
@@ -66,8 +34,8 @@ public class UpdateFirewallRuleSetAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.UpdateFirewallRuleSetResult value = res.getResult(org.zstack.sdk.UpdateFirewallRuleSetResult.class);
-        ret.value = value == null ? new org.zstack.sdk.UpdateFirewallRuleSetResult() : value; 
+        org.zstack.sdk.QueryFirewallInterfaceRuleSetRefResult value = res.getResult(org.zstack.sdk.QueryFirewallInterfaceRuleSetRefResult.class);
+        ret.value = value == null ? new org.zstack.sdk.QueryFirewallInterfaceRuleSetRefResult() : value; 
 
         return ret;
     }
@@ -96,11 +64,11 @@ public class UpdateFirewallRuleSetAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "PUT";
-        info.path = "/vpcfirewalls/ruleSets/{uuid}";
+        info.httpMethod = "GET";
+        info.path = "/vpcfirewalls/interfaces/rulesets/refs";
         info.needSession = true;
-        info.needPoll = true;
-        info.parameterName = "updateFirewallRuleSet";
+        info.needPoll = false;
+        info.parameterName = "";
         return info;
     }
 

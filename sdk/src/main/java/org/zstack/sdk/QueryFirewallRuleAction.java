@@ -12,7 +12,7 @@ public class QueryFirewallRuleAction extends QueryAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.QueryFirewallRuleSetResult value;
+        public org.zstack.sdk.QueryFirewallRuleResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -34,8 +34,8 @@ public class QueryFirewallRuleAction extends QueryAction {
             return ret;
         }
         
-        org.zstack.sdk.QueryFirewallRuleSetResult value = res.getResult(org.zstack.sdk.QueryFirewallRuleSetResult.class);
-        ret.value = value == null ? new org.zstack.sdk.QueryFirewallRuleSetResult() : value; 
+        org.zstack.sdk.QueryFirewallRuleResult value = res.getResult(org.zstack.sdk.QueryFirewallRuleResult.class);
+        ret.value = value == null ? new org.zstack.sdk.QueryFirewallRuleResult() : value;
 
         return ret;
     }
@@ -65,7 +65,7 @@ public class QueryFirewallRuleAction extends QueryAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/vpcfirewall/rule";
+        info.path = "/vpcfirewalls/rules";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

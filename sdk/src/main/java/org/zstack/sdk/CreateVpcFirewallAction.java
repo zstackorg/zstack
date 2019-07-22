@@ -100,7 +100,7 @@ public class CreateVpcFirewallAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/vpcfirewall";
+        info.path = "/vpcfirewalls";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

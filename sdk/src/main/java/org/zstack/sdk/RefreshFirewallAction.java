@@ -88,7 +88,7 @@ public class RefreshFirewallAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/vpcfirewall/refresh";
+        info.path = "/vpcfirewalls/refresh";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

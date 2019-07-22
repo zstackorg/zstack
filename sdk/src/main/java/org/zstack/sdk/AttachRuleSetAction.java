@@ -97,7 +97,7 @@ public class AttachRuleSetAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/vpcfirewall/ruleSet/attach";
+        info.path = "/vpcfirewalls/ruleSets/{ruleSetUuid}/interfaces/{interfaceUuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

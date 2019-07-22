@@ -91,7 +91,7 @@ public class DeleteFirewallAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "DELETE";
-        info.path = "/vpcfirewall/{uuid}";
+        info.path = "/vpcfirewalls/{uuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "";

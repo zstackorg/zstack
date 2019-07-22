@@ -103,7 +103,7 @@ public class CreateFirewallRuleSetAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/vpcfirewall/ruleSet";
+        info.path = "/vpcfirewalls/ruleSets";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

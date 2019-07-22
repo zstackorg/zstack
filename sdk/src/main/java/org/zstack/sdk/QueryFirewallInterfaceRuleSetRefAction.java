@@ -65,7 +65,7 @@ public class QueryFirewallInterfaceRuleSetRefAction extends QueryAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/vpcfirewall/interface/ruleset/refs";
+        info.path = "/vpcfirewalls/interfaces/rulesets/refs";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

@@ -94,7 +94,7 @@ public class DetachRuleSetAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/vpcfirewall/ruleSet/detach";
+        info.path = "/vpcfirewalls/interfaces/{interfaceUuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

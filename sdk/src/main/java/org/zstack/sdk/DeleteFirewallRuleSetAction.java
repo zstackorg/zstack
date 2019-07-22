@@ -91,7 +91,7 @@ public class DeleteFirewallRuleSetAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "DELETE";
-        info.path = "/vpcfirewall/ruleSet/{uuid}";
+        info.path = "/vpcfirewalls/ruleSets/{uuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "";

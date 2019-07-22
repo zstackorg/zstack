@@ -97,7 +97,7 @@ public class UpdateFirewallRuleSetAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/vpcfirewall/ruleSet/{uuid}";
+        info.path = "/vpcfirewalls/ruleSets/{uuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "updateFirewallRuleSet";

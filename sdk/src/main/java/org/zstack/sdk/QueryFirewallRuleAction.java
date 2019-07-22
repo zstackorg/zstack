@@ -65,7 +65,7 @@ public class QueryFirewallRuleAction extends QueryAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/vpcfirewall/rule";
+        info.path = "/vpcfirewall/rules";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

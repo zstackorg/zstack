@@ -12,6 +12,14 @@ public class FlowMeterInventory  {
         return this.collectors;
     }
 
+    public java.util.List networkRefs;
+    public void setNetworkRefs(java.util.List networkRefs) {
+        this.networkRefs = networkRefs;
+    }
+    public java.util.List getNetworkRefs() {
+        return this.networkRefs;
+    }
+
     public java.lang.String uuid;
     public void setUuid(java.lang.String uuid) {
         this.uuid = uuid;

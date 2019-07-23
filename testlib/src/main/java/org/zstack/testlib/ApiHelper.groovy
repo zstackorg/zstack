@@ -19021,6 +19021,35 @@ trait ApiHelper {
     }
 
 
+    def queryPhysicalDriveSelfTestHistory(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryPhysicalDriveSelfTestHistoryAction.class) Closure c) {
+        def a = new org.zstack.sdk.QueryPhysicalDriveSelfTestHistoryAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+        a.conditions = a.conditions.collect { it.toString() }
+
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
     def queryPolicy(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryPolicyAction.class) Closure c) {
         def a = new org.zstack.sdk.QueryPolicyAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
@@ -22393,6 +22422,33 @@ trait ApiHelper {
 
     def runSchedulerTrigger(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.RunSchedulerTriggerAction.class) Closure c) {
         def a = new org.zstack.sdk.RunSchedulerTriggerAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def selfTestLocalRaid(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.SelfTestLocalRaidAction.class) Closure c) {
+        def a = new org.zstack.sdk.SelfTestLocalRaidAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.zstack.compute.cluster.ClusterGlobalConfig;
 import org.zstack.compute.host.HostBase;
 import org.zstack.compute.host.HostGlobalConfig;
 import org.zstack.compute.host.HostSystemTags;
@@ -2707,6 +2708,13 @@ public class KVMHost extends HostBase implements Host {
                             }
                             runner.putArgument("update_packages", String.valueOf(CoreGlobalProperty.UPDATE_PKG_WHEN_CONNECT));
 
+                            // if UPDATE_PKG_WHEN_CONNECT and ZSTACK_EXPERIMENTAL_REPO are all true
+                            Boolean enableExpRepo = rcf.getResourceConfigValue(
+                                    ClusterGlobalConfig.ZSTACK_EXPERIMENTAL_REPO,
+                                    getSelf().getClusterUuid(), Boolean.class);
+                            runner.putArgument("enable_zstack_experimental_repo",
+                                    String.valueOf(CoreGlobalProperty.UPDATE_PKG_WHEN_CONNECT && enableExpRepo));
+
                             UriComponentsBuilder ub = UriComponentsBuilder.fromHttpUrl(restf.getBaseUrl());
                             ub.path(new StringBind(KVMConstant.KVM_ANSIBLE_LOG_PATH_FROMAT).bind("uuid", self.getUuid()).toString());
                             String postUrl = ub.build().toString();
@@ -2970,7 +2978,7 @@ public class KVMHost extends HostBase implements Host {
     }
 
     @Override
-    protected void updateOsHook(String exclude, Completion completion) {
+    protected void updateOsHook(UpdateHostOSMsg msg, Completion completion) {
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
         chain.setName(String.format("update-operating-system-for-host-%s", self.getUuid()));
         chain.then(new ShareFlow() {
@@ -3046,7 +3054,8 @@ public class KVMHost extends HostBase implements Host {
                     public void run(FlowTrigger trigger, Map data) {
                         UpdateHostOSCmd cmd = new UpdateHostOSCmd();
                         cmd.hostUuid = self.getUuid();
-                        cmd.excludePackages = exclude;
+                        cmd.excludePackages = msg.getExcludePackages();
+                        cmd.enableExpRepo = msg.isEnableExperimentalRepo();
 
                         new Http<>(updateHostOSPath, cmd, UpdateHostOSRsp.class)
                                 .call(new ReturnValueCompletion<UpdateHostOSRsp>(trigger) {

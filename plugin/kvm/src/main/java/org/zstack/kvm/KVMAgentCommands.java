@@ -1954,6 +1954,7 @@ public class KVMAgentCommands {
     public static class UpdateHostOSCmd extends AgentCommand {
         public String hostUuid;
         public String excludePackages;
+        public boolean enableExpRepo;
     }
 
     public static class UpdateHostOSRsp extends AgentResponse {

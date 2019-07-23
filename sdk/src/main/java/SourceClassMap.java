@@ -365,6 +365,8 @@ public class SourceClassMap {
 			put("org.zstack.storage.primary.sharedblock.SharedBlockStatus", "org.zstack.sdk.SharedBlockStatus");
 			put("org.zstack.storage.primary.sharedblock.SharedBlockType", "org.zstack.sdk.SharedBlockType");
 			put("org.zstack.tag2.AttachTagResult", "org.zstack.sdk.AttachTagResult");
+			put("org.zstack.templateConfig.GlobalConfigTemplateInventory", "org.zstack.sdk.GlobalConfigTemplateInventory");
+			put("org.zstack.templateConfig.TemplateConfigInventory", "org.zstack.sdk.TemplateConfigInventory");
 			put("org.zstack.ticket.entity.ArchiveTicketInventory", "org.zstack.sdk.ticket.entity.ArchiveTicketInventory");
 			put("org.zstack.ticket.entity.ArchiveTicketStatusHistoryInventory", "org.zstack.sdk.ticket.entity.ArchiveTicketStatusHistoryInventory");
 			put("org.zstack.ticket.entity.TicketFlowCollectionInventory", "org.zstack.sdk.ticket.entity.TicketFlowCollectionInventory");
@@ -531,6 +533,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.FusionstorPrimaryStorageMonInventory", "org.zstack.storage.fusionstor.primary.FusionstorPrimaryStorageMonInventory");
 			put("org.zstack.sdk.GarbageCollectorInventory", "org.zstack.core.gc.GarbageCollectorInventory");
 			put("org.zstack.sdk.GlobalConfigInventory", "org.zstack.core.config.GlobalConfigInventory");
+			put("org.zstack.sdk.GlobalConfigTemplateInventory", "org.zstack.templateConfig.GlobalConfigTemplateInventory");
 			put("org.zstack.sdk.HostDiskCapacity", "org.zstack.storage.primary.local.APIGetLocalStorageHostDiskCapacityReply$HostDiskCapacity");
 			put("org.zstack.sdk.HostInventory", "org.zstack.header.host.HostInventory");
 			put("org.zstack.sdk.HostIommuStateType", "org.zstack.pciDevice.HostIommuStateType");
@@ -704,6 +707,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.TagPatternInventory", "org.zstack.header.tag.TagPatternInventory");
 			put("org.zstack.sdk.TagPatternType", "org.zstack.header.tag.TagPatternType");
 			put("org.zstack.sdk.TaskProgressInventory", "org.zstack.header.core.progress.TaskProgressInventory");
+			put("org.zstack.sdk.TemplateConfigInventory", "org.zstack.templateConfig.TemplateConfigInventory");
 			put("org.zstack.sdk.TwoFactorAuthenticationInventory", "org.zstack.twoFactorAuthentication.TwoFactorAuthenticationInventory");
 			put("org.zstack.sdk.TwoFactorAuthenticationSecretInventory", "org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretInventory");
 			put("org.zstack.sdk.TwoFactorAuthenticationSecretStatus", "org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretStatus");

@@ -97,7 +97,7 @@ public class UpdateTemplateConfigAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/template-configurations/{templateUuid}/{category}/{name}/actions";
+        info.path = "/template-configurations/{templateUuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "updateTemplateConfig";

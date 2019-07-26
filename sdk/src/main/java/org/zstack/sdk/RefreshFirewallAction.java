@@ -12,7 +12,7 @@ public class RefreshFirewallAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.AttachRuleSetResult value;
+        public org.zstack.sdk.RefreshFirewallResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -57,8 +57,8 @@ public class RefreshFirewallAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.AttachRuleSetResult value = res.getResult(org.zstack.sdk.AttachRuleSetResult.class);
-        ret.value = value == null ? new org.zstack.sdk.AttachRuleSetResult() : value; 
+        org.zstack.sdk.RefreshFirewallResult value = res.getResult(org.zstack.sdk.RefreshFirewallResult.class);
+        ret.value = value == null ? new org.zstack.sdk.RefreshFirewallResult() : value; 
 
         return ret;
     }
@@ -87,11 +87,11 @@ public class RefreshFirewallAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "POST";
-        info.path = "/vpcfirewalls/refresh";
+        info.httpMethod = "PUT";
+        info.path = "/vpcfirewalls/refresh/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "params";
+        info.parameterName = "refreshFirewall";
         return info;
     }
 

@@ -94,7 +94,7 @@ public class UpdateVpcFirewallAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/vpcfirewalls/{uuid}";
+        info.path = "/vpcfirewalls/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "updateVpcFirewall";

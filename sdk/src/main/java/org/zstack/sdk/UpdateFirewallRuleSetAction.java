@@ -28,9 +28,6 @@ public class UpdateFirewallRuleSetAction extends AbstractAction {
     @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 
-    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String vpcFirewallUuid;
-
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String description;
 
@@ -97,7 +94,7 @@ public class UpdateFirewallRuleSetAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "PUT";
-        info.path = "/vpcfirewalls/ruleSets/{uuid}";
+        info.path = "/vpcfirewalls/ruleSets/{uuid}/actions";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "updateFirewallRuleSet";

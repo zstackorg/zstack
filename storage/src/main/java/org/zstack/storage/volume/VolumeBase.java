@@ -1952,11 +1952,12 @@ public class VolumeBase implements Volume {
             volumesSnapshotsJob.setVolumeUuid(vol.getUuid());
             volumesSnapshotsJob.setPrimaryStorageUuid(vol.getPrimaryStorageUuid());
             volumesSnapshotsJob.setResourceUuid(getUuid());
-            volumesSnapshotsJob.setName(msg.getName());
+            volumesSnapshotsJob.setName(msg.getName() + "-" + vol.getName());
             volumesSnapshotsJob.setDescription(msg.getDescription());
             volumesSnapshotsJobs.add(volumesSnapshotsJob);
         }
         cmsg.setVolumeSnapshotJobs(volumesSnapshotsJobs);
+        cmsg.setConsistentType(ConsistentType.None);
 
         bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeConstant.SERVICE_ID, msg.getRootVolumeUuid());
         bus.send(cmsg, new CloudBusCallBack(evt) {

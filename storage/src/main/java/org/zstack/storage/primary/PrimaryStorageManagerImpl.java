@@ -140,9 +140,11 @@ public class PrimaryStorageManagerImpl extends AbstractService implements Primar
             public void run(MessageReply r) {
                 if (r.isSuccess()) {
                     GetPrimaryStorageLicenseInfoReply reply1 = r.castReply();
-                    reply.setUuid(reply1.getPrimaryStorageLicenseInfo().getUuid());
-                    reply.setExpireTime(reply1.getPrimaryStorageLicenseInfo().getExpireTime());
-                    reply.setName(primaryStorageVO.getName());
+                    if (reply1.getPrimaryStorageLicenseInfo() != null) {
+                        reply.setUuid(reply1.getPrimaryStorageLicenseInfo().getUuid());
+                        reply.setExpireTime(reply1.getPrimaryStorageLicenseInfo().getExpireTime());
+                        reply.setName(primaryStorageVO.getName());
+                    }
                 } else {
                     reply.setError(r.getError());
                 }
@@ -332,7 +334,7 @@ public class PrimaryStorageManagerImpl extends AbstractService implements Primar
         GetPrimaryStorageLicenseInfoReply reply = new GetPrimaryStorageLicenseInfoReply();
 
         if (!PrimaryStorageSystemTags.PRIMARY_STORAGE_VENDOR.hasTag(msg.getPrimaryStorageUuid())) {
-            reply.setError(operr("primaryStorage[%s] has no license info", msg.getPrimaryStorageUuid()));
+            logger.debug(String.format("primaryStorage[%s] has no license info", msg.getPrimaryStorageUuid()));
             bus.reply(msg, reply);
             return;
         }

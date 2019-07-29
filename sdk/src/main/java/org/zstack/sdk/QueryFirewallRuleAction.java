@@ -35,7 +35,7 @@ public class QueryFirewallRuleAction extends QueryAction {
         }
         
         org.zstack.sdk.QueryFirewallRuleResult value = res.getResult(org.zstack.sdk.QueryFirewallRuleResult.class);
-        ret.value = value == null ? new org.zstack.sdk.QueryFirewallRuleResult() : value;
+        ret.value = value == null ? new org.zstack.sdk.QueryFirewallRuleResult() : value; 
 
         return ret;
     }

@@ -164,3 +164,5 @@ DROP PROCEDURE IF EXISTS createRoleRefsInProject;
 DROP PROCEDURE IF EXISTS upgradeIAM2ReadRole;
 DROP PROCEDURE IF EXISTS upgradeIAM2ReadRole;
 
+# delete dirty project admin attributes in db
+delete from IAM2VirtualIDAttributeVO where name = '__ProjectAdmin__' and value not in (select uuid from IAM2ProjectVO);

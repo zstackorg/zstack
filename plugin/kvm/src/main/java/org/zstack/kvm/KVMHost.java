@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.zstack.compute.cluster.ClusterGlobalConfig;
 import org.zstack.compute.host.HostBase;
 import org.zstack.compute.host.HostGlobalConfig;
 import org.zstack.compute.host.HostSystemTags;
@@ -22,7 +21,6 @@ import org.zstack.core.ansible.*;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.CloudBusGlobalProperty;
 import org.zstack.core.componentloader.PluginRegistry;
-import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.db.SimpleQuery.Op;
@@ -56,10 +54,13 @@ import org.zstack.header.storage.primary.*;
 import org.zstack.header.storage.snapshot.VolumeSnapshotInventory;
 import org.zstack.header.tag.SystemTagInventory;
 import org.zstack.header.vm.*;
-import org.zstack.header.volume.*;
+import org.zstack.header.volume.VolumeInventory;
+import org.zstack.header.volume.VolumeType;
+import org.zstack.header.volume.VolumeVO;
 import org.zstack.kvm.KVMAgentCommands.*;
 import org.zstack.kvm.KVMConstant.KvmVmState;
 import org.zstack.network.l3.NetworkGlobalProperty;
+import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.TagManager;
@@ -2707,13 +2708,6 @@ public class KVMHost extends HostBase implements Host {
                                 runner.putArgument("chrony_servers", String.join(",", CoreGlobalProperty.CHRONY_SERVERS));
                             }
                             runner.putArgument("update_packages", String.valueOf(CoreGlobalProperty.UPDATE_PKG_WHEN_CONNECT));
-
-                            // if UPDATE_PKG_WHEN_CONNECT and ZSTACK_EXPERIMENTAL_REPO are all true
-                            Boolean enableExpRepo = rcf.getResourceConfigValue(
-                                    ClusterGlobalConfig.ZSTACK_EXPERIMENTAL_REPO,
-                                    getSelf().getClusterUuid(), Boolean.class);
-                            runner.putArgument("enable_zstack_experimental_repo",
-                                    String.valueOf(CoreGlobalProperty.UPDATE_PKG_WHEN_CONNECT && enableExpRepo));
 
                             UriComponentsBuilder ub = UriComponentsBuilder.fromHttpUrl(restf.getBaseUrl());
                             ub.path(new StringBind(KVMConstant.KVM_ANSIBLE_LOG_PATH_FROMAT).bind("uuid", self.getUuid()).toString());

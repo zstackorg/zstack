@@ -334,7 +334,6 @@ public class PrimaryStorageManagerImpl extends AbstractService implements Primar
         GetPrimaryStorageLicenseInfoReply reply = new GetPrimaryStorageLicenseInfoReply();
 
         if (!PrimaryStorageSystemTags.PRIMARY_STORAGE_VENDOR.hasTag(msg.getPrimaryStorageUuid())) {
-            logger.debug(String.format("primaryStorage[%s] has no license info", msg.getPrimaryStorageUuid()));
             bus.reply(msg, reply);
             return;
         }

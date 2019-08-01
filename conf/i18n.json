@@ -19414,6 +19414,16 @@
     "fileName": "src/main/java/org/zstack/zwatch/ZWatchManagerImpl.java"
   },
   {
+    "raw": "the metric[%s] repeatInterval value cannot be less than 1h",
+    "en_US": "the metric[{0}] repeatInterval value cannot be less than 1h",
+    "zh_CN": "时序数据[{0}]的报警间隔时间不能低于1h",
+    "arguments": [
+      "alarmVO.getMetricName()"
+    ],
+    "line": 59,
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
     "raw": "the action[uuid:%s] already attached to the event subscription[uuid:%s]",
     "en_US": "the action[uuid:{0}] already attached to the event subscription[uuid:{1}]",
     "zh_CN": "报警动作[uuid:{0}]已经被加载到报警时间订阅[uuid:{1}]",

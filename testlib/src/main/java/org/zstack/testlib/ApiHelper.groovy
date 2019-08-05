@@ -29131,6 +29131,33 @@ trait ApiHelper {
     }
 
 
+    def setIAM2ProjectRetirePolicy(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.iam2.api.SetIAM2ProjectRetirePolicyAction.class) Closure c) {
+        def a = new org.zstack.sdk.iam2.api.SetIAM2ProjectRetirePolicyAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
     def stopAllResourcesInIAM2Project(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.iam2.api.StopAllResourcesInIAM2ProjectAction.class) Closure c) {
         def a = new org.zstack.sdk.iam2.api.StopAllResourcesInIAM2ProjectAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
@@ -30445,6 +30472,33 @@ trait ApiHelper {
     }
 
 
+    def addTicketTypesToTicketFlowCollection(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ticket.api.AddTicketTypesToTicketFlowCollectionAction.class) Closure c) {
+        def a = new org.zstack.sdk.ticket.api.AddTicketTypesToTicketFlowCollectionAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
     def changeTicketFlowCollectionState(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ticket.api.ChangeTicketFlowCollectionStateAction.class) Closure c) {
         def a = new org.zstack.sdk.ticket.api.ChangeTicketFlowCollectionStateAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
@@ -30773,6 +30827,62 @@ trait ApiHelper {
                 Test.apiPaths[a.class.name] = path.join(" --->\n")
             }
 
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def queryTicketType(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ticket.api.QueryTicketTypeAction.class) Closure c) {
+        def a = new org.zstack.sdk.ticket.api.QueryTicketTypeAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+        a.conditions = a.conditions.collect { it.toString() }
+
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def removeTicketTypesFromTicketFlowCollection(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ticket.api.RemoveTicketTypesFromTicketFlowCollectionAction.class) Closure c) {
+        def a = new org.zstack.sdk.ticket.api.RemoveTicketTypesFromTicketFlowCollectionAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
             return out
         } else {
             return errorOut(a.call())

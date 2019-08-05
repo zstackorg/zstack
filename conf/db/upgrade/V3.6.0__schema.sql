@@ -211,3 +211,26 @@ CREATE TABLE  `zstack`.`TemplateConfigVO` (
     PRIMARY KEY  (`id`),
     CONSTRAINT `GlobalConfigTemplateVOTemplateConfigVO` FOREIGN KEY (`templateUuid`) REFERENCES `GlobalConfigTemplateVO` (`uuid`) ON UPDATE RESTRICT ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `TicketTypeVO` (
+    `uuid` VARCHAR(32) NOT NULL UNIQUE,
+    `name` VARCHAR(255) NOT NULL,
+    `description` VARCHAR(2048) DEFAULT NULL,
+    `requests` VARCHAR(2048) NOT NULL,
+    `type` VARCHAR(255) NOT NULL,
+    `adminOnly` tinyint(1) unsigned NOT NULL,
+    `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+    PRIMARY KEY (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `TicketTypeTicketFlowCollectionRefVO` (
+    `ticketTypeUuid` VARCHAR(32) NOT NULL,
+    `ticketFlowCollectionUuid` VARCHAR(32) NOT NULL,
+    `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+    PRIMARY KEY (`ticketTypeUuid`,`ticketFlowCollectionUuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `zstack`.`TicketVO` ADD COLUMN ticketTypeUuid VARCHAR(32) DEFAULT NULL;
+ALTER TABLE `zstack`.`TicketVO` ADD CONSTRAINT `fkTicketVOTicketTypeVO` FOREIGN KEY (`ticketTypeUuid`) REFERENCES `TicketTypeVO` (`uuid`) ON DELETE SET NULL;

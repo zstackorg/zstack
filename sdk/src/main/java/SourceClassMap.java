@@ -415,6 +415,7 @@ public class SourceClassMap {
 			put("org.zstack.vpcfirewall.entity.VpcFirewallRuleInventory", "org.zstack.sdk.VpcFirewallRuleInventory");
 			put("org.zstack.vpcfirewall.entity.VpcFirewallRuleSetInterfaceRefInventory", "org.zstack.sdk.VpcFirewallRuleSetInterfaceRefInventory");
 			put("org.zstack.vpcfirewall.entity.VpcFirewallRuleSetInventory", "org.zstack.sdk.VpcFirewallRuleSetInventory");
+			put("org.zstack.vpcfirewall.entity.VpcFirewallVRouterRefInventory", "org.zstack.sdk.VpcFirewallVRouterRefInventory");
 			put("org.zstack.vpcfirewall.entity.VpcRouterInterfaceInventory", "org.zstack.sdk.VpcRouterInterfaceInventory");
 			put("org.zstack.vrouterRoute.VRouterRouteEntryAO", "org.zstack.sdk.VRouterRouteEntryAO");
 			put("org.zstack.vrouterRoute.VRouterRouteEntryInventory", "org.zstack.sdk.VRouterRouteEntryInventory");
@@ -796,6 +797,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.VpcFirewallRuleInventory", "org.zstack.vpcfirewall.entity.VpcFirewallRuleInventory");
 			put("org.zstack.sdk.VpcFirewallRuleSetInterfaceRefInventory", "org.zstack.vpcfirewall.entity.VpcFirewallRuleSetInterfaceRefInventory");
 			put("org.zstack.sdk.VpcFirewallRuleSetInventory", "org.zstack.vpcfirewall.entity.VpcFirewallRuleSetInventory");
+			put("org.zstack.sdk.VpcFirewallVRouterRefInventory", "org.zstack.vpcfirewall.entity.VpcFirewallVRouterRefInventory");
 			put("org.zstack.sdk.VpcHaGroupApplianceVmInventory", "org.zstack.header.vpc.ha.VpcHaGroupApplianceVmInventory");
 			put("org.zstack.sdk.VpcHaGroupInventory", "org.zstack.header.vpc.ha.VpcHaGroupInventory");
 			put("org.zstack.sdk.VpcHaGroupMonitorIpInventory", "org.zstack.header.vpc.ha.VpcHaGroupMonitorIpInventory");

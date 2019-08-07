@@ -7151,25 +7151,26 @@ trait ApiHelper {
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
         c()
-
+        
 
         if (System.getProperty("apipath") != null) {
             if (a.apiId == null) {
                 a.apiId = Platform.uuid
             }
-
+    
             def tracker = new ApiPathTracker(a.apiId)
             def out = errorOut(a.call())
             def path = tracker.getApiPath()
             if (!path.isEmpty()) {
                 Test.apiPaths[a.class.name] = path.join(" --->\n")
             }
-
+        
             return out
         } else {
             return errorOut(a.call())
         }
     }
+
 
     def createVpcFirewall(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CreateVpcFirewallAction.class) Closure c) {
         def a = new org.zstack.sdk.CreateVpcFirewallAction()
@@ -7198,8 +7199,8 @@ trait ApiHelper {
     }
 
 
-    def createVpcUserVpnGatewayRemote(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CreateVpcUserVpnGatewayRemoteAction.class) Closure c) {
-        def a = new org.zstack.sdk.CreateVpcUserVpnGatewayRemoteAction()
+    def createVpcHaGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CreateVpcHaGroupAction.class) Closure c) {
+        def a = new org.zstack.sdk.CreateVpcHaGroupAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -7225,8 +7226,8 @@ trait ApiHelper {
     }
 
 
-    def createVpcHaGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CreateVpcHaGroupAction.class) Closure c) {
-        def a = new org.zstack.sdk.CreateVpcHaGroupAction()
+    def createVpcUserVpnGatewayRemote(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CreateVpcUserVpnGatewayRemoteAction.class) Closure c) {
+        def a = new org.zstack.sdk.CreateVpcUserVpnGatewayRemoteAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -20943,13 +20944,13 @@ trait ApiHelper {
     }
 
 
-    def queryVpcHaGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryVpcHaGroupAction.class) Closure c) {
-        def a = new org.zstack.sdk.QueryVpcHaGroupAction()
+    def queryVpcFirewall(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryVpcFirewallAction.class) Closure c) {
+        def a = new org.zstack.sdk.QueryVpcFirewallAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
         c()
-
+        
         a.conditions = a.conditions.collect { it.toString() }
 
 
@@ -20957,14 +20958,14 @@ trait ApiHelper {
             if (a.apiId == null) {
                 a.apiId = Platform.uuid
             }
-
+    
             def tracker = new ApiPathTracker(a.apiId)
             def out = errorOut(a.call())
             def path = tracker.getApiPath()
             if (!path.isEmpty()) {
                 Test.apiPaths[a.class.name] = path.join(" --->\n")
             }
-
+        
             return out
         } else {
             return errorOut(a.call())
@@ -20972,8 +20973,37 @@ trait ApiHelper {
     }
 
 
-    def queryVpcFirewall(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryVpcFirewallAction.class) Closure c) {
-        def a = new org.zstack.sdk.QueryVpcFirewallAction()
+    def queryVpcFirewallVRouterRef(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryVpcFirewallVRouterRefAction.class) Closure c) {
+        def a = new org.zstack.sdk.QueryVpcFirewallVRouterRefAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+        a.conditions = a.conditions.collect { it.toString() }
+
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def queryVpcHaGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryVpcHaGroupAction.class) Closure c) {
+        def a = new org.zstack.sdk.QueryVpcHaGroupAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -27445,8 +27475,8 @@ trait ApiHelper {
     }
 
 
-    def updateVpcHaGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.UpdateVpcHaGroupAction.class) Closure c) {
-        def a = new org.zstack.sdk.UpdateVpcHaGroupAction()
+    def updateVpcFirewall(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.UpdateVpcFirewallAction.class) Closure c) {
+        def a = new org.zstack.sdk.UpdateVpcFirewallAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -27472,8 +27502,8 @@ trait ApiHelper {
     }
 
 
-    def updateVpcFirewall(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.UpdateVpcFirewallAction.class) Closure c) {
-        def a = new org.zstack.sdk.UpdateVpcFirewallAction()
+    def updateVpcHaGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.UpdateVpcHaGroupAction.class) Closure c) {
+        def a = new org.zstack.sdk.UpdateVpcHaGroupAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a

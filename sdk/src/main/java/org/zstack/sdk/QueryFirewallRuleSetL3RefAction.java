@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class QueryFirewallInterfaceRuleSetRefAction extends QueryAction {
+public class QueryFirewallRuleSetL3RefAction extends QueryAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class QueryFirewallInterfaceRuleSetRefAction extends QueryAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.QueryFirewallInterfaceRuleSetRefResult value;
+        public org.zstack.sdk.QueryFirewallRuleSetL3RefResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -34,8 +34,8 @@ public class QueryFirewallInterfaceRuleSetRefAction extends QueryAction {
             return ret;
         }
         
-        org.zstack.sdk.QueryFirewallInterfaceRuleSetRefResult value = res.getResult(org.zstack.sdk.QueryFirewallInterfaceRuleSetRefResult.class);
-        ret.value = value == null ? new org.zstack.sdk.QueryFirewallInterfaceRuleSetRefResult() : value; 
+        org.zstack.sdk.QueryFirewallRuleSetL3RefResult value = res.getResult(org.zstack.sdk.QueryFirewallRuleSetL3RefResult.class);
+        ret.value = value == null ? new org.zstack.sdk.QueryFirewallRuleSetL3RefResult() : value; 
 
         return ret;
     }
@@ -65,7 +65,7 @@ public class QueryFirewallInterfaceRuleSetRefAction extends QueryAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/vpcfirewalls/interfaces/rulesets/refs";
+        info.path = "/vpcfirewalls/l3networks/rulesets/refs";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

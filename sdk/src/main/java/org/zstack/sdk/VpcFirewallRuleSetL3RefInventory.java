@@ -2,7 +2,7 @@ package org.zstack.sdk;
 
 import org.zstack.sdk.PacketsForwardType;
 
-public class VpcFirewallRuleSetInterfaceRefInventory  {
+public class VpcFirewallRuleSetL3RefInventory  {
 
     public long id;
     public void setId(long id) {
@@ -20,12 +20,12 @@ public class VpcFirewallRuleSetInterfaceRefInventory  {
         return this.ruleSetUuid;
     }
 
-    public java.lang.String interfaceUuid;
-    public void setInterfaceUuid(java.lang.String interfaceUuid) {
-        this.interfaceUuid = interfaceUuid;
+    public java.lang.String l3Uuid;
+    public void setL3Uuid(java.lang.String l3Uuid) {
+        this.l3Uuid = l3Uuid;
     }
-    public java.lang.String getInterfaceUuid() {
-        return this.interfaceUuid;
+    public java.lang.String getL3Uuid() {
+        return this.l3Uuid;
     }
 
     public PacketsForwardType packetsForwardType;

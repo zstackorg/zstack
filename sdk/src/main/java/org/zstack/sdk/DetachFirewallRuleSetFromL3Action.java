@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class AttachRuleSetAction extends AbstractAction {
+public class DetachFirewallRuleSetFromL3Action extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class AttachRuleSetAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.AttachRuleSetResult value;
+        public org.zstack.sdk.DetachFirewallRuleSetFromL3Result value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -29,13 +29,10 @@ public class AttachRuleSetAction extends AbstractAction {
     public java.lang.String vpcFirewallUuid;
 
     @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String interfaceUuid;
+    public java.lang.String l3Uuid;
 
     @Param(required = true, validValues = {"in","out"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String forward;
-
-    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String ruleSetUuid;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -69,8 +66,8 @@ public class AttachRuleSetAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.AttachRuleSetResult value = res.getResult(org.zstack.sdk.AttachRuleSetResult.class);
-        ret.value = value == null ? new org.zstack.sdk.AttachRuleSetResult() : value; 
+        org.zstack.sdk.DetachFirewallRuleSetFromL3Result value = res.getResult(org.zstack.sdk.DetachFirewallRuleSetFromL3Result.class);
+        ret.value = value == null ? new org.zstack.sdk.DetachFirewallRuleSetFromL3Result() : value; 
 
         return ret;
     }
@@ -100,7 +97,7 @@ public class AttachRuleSetAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/vpcfirewalls/ruleSets/{ruleSetUuid}/interfaces/{interfaceUuid}";
+        info.path = "/vpcfirewalls/l3networks/{l3Uuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

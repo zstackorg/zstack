@@ -20981,7 +20981,7 @@ trait ApiHelper {
         c()
         
         a.conditions = a.conditions.collect { it.toString() }
-        
+
         if (System.getProperty("apipath") != null) {
             if (a.apiId == null) {
                 a.apiId = Platform.uuid

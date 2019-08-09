@@ -20,12 +20,12 @@ public class VpcFirewallRuleSetL3RefInventory  {
         return this.ruleSetUuid;
     }
 
-    public java.lang.String l3Uuid;
-    public void setL3Uuid(java.lang.String l3Uuid) {
-        this.l3Uuid = l3Uuid;
+    public java.lang.String l3NetworkUuid;
+    public void setL3NetworkUuid(java.lang.String l3NetworkUuid) {
+        this.l3NetworkUuid = l3NetworkUuid;
     }
-    public java.lang.String getL3Uuid() {
-        return this.l3Uuid;
+    public java.lang.String getL3NetworkUuid() {
+        return this.l3NetworkUuid;
     }
 
     public PacketsForwardType packetsForwardType;

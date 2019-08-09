@@ -2474,6 +2474,33 @@ trait ApiHelper {
     }
 
 
+    def attachFirewallRuleSetToL3(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.AttachFirewallRuleSetToL3Action.class) Closure c) {
+        def a = new org.zstack.sdk.AttachFirewallRuleSetToL3Action()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
     def attachHybridEipToEcs(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.AttachHybridEipToEcsAction.class) Closure c) {
         def a = new org.zstack.sdk.AttachHybridEipToEcsAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
@@ -2935,33 +2962,6 @@ trait ApiHelper {
 
     def attachPrimaryStorageToCluster(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.AttachPrimaryStorageToClusterAction.class) Closure c) {
         def a = new org.zstack.sdk.AttachPrimaryStorageToClusterAction()
-        a.sessionId = Test.currentEnvSpec?.session?.uuid
-        c.resolveStrategy = Closure.OWNER_FIRST
-        c.delegate = a
-        c()
-        
-
-        if (System.getProperty("apipath") != null) {
-            if (a.apiId == null) {
-                a.apiId = Platform.uuid
-            }
-    
-            def tracker = new ApiPathTracker(a.apiId)
-            def out = errorOut(a.call())
-            def path = tracker.getApiPath()
-            if (!path.isEmpty()) {
-                Test.apiPaths[a.class.name] = path.join(" --->\n")
-            }
-        
-            return out
-        } else {
-            return errorOut(a.call())
-        }
-    }
-
-
-    def attachRuleSet(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.AttachRuleSetAction.class) Closure c) {
-        def a = new org.zstack.sdk.AttachRuleSetAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -11357,6 +11357,33 @@ trait ApiHelper {
     }
 
 
+    def detachFirewallRuleSetFromL3(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.DetachFirewallRuleSetFromL3Action.class) Closure c) {
+        def a = new org.zstack.sdk.DetachFirewallRuleSetFromL3Action()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
     def detachHybridEipFromEcs(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.DetachHybridEipFromEcsAction.class) Closure c) {
         def a = new org.zstack.sdk.DetachHybridEipFromEcsAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
@@ -11791,33 +11818,6 @@ trait ApiHelper {
 
     def detachPrimaryStorageFromCluster(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.DetachPrimaryStorageFromClusterAction.class) Closure c) {
         def a = new org.zstack.sdk.DetachPrimaryStorageFromClusterAction()
-        a.sessionId = Test.currentEnvSpec?.session?.uuid
-        c.resolveStrategy = Closure.OWNER_FIRST
-        c.delegate = a
-        c()
-        
-
-        if (System.getProperty("apipath") != null) {
-            if (a.apiId == null) {
-                a.apiId = Platform.uuid
-            }
-    
-            def tracker = new ApiPathTracker(a.apiId)
-            def out = errorOut(a.call())
-            def path = tracker.getApiPath()
-            if (!path.isEmpty()) {
-                Test.apiPaths[a.class.name] = path.join(" --->\n")
-            }
-        
-            return out
-        } else {
-            return errorOut(a.call())
-        }
-    }
-
-
-    def detachRuleSet(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.DetachRuleSetAction.class) Closure c) {
-        def a = new org.zstack.sdk.DetachRuleSetAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -17841,35 +17841,6 @@ trait ApiHelper {
     }
 
 
-    def queryFirewallInterfaceRuleSetRef(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryFirewallInterfaceRuleSetRefAction.class) Closure c) {
-        def a = new org.zstack.sdk.QueryFirewallInterfaceRuleSetRefAction()
-        a.sessionId = Test.currentEnvSpec?.session?.uuid
-        c.resolveStrategy = Closure.OWNER_FIRST
-        c.delegate = a
-        c()
-        
-        a.conditions = a.conditions.collect { it.toString() }
-
-
-        if (System.getProperty("apipath") != null) {
-            if (a.apiId == null) {
-                a.apiId = Platform.uuid
-            }
-    
-            def tracker = new ApiPathTracker(a.apiId)
-            def out = errorOut(a.call())
-            def path = tracker.getApiPath()
-            if (!path.isEmpty()) {
-                Test.apiPaths[a.class.name] = path.join(" --->\n")
-            }
-        
-            return out
-        } else {
-            return errorOut(a.call())
-        }
-    }
-
-
     def queryFirewallRule(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryFirewallRuleAction.class) Closure c) {
         def a = new org.zstack.sdk.QueryFirewallRuleAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
@@ -17901,6 +17872,35 @@ trait ApiHelper {
 
     def queryFirewallRuleSet(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryFirewallRuleSetAction.class) Closure c) {
         def a = new org.zstack.sdk.QueryFirewallRuleSetAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+        a.conditions = a.conditions.collect { it.toString() }
+
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def queryFirewallRuleSetL3Ref(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.QueryFirewallRuleSetL3RefAction.class) Closure c) {
+        def a = new org.zstack.sdk.QueryFirewallRuleSetL3RefAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -20981,8 +20981,7 @@ trait ApiHelper {
         c()
         
         a.conditions = a.conditions.collect { it.toString() }
-
-
+        
         if (System.getProperty("apipath") != null) {
             if (a.apiId == null) {
                 a.apiId = Platform.uuid

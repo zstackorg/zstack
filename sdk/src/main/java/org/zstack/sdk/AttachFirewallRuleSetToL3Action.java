@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class DetachRuleSetAction extends AbstractAction {
+public class AttachFirewallRuleSetToL3Action extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class DetachRuleSetAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.DetachRuleSetResult value;
+        public org.zstack.sdk.AttachFirewallRuleSetToL3Result value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -28,11 +28,14 @@ public class DetachRuleSetAction extends AbstractAction {
     @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String vpcFirewallUuid;
 
-    @Param(required = true, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String interfaceUuid;
+    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String l3Uuid;
 
     @Param(required = true, validValues = {"in","out"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String forward;
+
+    @Param(required = true, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String ruleSetUuid;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -66,8 +69,8 @@ public class DetachRuleSetAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.DetachRuleSetResult value = res.getResult(org.zstack.sdk.DetachRuleSetResult.class);
-        ret.value = value == null ? new org.zstack.sdk.DetachRuleSetResult() : value; 
+        org.zstack.sdk.AttachFirewallRuleSetToL3Result value = res.getResult(org.zstack.sdk.AttachFirewallRuleSetToL3Result.class);
+        ret.value = value == null ? new org.zstack.sdk.AttachFirewallRuleSetToL3Result() : value; 
 
         return ret;
     }
@@ -97,7 +100,7 @@ public class DetachRuleSetAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "POST";
-        info.path = "/vpcfirewalls/interfaces/{interfaceUuid}";
+        info.path = "/vpcfirewalls/ruleSets/{ruleSetUuid}/l3networks/{l3Uuid}";
         info.needSession = true;
         info.needPoll = true;
         info.parameterName = "params";

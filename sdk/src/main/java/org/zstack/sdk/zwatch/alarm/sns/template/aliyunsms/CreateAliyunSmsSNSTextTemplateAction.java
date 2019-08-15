@@ -12,7 +12,7 @@ public class CreateAliyunSmsSNSTextTemplateAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.zwatch.alarm.sns.template.aliyunsms.CreateAliyunSmsSNSTextTemplateResult value;
+        public org.zstack.sdk.zwatch.alarm.sns.CreateSNSTextTemplateResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -76,6 +76,9 @@ public class CreateAliyunSmsSNSTextTemplateAction extends AbstractAction {
     @Param(required = false)
     public String accessKeySecret;
 
+    @Param(required = false)
+    public String requestIp;
+
     @NonAPIParam
     public long timeout = -1;
 
@@ -90,8 +93,8 @@ public class CreateAliyunSmsSNSTextTemplateAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.zwatch.alarm.sns.template.aliyunsms.CreateAliyunSmsSNSTextTemplateResult value = res.getResult(org.zstack.sdk.zwatch.alarm.sns.template.aliyunsms.CreateAliyunSmsSNSTextTemplateResult.class);
-        ret.value = value == null ? new org.zstack.sdk.zwatch.alarm.sns.template.aliyunsms.CreateAliyunSmsSNSTextTemplateResult() : value; 
+        org.zstack.sdk.zwatch.alarm.sns.CreateSNSTextTemplateResult value = res.getResult(org.zstack.sdk.zwatch.alarm.sns.CreateSNSTextTemplateResult.class);
+        ret.value = value == null ? new org.zstack.sdk.zwatch.alarm.sns.CreateSNSTextTemplateResult() : value; 
 
         return ret;
     }

@@ -26,7 +26,7 @@ public class CreateSNSAliyunSmsEndpointAction extends AbstractAction {
     }
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String AccessKeyUuid;
+    public java.lang.String accessKeyUuid;
 
     @Param(required = false, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
     public java.util.List receivers;
@@ -60,6 +60,9 @@ public class CreateSNSAliyunSmsEndpointAction extends AbstractAction {
 
     @Param(required = false)
     public String accessKeySecret;
+
+    @Param(required = false)
+    public String requestIp;
 
     @NonAPIParam
     public long timeout = -1;

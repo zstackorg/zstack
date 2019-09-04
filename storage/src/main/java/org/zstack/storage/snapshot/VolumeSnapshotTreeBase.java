@@ -56,6 +56,7 @@ import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.*;
+import org.zstack.longjob.LongJobUtils;
 import org.zstack.storage.primary.PrimaryStorageCapacityUpdater;
 import org.zstack.storage.volume.FireSnapShotCanonicalEvent;
 import org.zstack.utils.CollectionUtils;
@@ -800,6 +801,7 @@ public class VolumeSnapshotTreeBase {
                 e(ParamOut.class, paramOut)
         );
         chain.then(workflowTemplate.getCreateTemporaryTemplate());
+        chain.preCheck(data -> LongJobUtils.buildErrIfCanceled());
         chain.then(new Flow() {
             String __name__ = "allocate-backup-storage";
 

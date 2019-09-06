@@ -1,11 +1,11 @@
-CREATE TABLE `zstack`.`SNSSmsEndpointVO`
+CREATE TABLE IF NOT EXISTS `zstack`.`SNSSmsEndpointVO`
 (
     `uuid` varchar(32) NOT NULL UNIQUE,
     PRIMARY KEY (`uuid`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-CREATE TABLE `zstack`.`SNSSmsReceiverVO`
+CREATE TABLE IF NOT EXISTS `zstack`.`SNSSmsReceiverVO`
 (
     `uuid`         varchar(32) NOT NULL UNIQUE,
     `phoneNumber`  varchar(24) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE `zstack`.`SNSSmsReceiverVO`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-CREATE TABLE `zstack`.`AliyunSmsSNSTextTemplateVO`
+CREATE TABLE IF NOT EXISTS `zstack`.`AliyunSmsSNSTextTemplateVO`
 (
     `uuid`              varchar(32) NOT NULL UNIQUE,
     `sign`              varchar(12) NOT NULL,

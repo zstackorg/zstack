@@ -18,9 +18,9 @@ CREATE TABLE IF NOT EXISTS `zstack`.`SNSSmsReceiverVO`
 CREATE TABLE IF NOT EXISTS `zstack`.`AliyunSmsSNSTextTemplateVO`
 (
     `uuid`              varchar(32) NOT NULL UNIQUE,
-    `sign`              varchar(12) NOT NULL,
-    `alarmTemplateCode` varchar(13) NOT NULL,
-    `eventTemplateCode` varchar(13) NOT NULL,
+    `sign`              varchar(24) NOT NULL,
+    `alarmTemplateCode` varchar(24) NOT NULL,
+    `eventTemplateCode` varchar(24) NOT NULL,
     `eventTemplate`     text,
     PRIMARY KEY (`uuid`)
 ) ENGINE = InnoDB

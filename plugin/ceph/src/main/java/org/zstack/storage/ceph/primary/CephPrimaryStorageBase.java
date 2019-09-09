@@ -2,7 +2,6 @@ package org.zstack.storage.ceph.primary;
 
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.zstack.core.Platform;
 import org.zstack.core.agent.AgentConstant;
 import org.zstack.core.asyncbatch.While;
@@ -762,7 +761,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
     }
 
-    public static class CephToCephMigrateVolumeSegmentCmd extends AgentCommand {
+    public static class CephToCephMigrateVolumeSegmentCmd extends AgentCommand implements HasThreadContext {
         String parentUuid;
         String resourceUuid;
         String srcInstallPath;
@@ -2369,8 +2368,8 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     }
 
     @Override
-    protected void handle(CancelCreateTemplateFromVolumeOnPrimaryStorageMsg msg) {
-        final CancelCreateTemplateFromVolumeOnPrimaryStorageReply reply = new CancelCreateTemplateFromVolumeOnPrimaryStorageReply();
+    protected void handle(CancelJobOnPrimaryStorageMsg msg) {
+        final CancelJobOnPrimaryStorageReply reply = new CancelJobOnPrimaryStorageReply();
         CancelCmd cmd = new CancelCmd();
         cmd.setCancellationApiId(msg.getCancellationApiId());
         new HttpCaller<>(AgentConstant.CANCEL_JOB, cmd, AgentResponse.class, new ReturnValueCompletion<AgentResponse>(msg) {
@@ -3584,7 +3583,6 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         }).specifyOrder(randomFactor).tryNext().call();
     }
 
-
     private void handle(DeleteImageCacheOnPrimaryStorageMsg msg) {
         DeleteImageCacheOnPrimaryStorageReply reply = new DeleteImageCacheOnPrimaryStorageReply();
 
@@ -4225,8 +4223,9 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         cmd.setDstMonSshPassword(msg.getDstMonSshPassword());
         cmd.setDstMonSshPort(msg.getDstMonSshPort());
 
+        final String apiId = ThreadContext.get(Constants.THREAD_CONTEXT_API);
         final CephToCephMigrateVolumeSegmentReply reply = new CephToCephMigrateVolumeSegmentReply();
-        httpCall(CEPH_TO_CEPH_MIGRATE_VOLUME_SEGMENT_PATH, cmd, StorageMigrationRsp.class, new ReturnValueCompletion<StorageMigrationRsp>(msg) {
+        new HttpCaller<>(CEPH_TO_CEPH_MIGRATE_VOLUME_SEGMENT_PATH, cmd, StorageMigrationRsp.class, new ReturnValueCompletion<StorageMigrationRsp>(msg) {
             @Override
             public void success(StorageMigrationRsp returnValue) {
                 bus.reply(msg, reply);
@@ -4237,7 +4236,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                 reply.setError(errorCode);
                 bus.reply(msg, reply);
             }
-        }, TimeUnit.MILLISECONDS, msg.getTimeout());
+        }, TimeUnit.MILLISECONDS, msg.getTimeout()).specifyOrder(apiId).call();
     }
 
     private void handle(GetVolumeSnapshotInfoMsg msg) {

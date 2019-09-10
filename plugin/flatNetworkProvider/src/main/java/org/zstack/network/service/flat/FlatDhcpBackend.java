@@ -179,6 +179,9 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         for (VmNicVO nic : nics) {
             for (UsedIpVO ip : nic.getUsedIps()) {
 
+                String vmMultiGateway = VmSystemTags.MULTIPLE_GATEWAY.getTokenByResourceUuid(nic.getVmInstanceUuid(),
+                        VmSystemTags.MULTIPLE_GATEWAY_TOKEN);
+                boolean multiGateway = Boolean.valueOf(vmMultiGateway);
                 DhcpInfo info = new DhcpInfo();
                 info.bridgeName = KVMSystemTags.L2_BRIDGE_NAME.getTokenByTag(bridgeNames.get(nic.getL3NetworkUuid()), KVMSystemTags.L2_BRIDGE_NAME_TOKEN);
                 info.namespaceName = makeNamespaceName(
@@ -223,6 +226,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
                 info.l3NetworkUuid = l3.getUuid();
                 info.hostRoutes = getL3NetworkHostRoute(ip.getL3NetworkUuid());
+                info.vmMultiGateway = multiGateway;
 
                 dhcpInfoList.add(info);
             }
@@ -571,6 +575,10 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             l3Map.put(l3.getUuid(), l3);
         }
 
+        String vmMultiGateway = VmSystemTags.MULTIPLE_GATEWAY.getTokenByResourceUuid(vm.getUuid(),
+                VmSystemTags.MULTIPLE_GATEWAY_TOKEN);
+        boolean multiGateway = Boolean.valueOf(vmMultiGateway);
+
         List<DhcpInfo> dhcpInfoList = new ArrayList<DhcpInfo>();
         List<VmNicVO> defaultNics = nics.stream().filter(nic -> nic.getL3NetworkUuid().equals(vm.getDefaultL3NetworkUuid())).collect(Collectors.toList());
         for (VmNicVO nic : nics) {
@@ -617,6 +625,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
                 info.l3NetworkUuid = l3.getUuid();
                 info.hostRoutes = getL3NetworkHostRoute(ip.getL3NetworkUuid());
+                info.vmMultiGateway = multiGateway;
 
                 dhcpInfoList.add(info);
             }
@@ -969,6 +978,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         public String namespaceName;
         public String l3NetworkUuid;
         public Integer mtu;
+        public boolean vmMultiGateway;
         public List<HostRouteInfo> hostRoutes;
     }
 
@@ -1088,6 +1098,10 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                     return null;
                 }
 
+                String vmMultiGateway = VmSystemTags.MULTIPLE_GATEWAY.getTokenByResourceUuid(arg.getVmUuid(),
+                        VmSystemTags.MULTIPLE_GATEWAY_TOKEN);
+                boolean multiGateway = Boolean.valueOf(vmMultiGateway);
+
                 DhcpInfo info = new DhcpInfo();
                 info.ipVersion = arg.getIpVersion();
                 info.raMode = arg.getRaMode();
@@ -1122,6 +1136,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 info.namespaceName = makeNamespaceName(info.bridgeName, arg.getL3Network().getUuid());
                 info.mtu = arg.getMtu();
                 info.hostRoutes = getL3NetworkHostRoute(arg.getL3Network().getUuid());
+                info.vmMultiGateway = multiGateway;
                 return info;
             }
         });

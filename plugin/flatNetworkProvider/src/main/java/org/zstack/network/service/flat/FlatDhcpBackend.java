@@ -9,7 +9,10 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.MessageSafe;
 import org.zstack.core.componentloader.PluginRegistry;
-import org.zstack.core.db.*;
+import org.zstack.core.db.DatabaseFacade;
+import org.zstack.core.db.GLock;
+import org.zstack.core.db.Q;
+import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.defer.Defer;
 import org.zstack.core.defer.Deferred;
 import org.zstack.core.thread.SyncTask;
@@ -51,12 +54,16 @@ import org.zstack.utils.network.NetworkUtils;
 
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.zstack.core.Platform.*;
+import static org.zstack.core.Platform.argerr;
+import static org.zstack.core.Platform.operr;
+import static org.zstack.network.service.flat.IpStatisticConstants.ResourceType;
+import static org.zstack.network.service.flat.IpStatisticConstants.SortBy;
 import static org.zstack.utils.CollectionDSL.*;
 
 /**
@@ -245,9 +252,190 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     private void handleApiMessage(APIMessage msg) {
         if (msg instanceof APIGetL3NetworkDhcpIpAddressMsg) {
             handle((APIGetL3NetworkDhcpIpAddressMsg) msg);
+        } else if (msg instanceof APIGetL3NetworkIpStatisticMsg) {
+            handle((APIGetL3NetworkIpStatisticMsg) msg);
         } else {
             bus.dealWithUnknownMessage(msg);
         }
+    }
+
+    private void handle(APIGetL3NetworkIpStatisticMsg msg) {
+        APIGetL3NetworkIpStatisticReply reply = new APIGetL3NetworkIpStatisticReply();
+        List<IpStatisticData> ipStatistics = doStatistic(msg);
+        reply.setIpStatistics(ipStatistics);
+        if (msg.isReplyWithCount()) {
+            reply.setCount(ipStatistics.size());
+        }
+        bus.reply(msg, reply);
+    }
+
+    private List<IpStatisticData> doStatistic(APIGetL3NetworkIpStatisticMsg msg) {
+        String orderExpr;
+        if (SortBy.IP.equals(msg.getSortBy())) {
+            Integer ipVersion = Q.New(L3NetworkVO.class).select(L3NetworkVO_.ipVersion)
+                    .eq(L3NetworkVO_.uuid, msg.getL3NetworkUuid()).findValue();
+            //when upgrade mysql to 5.6, both ipv4 and ipv6 can use INET6_ATON(ip) as order expression
+            if (ipVersion == 4) {
+                if (ResourceType.ALL.equals(msg.getResourceType())) {
+                    orderExpr = "ipInLong";
+                } else {
+                    orderExpr = "INET_ATON(ip)";
+                }
+            } else {
+                orderExpr = "ip";
+            }
+        } else {
+            orderExpr = "createDate";
+        }
+
+        List<IpStatisticData> res = null;
+
+        if (msg.getResourceType().equals(ResourceType.ALL)) {
+            res = ipStatisticAll(msg, orderExpr);
+        } else if (msg.getResourceType().equals(ResourceType.VIP)) {
+            res = ipStatisticVip(msg, orderExpr);
+        } else if (msg.getResourceType().equals(ResourceType.VM)) {
+            res = ipStatisticVm(msg, orderExpr);
+        }
+
+        return res != null ? res : new ArrayList<>();
+    }
+
+    private List<IpStatisticData> ipStatisticAll(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
+
+        String sql = "select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName " +
+                "from (select uuid, ip, ipInLong from UsedIpVO where l3NetworkUuid = :l3Uuid ";
+
+        if (msg.getIp() != null) {
+            sql += "and ip like '%:ip%'";
+        }
+
+        sql += "order by :sortBy :direction limit :limit offset :start) uip " +
+                "left join " +
+                "(select v.uuid, v.name, v.usedIpUuid from VipVO v) vip on uip.uuid = vip.usedIpUuid " +
+                "left join " +
+                "(select n.uuid, n.usedIpUuid, n.vmInstanceUuid from VmNicVO n) nic on nic.usedIpUuid = uip.uuid " +
+                "left join " +
+                "(select i.uuid, i.name from VmInstanceVO i) it on it.uuid = nic.vmInstanceUuid " +
+                "order by :sortBy :direction";
+
+        TypedQuery<Tuple> tq = dbf.getEntityManager().createQuery(sql, Tuple.class);
+        tq.setParameter("l3Uuid", msg.getL3NetworkUuid());
+        tq.setParameter("sortBy", sortBy);
+        tq.setParameter("direction", msg.getSortDirection());
+        tq.setParameter("limit", msg.getLimit());
+        tq.setParameter("start", msg.getStart());
+
+        if (msg.getIp() != null) {
+            tq.setParameter("ip", msg.getIp());
+        }
+
+        List<Tuple> ts = tq.getResultList();
+        List<IpStatisticData> ipStatistics = new ArrayList<>();
+
+        for (Tuple tuple : ts) {
+            IpStatisticData element = new IpStatisticData();
+            ipStatistics.add(element);
+            element.setIp(tuple.get(0, String.class));
+            element.setVipUuid(tuple.get(1, String.class));
+            element.setVipName(tuple.get(2, String.class));
+            element.setVmInstanceUuid(tuple.get(3, String.class));
+            element.setVmInstanceName(tuple.get(4, String.class));
+            List<String> resourceTypes = new ArrayList<>();
+            element.setResourceTypes(resourceTypes);
+            if (element.getVipUuid() != null) {
+                resourceTypes.add(ResourceType.VIP);
+            }
+            if (element.getVmInstanceUuid() != null) {
+                resourceTypes.add(ResourceType.VM);
+            }
+            if (resourceTypes.size() == 0) {
+                resourceTypes.add(ResourceType.OTHER);
+            }
+        }
+
+        return ipStatistics;
+    }
+
+    private List<IpStatisticData> ipStatisticVip(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
+        String sql = "select ip, uuid, name, state, useFor, vip.createDate " +
+                "from VipVO vip, AccountResourceRefVO ac " +
+                "where ac.accountUuid = :accUuid and vip.l3NetworkUuid = :l3Uuid and vip.uuid = ac.resourceUuid ";
+        if (msg.getIp() != null) {
+            sql += "and ip like '%:ip%'";
+        }
+        sql += "order by :sortBy :direction limit :limit offset :start";
+        TypedQuery<Tuple> tq = dbf.getEntityManager().createQuery(sql, Tuple.class);
+        tq.setParameter("accUuid", msg.getSession().getAccountUuid());
+        tq.setParameter("l3Uuid", msg.getL3NetworkUuid());
+        tq.setParameter("sortBy", sortBy);
+        tq.setParameter("direction", msg.getSortDirection());
+        tq.setParameter("limit", msg.getLimit());
+        tq.setParameter("start", msg.getStart());
+
+        if (msg.getIp() != null) {
+            tq.setParameter("ip", msg.getIp());
+        }
+
+        List<Tuple> ts = tq.getResultList();
+        List<IpStatisticData> ipStatistics = new ArrayList<>();
+
+        for (Tuple tuple : ts) {
+            IpStatisticData element = new IpStatisticData();
+            ipStatistics.add(element);
+            element.setIp(tuple.get(0, String.class));
+            element.setVipUuid(tuple.get(1, String.class));
+            element.setVipName(tuple.get(2, String.class));
+            element.setState(tuple.get(3, String.class));
+            element.setUseFor(tuple.get(4, String.class));
+            element.setCreateDate(tuple.get(5, Timestamp.class));
+            element.setResourceTypes(Collections.singletonList(ResourceType.VIP));
+        }
+
+        return ipStatistics;
+    }
+
+    private List<IpStatisticData> ipStatisticVm(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
+        String sql = "select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate " +
+                "from (select nic.vmInstanceUuid, ip from VmNicVO nic, AccountResourceRefVO ac " +
+                "where ac.accountUuid = :accUuid and nic.l3NetworkUuid = :l3Uuid and nic.uuid = ac.resourceUuid ";
+
+        if (msg.getIp() != null) {
+            sql += "and ip like '%:ip%'";
+        }
+
+        sql += "order by :sortBy :direction limit :limit offset :start) nic " +
+                "left join " +
+                "(select uuid, name, type, state, createDate from VmInstanceVO) vm on vm.uuid = nic.vmInstanceUuid " +
+                "order by :sortBy :direction";
+        TypedQuery<Tuple> tq = dbf.getEntityManager().createQuery(sql, Tuple.class);
+        tq.setParameter("accUuid", msg.getSession().getAccountUuid());
+        tq.setParameter("l3Uuid", msg.getL3NetworkUuid());
+        tq.setParameter("sortBy", sortBy);
+        tq.setParameter("direction", msg.getSortDirection());
+        tq.setParameter("limit", msg.getLimit());
+        tq.setParameter("start", msg.getStart());
+
+        if (msg.getIp() != null) {
+            tq.setParameter("ip", msg.getIp());
+        }
+
+        List<Tuple> ts = tq.getResultList();
+        List<IpStatisticData> ipStatistics = new ArrayList<>();
+
+        for (Tuple tuple : ts) {
+            IpStatisticData element = new IpStatisticData();
+            ipStatistics.add(element);
+            element.setIp(tuple.get(0, String.class));
+            element.setVmInstanceUuid(tuple.get(1, String.class));
+            element.setVmInstanceName(tuple.get(2, String.class));
+            element.setVmInstanceType(tuple.get(3, String.class));
+            element.setState(tuple.get(4, String.class));
+            element.setCreateDate(tuple.get(5, Timestamp.class));
+            element.setResourceTypes(Collections.singletonList(ResourceType.VM));
+        }
+
+        return ipStatistics;
     }
 
     private void handleLocalMessage(Message msg) {

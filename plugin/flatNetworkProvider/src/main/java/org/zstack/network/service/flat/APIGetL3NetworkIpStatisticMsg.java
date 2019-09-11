@@ -25,16 +25,16 @@ public class APIGetL3NetworkIpStatisticMsg extends APISyncCallMessage implements
     private String l3NetworkUuid;
 
     @APIParam(validValues = {ResourceType.ALL, ResourceType.VIP, ResourceType.VM}, required = false)
-    private String resourceType;
+    private String resourceType = ResourceType.ALL;
 
     @APIParam(required = false)
     private String ip;
 
     @APIParam(validValues = {SortBy.IP, SortBy.CREATE_TIME}, required = false)
-    private String sortBy;
+    private String sortBy = SortBy.IP;
 
     @APIParam(validValues = {SortDirection.ASC, SortDirection.DESC}, required = false)
-    private String sortDirection;
+    private String sortDirection = SortDirection.ASC;
 
     @APIParam(numberRange = {0, Integer.MAX_VALUE}, required = false)
     private Integer start = 0;

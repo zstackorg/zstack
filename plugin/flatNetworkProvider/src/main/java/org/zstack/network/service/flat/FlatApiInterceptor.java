@@ -21,22 +21,6 @@ public class FlatApiInterceptor implements ApiMessageInterceptor {
     }
 
     private void validate(APIGetL3NetworkIpStatisticMsg msg) {
-        if (msg.getSortBy() == null) {
-            msg.setSortBy(SortBy.IP);
-        }
-
-        if (msg.getSortDirection() == null) {
-            msg.setSortDirection(SortDirection.ASC);
-        }
-
-        if (msg.getStart() == null) {
-            msg.setStart(0);
-        }
-
-        if (msg.getLimit() == null) {
-            msg.setLimit(20);
-        }
-
         if (!(msg.getLimit() == 20 || msg.getLimit() == 10 || msg.getLimit() == 50 || msg.getLimit() == 100)) {
             throw new ApiMessageInterceptionException(Platform.argerr("Page size should in [10, 20, 50, 100]. Got %d.", msg.getLimit()));
         }

@@ -37,7 +37,7 @@ public class FlatApiInterceptor implements ApiMessageInterceptor {
             msg.setLimit(20);
         }
 
-        if (msg.getLimit() != 10 || msg.getLimit() != 20 || msg.getLimit() != 50 || msg.getLimit() != 100) {
+        if (!(msg.getLimit() == 20 || msg.getLimit() == 10 || msg.getLimit() == 50 || msg.getLimit() == 100)) {
             throw new ApiMessageInterceptionException(Platform.argerr("Page size should in [10, 20, 50, 100]. Got %d.", msg.getLimit()));
         }
     }

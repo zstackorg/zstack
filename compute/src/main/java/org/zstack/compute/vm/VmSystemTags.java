@@ -122,4 +122,7 @@ public class VmSystemTags {
             String.format("vmMachineType::{%s}", MACHINE_TYPE_TOKEN),
             VmInstanceVO.class
     );
+
+    public static String MULTIPLE_GATEWAY_TOKEN = "vmMultipleGateway";
+    public static PatternedSystemTag MULTIPLE_GATEWAY = new PatternedSystemTag(String.format("vmMultipleGateway::{%s}", MULTIPLE_GATEWAY_TOKEN), VmInstanceVO.class);
 }

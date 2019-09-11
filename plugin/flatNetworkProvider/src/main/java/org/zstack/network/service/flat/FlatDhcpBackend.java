@@ -303,34 +303,43 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     }
 
     private List<IpStatisticData> ipStatisticAll(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
+        /*
+        select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName
+        from (select uuid, ip, IpInLong
+            from UsedIpVO
+            where l3NetworkUuid = '{uuid}' [and ip like '%{ip}%']
+            order by {sortBy} {direction}
+            limit {limit} offset {start}) uip
+                left join (select v.uuid, v.name, v.usedIpUuid from VipVO v) vip on uip.uuid = vip.usedIpUuid
+                left join (select n.uuid, n.usedIpUuid, n.vmInstanceUuid from VmNicVO n) nic on nic.usedIpUuid = uip.uuid
+                left join (select i.uuid, i.name from VmInstanceVO i) it on nic.vmInstanceUuid = it.uuid
+        order by {sortBy} {direction};
+         */
 
-        String sql = "select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName " +
-                "from (select uuid, ip, ipInLong from UsedIpVO where l3NetworkUuid = :l3Uuid ";
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName ")
+                .append("from (select uuid, ip, ipInLong from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+                .append("' ");
 
         if (msg.getIp() != null) {
-            sql += "and ip like '%" + msg.getIp() + "%' ";
+            sqlBuilder.append("and ip like '%").append(msg.getIp()).append("%' ");
         }
 
-        sql += "order by :sortBy :direction limit :limit offset :start) uip " +
-                "left join " +
-                "(select v.uuid, v.name, v.usedIpUuid from VipVO v) vip on uip.uuid = vip.usedIpUuid " +
-                "left join " +
-                "(select n.uuid, n.usedIpUuid, n.vmInstanceUuid from VmNicVO n) nic on nic.usedIpUuid = uip.uuid " +
-                "left join " +
-                "(select i.uuid, i.name from VmInstanceVO i) it on it.uuid = nic.vmInstanceUuid " +
-                "order by :sortBy :direction";
+        sqlBuilder.append("order by ").append(sortBy).append(' ').append(msg.getSortDirection()).append(" limit ")
+                .append(msg.getLimit()).append(" offset ").append(msg.getStart()).append(") uip ")
+                .append("left join ")
+                .append("(select v.uuid, v.name, v.usedIpUuid from VipVO v) vip on uip.uuid = vip.usedIpUuid ")
+                .append("left join ")
+                .append("(select n.uuid, n.usedIpUuid, n.vmInstanceUuid from VmNicVO n) nic on nic.usedIpUuid = uip.uuid ")
+                .append("left join ")
+                .append("(select i.uuid, i.name from VmInstanceVO i) it on it.uuid = nic.vmInstanceUuid ")
+                .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection());
 
-        Query tq = dbf.getEntityManager().createNativeQuery(sql);
-        tq.setParameter("l3Uuid", msg.getL3NetworkUuid());
-        tq.setParameter("sortBy", sortBy);
-        tq.setParameter("direction", msg.getSortDirection());
-        tq.setParameter("limit", msg.getLimit());
-        tq.setParameter("start", msg.getStart());
-
-        List<Object[]> ts = tq.getResultList();
+        Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
+        List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
 
-        for (Object[] t : ts) {
+        for (Object[] t : results) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
             element.setIp((String) t[0]);
@@ -355,27 +364,34 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     }
 
     private List<IpStatisticData> ipStatisticVip(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
-        String sql = "select ip, uuid, name, state, useFor, vip.createDate " +
-                "from VipVO vip, AccountResourceRefVO ac " +
-                "where ac.accountUuid = :accUuid and vip.l3NetworkUuid = :l3Uuid and vip.uuid = ac.resourceUuid ";
+        /*
+        select ip, uuid, name, state, useFor, vip.createDate
+        from VipVO vip,
+            AccountResourceRefVO ac
+        where vip.l3NetworkUuid = '{l3Uuid}'
+            and vip.uuid = ac.resourceUuid
+            and ac.accountUuid = '{accUuid}'
+            [and ip like '%{ip}%']
+        order by {sortBy} {direction}
+        limit {limit} offset {start};
+         */
 
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select ip, uuid, name, state, useFor, vip.createDate from VipVO vip, AccountResourceRefVO ac ")
+                .append("where ac.accountUuid = '").append(msg.getSession().getAccountUuid())
+                .append("' and vip.l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+                .append("' and vip.uuid = ac.resourceUuid ");
         if (msg.getIp() != null) {
-            sql += "and ip like '%" + msg.getIp() + "%' ";
+            sqlBuilder.append("and ip like '%").append(msg.getIp()).append("%' ");
         }
+        sqlBuilder.append("order by ").append(sortBy).append(' ').append(msg.getSortDirection())
+                .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart());
 
-        sql += "order by :sortBy :direction limit :limit offset :start";
-        Query tq = dbf.getEntityManager().createNativeQuery(sql);
-        tq.setParameter("accUuid", msg.getSession().getAccountUuid());
-        tq.setParameter("l3Uuid", msg.getL3NetworkUuid());
-        tq.setParameter("sortBy", sortBy);
-        tq.setParameter("direction", msg.getSortDirection());
-        tq.setParameter("limit", msg.getLimit());
-        tq.setParameter("start", msg.getStart());
-
-        List<Object[]> ts = tq.getResultList();
+        Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
+        List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
 
-        for (Object[] t : ts) {
+        for (Object[] t : results) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
             element.setIp((String) t[0]);
@@ -391,30 +407,40 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     }
 
     private List<IpStatisticData> ipStatisticVm(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
-        String sql = "select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate " +
-                "from (select nic.vmInstanceUuid, ip from VmNicVO nic, AccountResourceRefVO ac " +
-                "where ac.accountUuid = :accUuid and nic.l3NetworkUuid = :l3Uuid and nic.uuid = ac.resourceUuid ";
+        /*
+        select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate
+        from (select nic.vmInstanceUuid, ip
+            from VmNicVO nic,
+                AccountResourceRefVO ac
+            where nic.l3NetworkUuid = '{l3Uuid}'
+                and nic.uuid = ac.resourceUuid
+                and ac.accountUuid = '{accUuid}'
+                [and ip like '%{ip}%']
+            order by {sortBy} {direction}
+            limit {limit} offset {start}) nic
+                left join (select uuid, name, state, type, createDate from VmInstanceVO) vm on nic.vmInstanceUuid = vm.uuid
+        order by {sortBy} {direction};
+         */
 
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate ")
+                .append("from (select nic.vmInstanceUuid, ip from VmNicVO nic, AccountResourceRefVO ac ")
+                .append("where ac.accountUuid = '").append(msg.getSession().getAccountUuid())
+                .append("' and nic.l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+                .append("' and nic.uuid = ac.resourceUuid ");
         if (msg.getIp() != null) {
-            sql += "and ip like '%" + msg.getIp() + "%' ";
+            sqlBuilder.append("and ip like '%").append(msg.getId()).append("%' ");
         }
+        sqlBuilder.append("order by ").append(sortBy).append(' ').append(msg.getSortDirection()).append(" limit ")
+                .append(msg.getLimit()).append(" offset ").append(msg.getStart()).append(") nic ").append("left join ")
+                .append("(select uuid, name, type, state, createDate from VmInstanceVO) vm on vm.uuid = nic.vmInstanceUuid ")
+                .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection());
 
-        sql += "order by :sortBy :direction limit :limit offset :start) nic " +
-                "left join " +
-                "(select uuid, name, type, state, createDate from VmInstanceVO) vm on vm.uuid = nic.vmInstanceUuid " +
-                "order by :sortBy :direction";
-        Query tq = dbf.getEntityManager().createNativeQuery(sql);
-        tq.setParameter("accUuid", msg.getSession().getAccountUuid());
-        tq.setParameter("l3Uuid", msg.getL3NetworkUuid());
-        tq.setParameter("sortBy", sortBy);
-        tq.setParameter("direction", msg.getSortDirection());
-        tq.setParameter("limit", msg.getLimit());
-        tq.setParameter("start", msg.getStart());
-
-        List<Object[]> ts = tq.getResultList();
+        Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
+        List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
 
-        for (Object[] t : ts) {
+        for (Object[] t : results) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
             element.setIp((String) t[0]);

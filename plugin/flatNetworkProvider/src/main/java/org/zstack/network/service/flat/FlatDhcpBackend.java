@@ -52,6 +52,7 @@ import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.IPv6NetworkUtils;
 import org.zstack.utils.network.NetworkUtils;
 
+import javax.persistence.Query;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.sql.Timestamp;
@@ -307,7 +308,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 "from (select uuid, ip, ipInLong from UsedIpVO where l3NetworkUuid = :l3Uuid ";
 
         if (msg.getIp() != null) {
-            sql += "and ip like '%:ip%'";
+            sql += "and ip like '%" + msg.getIp() + "%' ";
         }
 
         sql += "order by :sortBy :direction limit :limit offset :start) uip " +
@@ -319,28 +320,24 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 "(select i.uuid, i.name from VmInstanceVO i) it on it.uuid = nic.vmInstanceUuid " +
                 "order by :sortBy :direction";
 
-        TypedQuery<Tuple> tq = dbf.getEntityManager().createQuery(sql, Tuple.class);
+        Query tq = dbf.getEntityManager().createNativeQuery(sql);
         tq.setParameter("l3Uuid", msg.getL3NetworkUuid());
         tq.setParameter("sortBy", sortBy);
         tq.setParameter("direction", msg.getSortDirection());
         tq.setParameter("limit", msg.getLimit());
         tq.setParameter("start", msg.getStart());
 
-        if (msg.getIp() != null) {
-            tq.setParameter("ip", msg.getIp());
-        }
-
-        List<Tuple> ts = tq.getResultList();
+        List<Object[]> ts = tq.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
 
-        for (Tuple tuple : ts) {
+        for (Object[] t : ts) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
-            element.setIp(tuple.get(0, String.class));
-            element.setVipUuid(tuple.get(1, String.class));
-            element.setVipName(tuple.get(2, String.class));
-            element.setVmInstanceUuid(tuple.get(3, String.class));
-            element.setVmInstanceName(tuple.get(4, String.class));
+            element.setIp((String) t[0]);
+            element.setVipUuid((String) t[1]);
+            element.setVipName((String) t[2]);
+            element.setVmInstanceUuid((String) t[3]);
+            element.setVmInstanceName((String) t[4]);
             List<String> resourceTypes = new ArrayList<>();
             element.setResourceTypes(resourceTypes);
             if (element.getVipUuid() != null) {
@@ -361,11 +358,13 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         String sql = "select ip, uuid, name, state, useFor, vip.createDate " +
                 "from VipVO vip, AccountResourceRefVO ac " +
                 "where ac.accountUuid = :accUuid and vip.l3NetworkUuid = :l3Uuid and vip.uuid = ac.resourceUuid ";
+
         if (msg.getIp() != null) {
-            sql += "and ip like '%:ip%'";
+            sql += "and ip like '%" + msg.getIp() + "%' ";
         }
+
         sql += "order by :sortBy :direction limit :limit offset :start";
-        TypedQuery<Tuple> tq = dbf.getEntityManager().createQuery(sql, Tuple.class);
+        Query tq = dbf.getEntityManager().createNativeQuery(sql);
         tq.setParameter("accUuid", msg.getSession().getAccountUuid());
         tq.setParameter("l3Uuid", msg.getL3NetworkUuid());
         tq.setParameter("sortBy", sortBy);
@@ -373,22 +372,18 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         tq.setParameter("limit", msg.getLimit());
         tq.setParameter("start", msg.getStart());
 
-        if (msg.getIp() != null) {
-            tq.setParameter("ip", msg.getIp());
-        }
-
-        List<Tuple> ts = tq.getResultList();
+        List<Object[]> ts = tq.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
 
-        for (Tuple tuple : ts) {
+        for (Object[] t : ts) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
-            element.setIp(tuple.get(0, String.class));
-            element.setVipUuid(tuple.get(1, String.class));
-            element.setVipName(tuple.get(2, String.class));
-            element.setState(tuple.get(3, String.class));
-            element.setUseFor(tuple.get(4, String.class));
-            element.setCreateDate(tuple.get(5, Timestamp.class));
+            element.setIp((String) t[0]);
+            element.setVipUuid((String) t[1]);
+            element.setVipName((String) t[2]);
+            element.setState((String) t[3]);
+            element.setUseFor((String) t[4]);
+            element.setCreateDate((Timestamp) t[5]);
             element.setResourceTypes(Collections.singletonList(ResourceType.VIP));
         }
 
@@ -401,14 +396,14 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 "where ac.accountUuid = :accUuid and nic.l3NetworkUuid = :l3Uuid and nic.uuid = ac.resourceUuid ";
 
         if (msg.getIp() != null) {
-            sql += "and ip like '%:ip%'";
+            sql += "and ip like '%" + msg.getIp() + "%' ";
         }
 
         sql += "order by :sortBy :direction limit :limit offset :start) nic " +
                 "left join " +
                 "(select uuid, name, type, state, createDate from VmInstanceVO) vm on vm.uuid = nic.vmInstanceUuid " +
                 "order by :sortBy :direction";
-        TypedQuery<Tuple> tq = dbf.getEntityManager().createQuery(sql, Tuple.class);
+        Query tq = dbf.getEntityManager().createNativeQuery(sql);
         tq.setParameter("accUuid", msg.getSession().getAccountUuid());
         tq.setParameter("l3Uuid", msg.getL3NetworkUuid());
         tq.setParameter("sortBy", sortBy);
@@ -416,22 +411,18 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         tq.setParameter("limit", msg.getLimit());
         tq.setParameter("start", msg.getStart());
 
-        if (msg.getIp() != null) {
-            tq.setParameter("ip", msg.getIp());
-        }
-
-        List<Tuple> ts = tq.getResultList();
+        List<Object[]> ts = tq.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
 
-        for (Tuple tuple : ts) {
+        for (Object[] t : ts) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
-            element.setIp(tuple.get(0, String.class));
-            element.setVmInstanceUuid(tuple.get(1, String.class));
-            element.setVmInstanceName(tuple.get(2, String.class));
-            element.setVmInstanceType(tuple.get(3, String.class));
-            element.setState(tuple.get(4, String.class));
-            element.setCreateDate(tuple.get(5, Timestamp.class));
+            element.setIp((String) t[0]);
+            element.setVmInstanceUuid((String) t[1]);
+            element.setVmInstanceName((String) t[2]);
+            element.setVmInstanceType((String) t[3]);
+            element.setState((String) t[4]);
+            element.setCreateDate((Timestamp) t[5]);
             element.setResourceTypes(Collections.singletonList(ResourceType.VM));
         }
 

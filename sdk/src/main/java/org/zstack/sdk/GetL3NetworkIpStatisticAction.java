@@ -29,16 +29,16 @@ public class GetL3NetworkIpStatisticAction extends AbstractAction {
     public java.lang.String l3NetworkUuid;
 
     @Param(required = false, validValues = {"All","Vip","VM"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String resourceType;
+    public java.lang.String resourceType = "All";
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String ip;
 
     @Param(required = false, validValues = {"Ip","CreateDate"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String sortBy;
+    public java.lang.String sortBy = "Ip";
 
     @Param(required = false, validValues = {"asc","desc"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String sortDirection;
+    public java.lang.String sortDirection = "asc";
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,2147483647L}, noTrim = false)
     public java.lang.Integer start = 0;

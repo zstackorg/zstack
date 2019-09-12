@@ -36,11 +36,13 @@ import org.zstack.header.network.l3.*;
 import org.zstack.header.network.service.*;
 import org.zstack.header.vm.*;
 import org.zstack.header.vm.VmAbnormalLifeCycleStruct.VmAbnormalLifeCycleOperation;
+import org.zstack.identity.AccountManager;
 import org.zstack.kvm.*;
 import org.zstack.kvm.KvmCommandSender.SteppingSendCallback;
 import org.zstack.network.service.MtuGetter;
 import org.zstack.network.service.NetworkProviderFinder;
 import org.zstack.network.service.NetworkServiceProviderLookup;
+import org.zstack.network.service.vip.VipVO;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
@@ -83,6 +85,8 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     private ThreadFacade thdf;
     @Autowired
     private PluginRegistry pluginRgty;
+    @Autowired
+    private AccountManager acntMgr;
 
     public static final String APPLY_DHCP_PATH = "/flatnetworkprovider/dhcp/apply";
     public static final String PREPARE_DHCP_PATH = "/flatnetworkprovider/dhcp/prepare";
@@ -339,20 +343,41 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
 
-        for (Object[] t : results) {
+        boolean isAdmin = acntMgr.isAdmin(msg.getSession());
+
+        Set<String> ownedVms = new HashSet<>();
+        Set<String> ownedVips = new HashSet<>();
+        if (!isAdmin) {
+            ownedVms.addAll(acntMgr.getResourceUuidsCanAccessByAccount(msg.getSession().getAccountUuid(), VmInstanceVO.class));
+            ownedVips.addAll(acntMgr.getResourceUuidsCanAccessByAccount(msg.getSession().getAccountUuid(), VipVO.class));
+        }
+
+        for (Object[] result : results) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
-            element.setIp((String) t[0]);
-            element.setVipUuid((String) t[1]);
-            element.setVipName((String) t[2]);
-            element.setVmInstanceUuid((String) t[3]);
-            element.setVmInstanceName((String) t[4]);
+            element.setIp((String) result[0]);
+            if (isAdmin) {
+                element.setVipUuid((String) result[1]);
+                element.setVipName((String) result[2]);
+                element.setVmInstanceUuid((String) result[3]);
+                element.setVmInstanceName((String) result[4]);
+            } else {
+                if (result[1] != null && ownedVips.contains(result[1])) {
+                    element.setVipUuid((String) result[1]);
+                    element.setVipName((String) result[2]);
+                }
+                if (result[3] != null && ownedVms.contains(result[3])) {
+                    element.setVmInstanceUuid((String) result[3]);
+                    element.setVmInstanceName((String) result[4]);
+                }
+            }
+
             List<String> resourceTypes = new ArrayList<>();
             element.setResourceTypes(resourceTypes);
-            if (element.getVipUuid() != null) {
+            if (result[1] != null) {
                 resourceTypes.add(ResourceType.VIP);
             }
-            if (element.getVmInstanceUuid() != null) {
+            if (result[3] != null) {
                 resourceTypes.add(ResourceType.VM);
             }
             if (resourceTypes.size() == 0) {
@@ -391,15 +416,15 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
 
-        for (Object[] t : results) {
+        for (Object[] result : results) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
-            element.setIp((String) t[0]);
-            element.setVipUuid((String) t[1]);
-            element.setVipName((String) t[2]);
-            element.setState((String) t[3]);
-            element.setUseFor((String) t[4]);
-            element.setCreateDate((Timestamp) t[5]);
+            element.setIp((String) result[0]);
+            element.setVipUuid((String) result[1]);
+            element.setVipName((String) result[2]);
+            element.setState((String) result[3]);
+            element.setUseFor((String) result[4]);
+            element.setCreateDate((Timestamp) result[5]);
             element.setResourceTypes(Collections.singletonList(ResourceType.VIP));
         }
 
@@ -440,15 +465,15 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
 
-        for (Object[] t : results) {
+        for (Object[] result : results) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
-            element.setIp((String) t[0]);
-            element.setVmInstanceUuid((String) t[1]);
-            element.setVmInstanceName((String) t[2]);
-            element.setVmInstanceType((String) t[3]);
-            element.setState((String) t[4]);
-            element.setCreateDate((Timestamp) t[5]);
+            element.setIp((String) result[0]);
+            element.setVmInstanceUuid((String) result[1]);
+            element.setVmInstanceName((String) result[2]);
+            element.setVmInstanceType((String) result[3]);
+            element.setState((String) result[4]);
+            element.setCreateDate((Timestamp) result[5]);
             element.setResourceTypes(Collections.singletonList(ResourceType.VM));
         }
 

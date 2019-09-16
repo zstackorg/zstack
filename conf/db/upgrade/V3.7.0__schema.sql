@@ -48,3 +48,5 @@ DELIMITER ;
 
 CALL upgradeEmailAddressFromEndpoint();
 DROP PROCEDURE IF EXISTS upgradeEmailAddressFromEndpoint;
+
+UPDATE zstack.SNSEmailEndpointVO SET email = NULL;

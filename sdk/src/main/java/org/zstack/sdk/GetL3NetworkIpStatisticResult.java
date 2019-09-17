@@ -11,12 +11,12 @@ public class GetL3NetworkIpStatisticResult {
         return this.ipStatistics;
     }
 
-    public java.lang.Integer count;
-    public void setCount(java.lang.Integer count) {
-        this.count = count;
+    public java.lang.Long total;
+    public void setTotal(java.lang.Long total) {
+        this.total = total;
     }
-    public java.lang.Integer getCount() {
-        return this.count;
+    public java.lang.Long getTotal() {
+        return this.total;
     }
 
 }

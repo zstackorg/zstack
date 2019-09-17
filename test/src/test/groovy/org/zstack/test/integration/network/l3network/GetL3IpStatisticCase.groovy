@@ -73,7 +73,7 @@ class GetL3IpStatisticCase extends SubCase {
 
         List<VmInstanceInventory> vms = new ArrayList<>()
 
-        if (NetworkUtils.ipv4StringToLong(vm1.getVmNics().first().ip) < NetworkUtils.ipv4StringToLong(vm2.getVmNics().first().ip)) {
+        if (NetworkUtils.ipv4StringToLong(vm1.vmNics.first().ip) < NetworkUtils.ipv4StringToLong(vm2.vmNics.first().ip)) {
             vms.add(vm1)
             vms.add(vm2)
         } else {
@@ -111,7 +111,11 @@ class GetL3IpStatisticCase extends SubCase {
         IpData = res.ipStatistics
 
         assert IpData.first().vmInstanceUuid == vms.first().uuid
+        assert IpData.first().ownerName == "admin"
+        assert IpData.first().vmDefaultIp == vms.first().vmNics.first().ip
         assert IpData.get(1).vmInstanceUuid == vms.get(1).uuid
+        assert IpData.get(1).ownerName == "admin"
+        assert IpData.get(1).vmDefaultIp == vms.get(1).vmNics.first().ip
 
         res = getL3NetworkIpStatistic {
             l3NetworkUuid = l3Net.uuid

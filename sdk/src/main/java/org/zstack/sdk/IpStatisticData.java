@@ -52,6 +52,14 @@ public class IpStatisticData  {
         return this.vmInstanceType;
     }
 
+    public java.lang.String vmDefaultIp;
+    public void setVmDefaultIp(java.lang.String vmDefaultIp) {
+        this.vmDefaultIp = vmDefaultIp;
+    }
+    public java.lang.String getVmDefaultIp() {
+        return this.vmDefaultIp;
+    }
+
     public java.util.List resourceTypes;
     public void setResourceTypes(java.util.List resourceTypes) {
         this.resourceTypes = resourceTypes;

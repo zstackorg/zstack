@@ -13,6 +13,7 @@ public class IpStatisticData {
     private String vmInstanceUuid;
     private String vmInstanceName;
     private String vmInstanceType;
+    private String vmDefaultIp;
     private List<String> resourceTypes;
     private String state;
     private String useFor;
@@ -105,5 +106,13 @@ public class IpStatisticData {
 
     public void setOwnerName(String ownerName) {
         this.ownerName = ownerName;
+    }
+
+    public String getVmDefaultIp() {
+        return vmDefaultIp;
+    }
+
+    public void setVmDefaultIp(String vmDefaultIp) {
+        this.vmDefaultIp = vmDefaultIp;
     }
 }

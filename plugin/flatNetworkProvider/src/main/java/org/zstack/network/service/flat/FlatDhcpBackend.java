@@ -486,34 +486,66 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         order by {sortBy} {direction};
          */
 
+        String accUuid = msg.getSession().getAccountUuid();
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate ")
-                .append("from (select nic.vmInstanceUuid, ip from VmNicVO nic, AccountResourceRefVO ac ")
-                .append("where ac.accountUuid = '").append(msg.getSession().getAccountUuid())
-                .append("' and nic.l3NetworkUuid = '").append(msg.getL3NetworkUuid())
-                .append("' and nic.uuid = ac.resourceUuid ");
-        if (msg.getIp() != null) {
-            sqlBuilder.append("and ip like '%").append(msg.getId()).append("%' ");
+        sqlBuilder.append("select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate, ac.name as ownerName ")
+                .append("from (select uuid, vmInstanceUuid, ip from VmNicVO ")
+                .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+                .append('\'');
+        if (StringUtils.isNotEmpty(msg.getIp())) {
+            sqlBuilder.append(" and ip like '%").append(msg.getId()).append("%' ");
         }
-        sqlBuilder.append("order by ").append(sortBy).append(' ').append(msg.getSortDirection()).append(" limit ")
-                .append(msg.getLimit()).append(" offset ").append(msg.getStart()).append(") nic ").append("left join ")
-                .append("(select uuid, name, type, state, createDate from VmInstanceVO) vm on vm.uuid = nic.vmInstanceUuid ")
-                .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection());
+        sqlBuilder.append(") nic ").append("left join (select resourceUuid, ownerAccountUuid ")
+                .append("from AccountResourceRefVO where accountUuid = '").append(accUuid)
+                .append("' and resourceType = 'VmNicVO') ar ").append("on nic.uuid = ar.resourceUuid ")
+                .append("left join (select uuid, name from AccountVO where uuid = '").append(accUuid)
+                .append("') ac on ac.uuid = ar.ownerAccountUuid ")
+                .append("left join (select uuid, name, createDate, state, type from VmInstanceVO) vm ")
+                .append("on vm.uuid = nic.vmInstanceUuid ")
+                .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection()).append(" limit ")
+                .append(msg.getLimit()).append(" offset ").append(msg.getStart());
 
         Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
         List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
+        List<String> vmUuids = new ArrayList<>();
 
         for (Object[] result : results) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
             element.setIp((String) result[0]);
             element.setVmInstanceUuid((String) result[1]);
+            vmUuids.add((String) result[1]);
             element.setVmInstanceName((String) result[2]);
             element.setVmInstanceType((String) result[3]);
             element.setState((String) result[4]);
             element.setCreateDate((Timestamp) result[5]);
+            element.setOwnerName((String) result[6]);
             element.setResourceTypes(Collections.singletonList(ResourceType.VM));
+        }
+
+        List<VmInstanceVO> vms = Q.New(VmInstanceVO.class).in(VmInstanceVO_.uuid, vmUuids).list();
+        Map<String, VmInstanceVO> vmvos = vms.stream()
+                .collect(Collectors.toMap(VmInstanceVO::getUuid, inv -> inv));
+        for (IpStatisticData element : ipStatistics) {
+            VmInstanceVO vmvo = vmvos.get(element.getVmInstanceUuid());
+            if (vmvo == null) {
+                continue;
+            }
+            List<VmNicVO> nics = vmvo.getVmNics().stream()
+                    .filter(vmNic -> vmNic.getL3NetworkUuid().equals(vmvo.getDefaultL3NetworkUuid()))
+                    .collect(Collectors.toList());
+            VmNicVO nic;
+
+            if (nics.size() == 1) {
+                nic = nics.get(0);
+            } else if (nics.size() > 1) {
+                nic = VmNicVO.findTheEarliestOne(nics);
+            } else {
+                continue;
+            }
+
+            element.setVmDefaultIp(nic.getIp());
         }
 
         return ipStatistics;

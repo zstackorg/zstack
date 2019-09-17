@@ -1,5 +1,6 @@
 package org.zstack.network.service.flat;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.vm.StaticIpOperator;
@@ -9,10 +10,7 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.MessageSafe;
 import org.zstack.core.componentloader.PluginRegistry;
-import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.GLock;
-import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
+import org.zstack.core.db.*;
 import org.zstack.core.defer.Defer;
 import org.zstack.core.defer.Deferred;
 import org.zstack.core.thread.SyncTask;
@@ -269,7 +267,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         List<IpStatisticData> ipStatistics = doStatistic(msg);
         reply.setIpStatistics(ipStatistics);
         if (msg.isReplyWithCount()) {
-            reply.setCount(ipStatistics.size());
+            reply.setTotal(countResource(msg));
         }
         bus.reply(msg, reply);
     }
@@ -295,21 +293,41 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
         List<IpStatisticData> res = null;
 
-        if (msg.getResourceType().equals(ResourceType.ALL)) {
-            res = ipStatisticAll(msg, orderExpr);
-        } else if (msg.getResourceType().equals(ResourceType.VIP)) {
-            res = ipStatisticVip(msg, orderExpr);
-        } else if (msg.getResourceType().equals(ResourceType.VM)) {
-            res = ipStatisticVm(msg, orderExpr);
+        switch (msg.getResourceType()) {
+            case ResourceType.ALL:
+                res = ipStatisticAll(msg, orderExpr);
+                break;
+            case ResourceType.VIP:
+                res = ipStatisticVip(msg, orderExpr);
+                break;
+            case ResourceType.VM:
+                res = ipStatisticVm(msg, orderExpr);
+                break;
         }
 
         return res != null ? res : new ArrayList<>();
     }
 
+    private Long countResource(APIGetL3NetworkIpStatisticMsg msg) {
+        Long res = null;
+        switch (msg.getResourceType()) {
+            case ResourceType.ALL:
+                res = countUsedIp(msg);
+                break;
+            case ResourceType.VIP:
+                res = countVip(msg);
+                break;
+            case ResourceType.VM:
+                res = countVMNicIp(msg);
+                break;
+        }
+        return res;
+    }
+
     private List<IpStatisticData> ipStatisticAll(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
-        select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName
-        from (select uuid, ip, IpInLong
+        select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, uip.createDate
+        from (select uuid, ip, IpInLong, createDate
             from UsedIpVO
             where l3NetworkUuid = '{uuid}' [and ip like '%{ip}%']
             order by {sortBy} {direction}
@@ -321,11 +339,11 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
          */
 
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName ")
-                .append("from (select uuid, ip, ipInLong from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+        sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, uip.createDate ")
+                .append("from (select uuid, ip, ipInLong, createDate from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append("' ");
 
-        if (msg.getIp() != null) {
+        if (StringUtils.isNotEmpty(msg.getIp())) {
             sqlBuilder.append("and ip like '%").append(msg.getIp()).append("%' ");
         }
 
@@ -388,6 +406,14 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         return ipStatistics;
     }
 
+    private Long countUsedIp(APIGetL3NetworkIpStatisticMsg msg) {
+        Q q = Q.New(UsedIpVO.class).eq(UsedIpVO_.l3NetworkUuid, msg.getL3NetworkUuid());
+        if (StringUtils.isNotEmpty(msg.getIp())) {
+            q.like(UsedIpVO_.ip, msg.getIp());
+        }
+        return q.count();
+    }
+
     private List<IpStatisticData> ipStatisticVip(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
         select ip, uuid, name, state, useFor, vip.createDate
@@ -406,7 +432,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 .append("where ac.accountUuid = '").append(msg.getSession().getAccountUuid())
                 .append("' and vip.l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append("' and vip.uuid = ac.resourceUuid ");
-        if (msg.getIp() != null) {
+        if (StringUtils.isNotEmpty(msg.getIp())) {
             sqlBuilder.append("and ip like '%").append(msg.getIp()).append("%' ");
         }
         sqlBuilder.append("order by ").append(sortBy).append(' ').append(msg.getSortDirection())
@@ -429,6 +455,14 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         }
 
         return ipStatistics;
+    }
+
+    private Long countVip(APIGetL3NetworkIpStatisticMsg msg) {
+        return SQL.New("select count(*) from VipVO v, AccountResourceRefVO a" +
+                " where a.accountUuid = :accUuid" +
+                " and v.uuid = a.resourceUuid", Long.class)
+                .param("accUuid", msg.getSession().getAccountUuid())
+                .find();
     }
 
     private List<IpStatisticData> ipStatisticVm(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
@@ -478,6 +512,14 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         }
 
         return ipStatistics;
+    }
+
+    private Long countVMNicIp(APIGetL3NetworkIpStatisticMsg msg) {
+        return SQL.New("select count(*) from VmNicVO n, AccountResourceRefVO a " +
+                "where a.accountUuid = :accUuid " +
+                "and n.uuid = a.resourceUuid", Long.class)
+                .param("accUuid", msg.getSession().getAccountUuid())
+                .find();
     }
 
     private void handleLocalMessage(Message msg) {

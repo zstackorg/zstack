@@ -13,7 +13,7 @@ import java.util.List;
 public class APIGetL3NetworkIpStatisticReply extends APIReply {
     private List<IpStatisticData> ipStatistics;
 
-    private Integer count;
+    private Long total;
 
     public static APIGetL3NetworkIpStatisticReply __example__() {
         APIGetL3NetworkIpStatisticReply reply = new APIGetL3NetworkIpStatisticReply();
@@ -21,7 +21,7 @@ public class APIGetL3NetworkIpStatisticReply extends APIReply {
         data.setIp("192.168.0.1");
         data.setResourceTypes(Collections.singletonList(IpStatisticConstants.ResourceType.OTHER));
         reply.setIpStatistics(Collections.singletonList(data));
-        reply.setCount(1);
+        reply.setTotal(1L);
         return reply;
     }
 
@@ -33,11 +33,11 @@ public class APIGetL3NetworkIpStatisticReply extends APIReply {
         this.ipStatistics = ipStatistics;
     }
 
-    public Integer getCount() {
-        return count;
+    public Long getTotal() {
+        return total;
     }
 
-    public void setCount(Integer count) {
-        this.count = count;
+    public void setTotal(Long total) {
+        this.total = total;
     }
 }

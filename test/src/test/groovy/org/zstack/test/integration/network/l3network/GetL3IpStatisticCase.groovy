@@ -86,7 +86,7 @@ class GetL3IpStatisticCase extends SubCase {
             replyWithCount = true
         }
 
-        assert res.count == 4
+        assert res.total == 4
 
         List<IpStatisticData> IpData = res.ipStatistics
 
@@ -106,7 +106,7 @@ class GetL3IpStatisticCase extends SubCase {
             replyWithCount = true
         }
 
-        assert res.count == 2
+        assert res.total == 2
 
         IpData = res.ipStatistics
 
@@ -119,7 +119,7 @@ class GetL3IpStatisticCase extends SubCase {
             replyWithCount = true
         }
 
-        assert res.count == 2
+        assert res.total == 2
 
         IpData = res.ipStatistics
 

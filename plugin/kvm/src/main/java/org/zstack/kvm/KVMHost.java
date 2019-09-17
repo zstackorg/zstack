@@ -3157,6 +3157,8 @@ public class KVMHost extends HostBase implements Host {
                         UpdateHostOSCmd cmd = new UpdateHostOSCmd();
                         cmd.hostUuid = self.getUuid();
                         cmd.excludePackages = msg.getExcludePackages();
+                        cmd.updatePackages = msg.getUpdatePackages();
+                        cmd.releaseVersion = msg.getReleaseVersion();
                         cmd.enableExpRepo = msg.isEnableExperimentalRepo();
 
                         new Http<>(updateHostOSPath, cmd, UpdateHostOSRsp.class)

@@ -84,4 +84,12 @@ public class IpStatisticData  {
         return this.createDate;
     }
 
+    public java.lang.String ownerName;
+    public void setOwnerName(java.lang.String ownerName) {
+        this.ownerName = ownerName;
+    }
+    public java.lang.String getOwnerName() {
+        return this.ownerName;
+    }
+
 }

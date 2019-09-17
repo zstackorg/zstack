@@ -124,6 +124,8 @@ class GetL3IpStatisticCase extends SubCase {
         IpData = res.ipStatistics
 
         assert IpData.first().vipName == "vip-1"
+        assert IpData.first().ownerName == "admin"
         assert IpData.get(1).vipName == "vip-2"
+        assert IpData.get(1).ownerName == "admin"
     }
 }

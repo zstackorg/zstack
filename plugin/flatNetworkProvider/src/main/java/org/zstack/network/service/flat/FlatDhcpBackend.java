@@ -426,16 +426,20 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         order by {sortBy} {direction}
         limit {limit} offset {start};
          */
-
+        String accUuid = msg.getSession().getAccountUuid();
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select ip, uuid, name, state, useFor, vip.createDate from VipVO vip, AccountResourceRefVO ac ")
-                .append("where ac.accountUuid = '").append(msg.getSession().getAccountUuid())
-                .append("' and vip.l3NetworkUuid = '").append(msg.getL3NetworkUuid())
-                .append("' and vip.uuid = ac.resourceUuid ");
+        sqlBuilder.append("select ip, vip.uuid, vip.name as vipName, state, useFor, vip.createDate, ac.name as ownerName ")
+                .append("from (select ip, uuid, name, state, useFor, createDate ")
+                .append("from VipVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid()).append('\'');
         if (StringUtils.isNotEmpty(msg.getIp())) {
-            sqlBuilder.append("and ip like '%").append(msg.getIp()).append("%' ");
+            sqlBuilder.append(" and ip like '%").append(msg.getIp()).append("%'");
         }
-        sqlBuilder.append("order by ").append(sortBy).append(' ').append(msg.getSortDirection())
+        sqlBuilder.append(") vip ").append("left join (select resourceUuid, ownerAccountUuid ")
+                .append("from AccountResourceRefVO where accountUuid = '").append(accUuid)
+                .append("' and resourceType = 'VipVO') ar on vip.uuid = ar.resourceUuid ")
+                .append("left join (select uuid, name from AccountVO where uuid = '").append(accUuid).append("') ac ")
+                .append("on ar.ownerAccountUuid = ac.uuid ")
+                .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection())
                 .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart());
 
         Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
@@ -451,6 +455,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             element.setState((String) result[3]);
             element.setUseFor((String) result[4]);
             element.setCreateDate((Timestamp) result[5]);
+            element.setOwnerName((String) result[6]);
             element.setResourceTypes(Collections.singletonList(ResourceType.VIP));
         }
 

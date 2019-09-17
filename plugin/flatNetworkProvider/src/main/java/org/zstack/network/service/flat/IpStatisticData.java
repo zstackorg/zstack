@@ -17,6 +17,7 @@ public class IpStatisticData {
     private String state;
     private String useFor;
     private Timestamp createDate;
+    private String ownerName;
 
     public String getIp() {
         return ip;
@@ -96,5 +97,13 @@ public class IpStatisticData {
 
     public void setCreateDate(Timestamp createDate) {
         this.createDate = createDate;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
     }
 }

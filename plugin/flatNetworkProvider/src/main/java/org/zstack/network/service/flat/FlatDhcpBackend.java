@@ -332,9 +332,11 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             where l3NetworkUuid = '{uuid}' [and ip like '%{ip}%']
             order by {sortBy} {direction}
             limit {limit} offset {start}) uip
-                left join (select v.uuid, v.name, v.usedIpUuid from VipVO v) vip on uip.uuid = vip.usedIpUuid
-                left join (select n.uuid, n.usedIpUuid, n.vmInstanceUuid from VmNicVO n) nic on nic.usedIpUuid = uip.uuid
-                left join (select i.uuid, i.name from VmInstanceVO i) it on nic.vmInstanceUuid = it.uuid
+                left join (select uuid, name, usedIpUuid from VipVO
+                    where l3NetworkUuid = '{l3Uuid}') vip on uip.uuid = vip.usedIpUuid
+                left join (select uuid, usedIpUuid, vmInstanceUuid from VmNicVO
+                    where l3NetworkUuid = '{l3Uuid}') nic on nic.usedIpUuid = uip.uuid
+                left join (select uuid, name from VmInstanceVO) it on nic.vmInstanceUuid = it.uuid
         order by {sortBy} {direction};
          */
 
@@ -350,11 +352,15 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         sqlBuilder.append("order by ").append(sortBy).append(' ').append(msg.getSortDirection()).append(" limit ")
                 .append(msg.getLimit()).append(" offset ").append(msg.getStart()).append(") uip ")
                 .append("left join ")
-                .append("(select v.uuid, v.name, v.usedIpUuid from VipVO v) vip on uip.uuid = vip.usedIpUuid ")
+                .append("(select uuid, name, usedIpUuid from VipVO ")
+                .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+                .append("') vip on uip.uuid = vip.usedIpUuid ")
                 .append("left join ")
-                .append("(select n.uuid, n.usedIpUuid, n.vmInstanceUuid from VmNicVO n) nic on nic.usedIpUuid = uip.uuid ")
+                .append("(select uuid, usedIpUuid, vmInstanceUuid from VmNicVO ")
+                .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+                .append("') nic on nic.usedIpUuid = uip.uuid ")
                 .append("left join ")
-                .append("(select i.uuid, i.name from VmInstanceVO i) it on it.uuid = nic.vmInstanceUuid ")
+                .append("(select uuid, name from VmInstanceVO) it on it.uuid = nic.vmInstanceUuid ")
                 .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection());
 
         Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
@@ -416,13 +422,18 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
     private List<IpStatisticData> ipStatisticVip(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
-        select ip, uuid, name, state, useFor, vip.createDate
-        from VipVO vip,
-            AccountResourceRefVO ac
-        where vip.l3NetworkUuid = '{l3Uuid}'
-            and vip.uuid = ac.resourceUuid
-            and ac.accountUuid = '{accUuid}'
-            [and ip like '%{ip}%']
+        select ip, vip.uuid, vip.name, state, useFor, vip.createDate, ac.name as ownerName
+        from (select ip, uuid, name, state, useFor, createDate
+            from VipVO
+            where l3NetworkUuid = '{l3Uuid}'
+                and ip like '%{ip}%') vip
+            left join (select resourceUuid, ownerAccountUuid
+                    from AccountResourceRefVO
+                    where accountUuid = '{accUuid}'
+                      and resourceType = 'VipVO') ar
+                   on vip.uuid = ar.resourceUuid
+            left join (select uuid, name from AccountVO where uuid = '{accUuid}') ac
+                   on ar.ownerAccountUuid = ac.uuid
         order by {sortBy} {direction}
         limit {limit} offset {start};
          */
@@ -472,18 +483,21 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
     private List<IpStatisticData> ipStatisticVm(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
-        select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate
-        from (select nic.vmInstanceUuid, ip
-            from VmNicVO nic,
-                AccountResourceRefVO ac
-            where nic.l3NetworkUuid = '{l3Uuid}'
-                and nic.uuid = ac.resourceUuid
-                and ac.accountUuid = '{accUuid}'
-                [and ip like '%{ip}%']
+        select ip, vm.uuid, vm.name, vm.state, vm.type, vm.createDate, ac.name as ownerName
+        from (select uuid, vmInstanceUuid, ip
+                from VmNicVO
+                where l3NetworkUuid = '{l3Uuid}') nic
+                left join (select resourceUuid, ownerAccountUuid
+                          from AccountResourceRefVO
+                          where accountUuid = '{accUuid}'
+                            and resourceType = 'VmNicVO') ar
+                         on nic.uuid = ar.resourceUuid
+                left join (select uuid, name from AccountVO where uuid = '{accUuid}') ac
+                         on ac.uuid = ar.ownerAccountUuid
+                left join (select uuid, name, createDate, state, type from VmInstanceVO) vm
+                         on vm.uuid = nic.vmInstanceUuid
             order by {sortBy} {direction}
-            limit {limit} offset {start}) nic
-                left join (select uuid, name, state, type, createDate from VmInstanceVO) vm on nic.vmInstanceUuid = vm.uuid
-        order by {sortBy} {direction};
+            limit {limit} offset {start};
          */
 
         String accUuid = msg.getSession().getAccountUuid();

@@ -329,7 +329,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, uip.createDate
         from (select uuid, ip, IpInLong, createDate
             from UsedIpVO
-            where l3NetworkUuid = '{uuid}' [and ip like '%{ip}%']
+            where l3NetworkUuid = '{uuid}' [and ip like '{ip}']
             order by {sortBy} {direction}
             limit {limit} offset {start}) uip
                 left join (select uuid, name, usedIpUuid from VipVO
@@ -343,13 +343,13 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, uip.createDate ")
                 .append("from (select uuid, ip, ipInLong, createDate from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
-                .append("' ");
+                .append('\'');
 
         if (StringUtils.isNotEmpty(msg.getIp())) {
-            sqlBuilder.append("and ip like '%").append(msg.getIp()).append("%' ");
+            sqlBuilder.append(" and ip like '").append(msg.getIp()).append('\'');
         }
 
-        sqlBuilder.append("order by ").append(sortBy).append(' ').append(msg.getSortDirection()).append(" limit ")
+        sqlBuilder.append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection()).append(" limit ")
                 .append(msg.getLimit()).append(" offset ").append(msg.getStart()).append(") uip ")
                 .append("left join ")
                 .append("(select uuid, name, usedIpUuid from VipVO ")
@@ -413,11 +413,13 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     }
 
     private Long countUsedIp(APIGetL3NetworkIpStatisticMsg msg) {
-        Q q = Q.New(UsedIpVO.class).eq(UsedIpVO_.l3NetworkUuid, msg.getL3NetworkUuid());
+        String sql = "select count(*) from UsedIpVO where l3NetworkUuid = :l3Uuid";
         if (StringUtils.isNotEmpty(msg.getIp())) {
-            q.like(UsedIpVO_.ip, msg.getIp());
+            sql += " and ip like '" + msg.getIp() + '\'';
         }
-        return q.count();
+        return SQL.New(sql, Long.class)
+                .param("l3Uuid", msg.getL3NetworkUuid())
+                .find();
     }
 
     private List<IpStatisticData> ipStatisticVip(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
@@ -430,7 +432,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 and a.resourceType = 'VipVO'
                 and v.uuid = a.resourceUuid
                 [and a.accountUuid = '{accUuid}']
-                [and ip like '%{ip}%']
+                [and ip like '{ip}']
             order by {sortBy} {direction}
             limit {limit} offset {start}) vip
                 left join (select uuid, name from AccountVO) ac on ac.uuid = vip.accountUuid
@@ -444,7 +446,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 .append(msg.getL3NetworkUuid()).append('\'').append(" and a.resourceType = 'VipVO' ")
                 .append("and v.uuid = a.resourceUuid");
         if (StringUtils.isNotEmpty(msg.getIp())) {
-            sqlBuilder.append(" and ip like '%").append(msg.getIp()).append("%'");
+            sqlBuilder.append(" and ip like '").append(msg.getIp()).append('\'');
         }
         if (!acntMgr.isAdmin(msg.getSession())) {
             sqlBuilder.append(" and a.accountUuid = '").append(accUuid).append('\'');
@@ -479,7 +481,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         if (acntMgr.isAdmin(msg.getSession())) {
             String sql = "select count(*) from VipVO v where l3NetworkUuid = :l3Uuid";
             if (StringUtils.isNotEmpty(msg.getIp())) {
-                sql += " and ip like '%" + msg.getIp() + "%'";
+                sql += " and ip like '" + msg.getIp() + '\'';
             }
             return SQL.New(sql, Long.class)
                     .param("l3Uuid", msg.getL3NetworkUuid())
@@ -488,7 +490,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             String sql = "select count(*) from VipVO v, AccountResourceRefVO a where a.accountUuid = :accUuid " +
                     "and v.l3NetworkUuid = :l3Uuid and v.uuid = a.resourceUuid";
             if (StringUtils.isNotEmpty(msg.getIp())) {
-                sql += " and ip like '%" + msg.getIp() + "%'";
+                sql += " and ip like '" + msg.getIp() + '\'';
             }
             return SQL.New(sql, Long.class)
                     .param("accUuid", msg.getSession().getAccountUuid())
@@ -507,7 +509,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 and resourceType = 'VmNicVO'
                 and n.uuid = a.resourceUuid
                 [and ac.accountUuid = '{accUuid}']
-                [and ip like '%{ip}%']
+                [and ip like '{ip}']
             order by {sortBy} {direction}
             limit {limit} offset {start}) nic
                 left join (select uuid, name from AccountVO) ac on ac.uuid = nic.accountUuid
@@ -522,7 +524,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append('\'');
         if (StringUtils.isNotEmpty(msg.getIp())) {
-            sqlBuilder.append(" and ip like '%").append(msg.getId()).append("%' ");
+            sqlBuilder.append(" and ip like '").append(msg.getId()).append('\'');
         }
         sqlBuilder.append(") nic ").append("left join (select resourceUuid, ownerAccountUuid ")
                 .append("from AccountResourceRefVO where accountUuid = '").append(accUuid)
@@ -583,7 +585,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         if (acntMgr.isAdmin(msg.getSession())) {
             String sql = "select count(*) from VmNicVO where l3NetworkUuid = :l3Uuid";
             if (StringUtils.isNotEmpty(msg.getIp())) {
-                sql += " and ip like '%" + msg.getIp() + "%'";
+                sql += " and ip like '" + msg.getIp() + '\'';
             }
             return SQL.New(sql, Long.class)
                     .param("l3Uuid", msg.getL3NetworkUuid())
@@ -592,7 +594,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             String sql = "select count(*) from VmNicVO n, AccountResourceRefVO a " +
                     "where a.accountUuid = :accUuid and n.l3NetworkUuid = :l3Uuid and n.uuid = a.resourceUuid";
             if (StringUtils.isNotEmpty(msg.getIp())) {
-                sql += " and ip like '%" + msg.getIp() + "%'";
+                sql += " and ip like '" + msg.getIp() + '\'';
             }
             return SQL.New(sql, Long.class)
                     .param("accUuid", msg.getSession().getAccountUuid())

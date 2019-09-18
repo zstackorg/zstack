@@ -422,36 +422,38 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
     private List<IpStatisticData> ipStatisticVip(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
-        select ip, vip.uuid, vip.name, state, useFor, vip.createDate, ac.name as ownerName
-        from (select ip, uuid, name, state, useFor, createDate
-            from VipVO
-            where l3NetworkUuid = '{l3Uuid}'
-                and ip like '%{ip}%') vip
-            left join (select resourceUuid, ownerAccountUuid
-                    from AccountResourceRefVO
-                    where accountUuid = '{accUuid}'
-                      and resourceType = 'VipVO') ar
-                   on vip.uuid = ar.resourceUuid
-            left join (select uuid, name from AccountVO where uuid = '{accUuid}') ac
-                   on ar.ownerAccountUuid = ac.uuid
-        order by {sortBy} {direction}
-        limit {limit} offset {start};
+        select ip, vip.uuid, vip.name as vipName, state, useFor, vip.createDate, ac.name as ownerName
+        from (select ip, uuid, name, state, useFor, v.createDate, accountUuid
+            from VipVO v,
+                AccountResourceRefVO a
+            where v.l3NetworkUuid = '{l3Uuid}'
+                and a.resourceType = 'VipVO'
+                and v.uuid = a.resourceUuid
+                [and a.accountUuid = '{accUuid}']
+                [and ip like '%{ip}%']
+            order by {sortBy} {direction}
+            limit {limit} offset {start}) vip
+                left join (select uuid, name from AccountVO) ac on ac.uuid = vip.accountUuid
+            order by {sortBy} {direction};
          */
         String accUuid = msg.getSession().getAccountUuid();
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select ip, vip.uuid, vip.name as vipName, state, useFor, vip.createDate, ac.name as ownerName ")
-                .append("from (select ip, uuid, name, state, useFor, createDate ")
-                .append("from VipVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid()).append('\'');
+                .append("from (select ip, uuid, name, state, useFor, v.createDate, accountUuid ")
+                .append("from VipVO v, AccountResourceRefVO a where l3NetworkUuid = '")
+                .append(msg.getL3NetworkUuid()).append('\'').append(" and a.resourceType = 'VipVO' ")
+                .append("and v.uuid = a.resourceUuid");
         if (StringUtils.isNotEmpty(msg.getIp())) {
             sqlBuilder.append(" and ip like '%").append(msg.getIp()).append("%'");
         }
-        sqlBuilder.append(") vip ").append("left join (select resourceUuid, ownerAccountUuid ")
-                .append("from AccountResourceRefVO where accountUuid = '").append(accUuid)
-                .append("' and resourceType = 'VipVO') ar on vip.uuid = ar.resourceUuid ")
-                .append("left join (select uuid, name from AccountVO where uuid = '").append(accUuid).append("') ac ")
-                .append("on ar.ownerAccountUuid = ac.uuid ")
-                .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection())
-                .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart());
+        if (!acntMgr.isAdmin(msg.getSession())) {
+            sqlBuilder.append(" and a.accountUuid = '").append(accUuid).append('\'');
+        }
+        sqlBuilder.append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection())
+                .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart())
+                .append(") vip ")
+                .append("left join (select uuid, name from AccountVO) ac on ac.uuid = vip.accountUuid")
+                .append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection());
 
         Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
         List<Object[]> results = q.getResultList();
@@ -474,30 +476,43 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     }
 
     private Long countVip(APIGetL3NetworkIpStatisticMsg msg) {
-        return SQL.New("select count(*) from VipVO v, AccountResourceRefVO a" +
-                " where a.accountUuid = :accUuid" +
-                " and v.uuid = a.resourceUuid", Long.class)
-                .param("accUuid", msg.getSession().getAccountUuid())
-                .find();
+        if (acntMgr.isAdmin(msg.getSession())) {
+            String sql = "select count(*) from VipVO v where l3NetworkUuid = :l3Uuid";
+            if (StringUtils.isNotEmpty(msg.getIp())) {
+                sql += " and ip like '%" + msg.getIp() + "%'";
+            }
+            return SQL.New(sql, Long.class)
+                    .param("l3Uuid", msg.getL3NetworkUuid())
+                    .find();
+        } else {
+            String sql = "select count(*) from VipVO v, AccountResourceRefVO a where a.accountUuid = :accUuid " +
+                    "and v.l3NetworkUuid = :l3Uuid and v.uuid = a.resourceUuid";
+            if (StringUtils.isNotEmpty(msg.getIp())) {
+                sql += " and ip like '%" + msg.getIp() + "%'";
+            }
+            return SQL.New(sql, Long.class)
+                    .param("accUuid", msg.getSession().getAccountUuid())
+                    .param("l3Uuid", msg.getL3NetworkUuid())
+                    .find();
+        }
     }
 
     private List<IpStatisticData> ipStatisticVm(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
-        select ip, vm.uuid, vm.name, vm.state, vm.type, vm.createDate, ac.name as ownerName
-        from (select uuid, vmInstanceUuid, ip
-                from VmNicVO
-                where l3NetworkUuid = '{l3Uuid}') nic
-                left join (select resourceUuid, ownerAccountUuid
-                          from AccountResourceRefVO
-                          where accountUuid = '{accUuid}'
-                            and resourceType = 'VmNicVO') ar
-                         on nic.uuid = ar.resourceUuid
-                left join (select uuid, name from AccountVO where uuid = '{accUuid}') ac
-                         on ac.uuid = ar.ownerAccountUuid
-                left join (select uuid, name, createDate, state, type from VmInstanceVO) vm
-                         on vm.uuid = nic.vmInstanceUuid
+        select ip, vm.uuid, vm.name, vm.type, vm.state, vm.type, vm.createDate, ac.name as ownerName
+        from (select nic.vmInstanceUuid, ip, accountUuid
+            from VmNicVO n,
+                AccountResourceRefVO a
+            where l3NetworkUuid = '{l3Uuid}'
+                and resourceType = 'VmNicVO'
+                and n.uuid = a.resourceUuid
+                [and ac.accountUuid = '{accUuid}']
+                [and ip like '%{ip}%']
             order by {sortBy} {direction}
-            limit {limit} offset {start};
+            limit {limit} offset {start}) nic
+                left join (select uuid, name from AccountVO) ac on ac.uuid = nic.accountUuid
+                left join (select uuid, name, state, type, createDate from VmInstanceVO) vm on nic.vmInstanceUuid = vm.uuid
+            order by {sortBy} {direction};
          */
 
         String accUuid = msg.getSession().getAccountUuid();
@@ -515,9 +530,8 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 .append("left join (select uuid, name from AccountVO where uuid = '").append(accUuid)
                 .append("') ac on ac.uuid = ar.ownerAccountUuid ")
                 .append("left join (select uuid, name, createDate, state, type from VmInstanceVO) vm ")
-                .append("on vm.uuid = nic.vmInstanceUuid ")
-                .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection()).append(" limit ")
-                .append(msg.getLimit()).append(" offset ").append(msg.getStart());
+                .append("on vm.uuid = nic.vmInstanceUuid")
+                .append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection());
 
         Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
         List<Object[]> results = q.getResultList();
@@ -566,11 +580,25 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     }
 
     private Long countVMNicIp(APIGetL3NetworkIpStatisticMsg msg) {
-        return SQL.New("select count(*) from VmNicVO n, AccountResourceRefVO a " +
-                "where a.accountUuid = :accUuid " +
-                "and n.uuid = a.resourceUuid", Long.class)
-                .param("accUuid", msg.getSession().getAccountUuid())
-                .find();
+        if (acntMgr.isAdmin(msg.getSession())) {
+            String sql = "select count(*) from VmNicVO where l3NetworkUuid = :l3Uuid";
+            if (StringUtils.isNotEmpty(msg.getIp())) {
+                sql += " and ip like '%" + msg.getIp() + "%'";
+            }
+            return SQL.New(sql, Long.class)
+                    .param("l3Uuid", msg.getL3NetworkUuid())
+                    .find();
+        } else {
+            String sql = "select count(*) from VmNicVO n, AccountResourceRefVO a " +
+                    "where a.accountUuid = :accUuid and n.l3NetworkUuid = :l3Uuid and n.uuid = a.resourceUuid";
+            if (StringUtils.isNotEmpty(msg.getIp())) {
+                sql += " and ip like '%" + msg.getIp() + "%'";
+            }
+            return SQL.New(sql, Long.class)
+                    .param("accUuid", msg.getSession().getAccountUuid())
+                    .param("l3Uuid", msg.getL3NetworkUuid())
+                    .find();
+        }
     }
 
     private void handleLocalMessage(Message msg) {

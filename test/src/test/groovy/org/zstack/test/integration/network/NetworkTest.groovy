@@ -18,7 +18,6 @@ class NetworkTest extends Test {
         nfsPrimaryStorage()
         include("vip.xml")
         include("vxlan.xml")
-        include("flat.xml")
         eip()
         lb()
         portForwarding()

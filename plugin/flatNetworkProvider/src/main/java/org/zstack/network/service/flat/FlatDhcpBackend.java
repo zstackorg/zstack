@@ -502,13 +502,13 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     private List<IpStatisticData> ipStatisticVm(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
         select ip, vm.uuid, vm.name, vm.type, vm.state, vm.type, vm.createDate, ac.name as ownerName
-        from (select nic.vmInstanceUuid, ip, accountUuid
+        from (select n.vmInstanceUuid, ip, accountUuid
             from VmNicVO n,
                 AccountResourceRefVO a
             where l3NetworkUuid = '{l3Uuid}'
                 and resourceType = 'VmNicVO'
                 and n.uuid = a.resourceUuid
-                [and ac.accountUuid = '{accUuid}']
+                [and a.accountUuid = '{accUuid}']
                 [and ip like '{ip}']
             order by {sortBy} {direction}
             limit {limit} offset {start}) nic
@@ -520,17 +520,20 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         String accUuid = msg.getSession().getAccountUuid();
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate, ac.name as ownerName ")
-                .append("from (select uuid, vmInstanceUuid, ip from VmNicVO ")
+                .append("from (select n.vmInstanceUuid, ip, accountUuid from VmNicVO n, AccountResourceRefVO a ")
                 .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append('\'');
         if (StringUtils.isNotEmpty(msg.getIp())) {
-            sqlBuilder.append(" and ip like '").append(msg.getId()).append('\'');
+            sqlBuilder.append(" and ip like '").append(msg.getIp()).append('\'');
         }
-        sqlBuilder.append(") nic ").append("left join (select resourceUuid, ownerAccountUuid ")
-                .append("from AccountResourceRefVO where accountUuid = '").append(accUuid)
-                .append("' and resourceType = 'VmNicVO') ar ").append("on nic.uuid = ar.resourceUuid ")
-                .append("left join (select uuid, name from AccountVO where uuid = '").append(accUuid)
-                .append("') ac on ac.uuid = ar.ownerAccountUuid ")
+        if (!acntMgr.isAdmin(msg.getSession())) {
+            sqlBuilder.append(" and a.accountUuid = '").append(accUuid).append('\'');
+        }
+        sqlBuilder.append(" and n.uuid = a.resourceUuid")
+                .append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection())
+                .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart())
+                .append(") nic ")
+                .append("left join (select uuid, name from AccountVO) ac on ac.uuid = nic.accountUuid ")
                 .append("left join (select uuid, name, createDate, state, type from VmInstanceVO) vm ")
                 .append("on vm.uuid = nic.vmInstanceUuid")
                 .append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection());
@@ -552,6 +555,10 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             element.setCreateDate((Timestamp) result[5]);
             element.setOwnerName((String) result[6]);
             element.setResourceTypes(Collections.singletonList(ResourceType.VM));
+        }
+
+        if (vmUuids.size() == 0) {
+            return ipStatistics;
         }
 
         List<VmInstanceVO> vms = Q.New(VmInstanceVO.class).in(VmInstanceVO_.uuid, vmUuids).list();

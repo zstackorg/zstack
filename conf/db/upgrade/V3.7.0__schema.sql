@@ -76,3 +76,26 @@ CALL upgradeEmailAddressFromEndpoint();
 DROP PROCEDURE IF EXISTS upgradeEmailAddressFromEndpoint;
 
 UPDATE zstack.SNSEmailEndpointVO SET email = NULL;
+
+-- ----------------------------
+--  add h3c hardware sdn
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS `SdnControllerVO` (
+    `uuid` VARCHAR(32) NOT NULL UNIQUE,
+    `vendorType` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `description` VARCHAR(2048) DEFAULT NULL,
+    `ip` VARCHAR(255) NOT NULL,
+    `username` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+    PRIMARY KEY (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE  IF NOT EXISTS `HardwareL2VxlanNetworkPoolVO` (
+  `uuid` varchar(32) NOT NULL UNIQUE,
+  `sdnControllerUuid` VARCHAR(32) NOT NULL,
+  PRIMARY KEY  (`uuid`),
+  CONSTRAINT fkHardwareL2VxlanNetworkPoolVOL2NetworkEO FOREIGN KEY (uuid) REFERENCES L2NetworkEO (uuid) ON UPDATE RESTRICT ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

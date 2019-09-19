@@ -127,6 +127,7 @@ public class SourceClassMap {
 			put("org.zstack.header.core.progress.TaskInfo", "org.zstack.sdk.TaskInfo");
 			put("org.zstack.header.core.progress.TaskProgressInventory", "org.zstack.sdk.TaskProgressInventory");
 			put("org.zstack.header.core.trash.CleanTrashResult", "org.zstack.sdk.CleanTrashResult");
+			put("org.zstack.header.core.trash.InstallPathRecycleInventory", "org.zstack.sdk.InstallPathRecycleInventory");
 			put("org.zstack.header.core.webhooks.WebhookInventory", "org.zstack.sdk.WebhookInventory");
 			put("org.zstack.header.daho.process.DahoCloudConnectionInventory", "org.zstack.sdk.DahoCloudConnectionInventory");
 			put("org.zstack.header.daho.process.DahoConnectionInventory", "org.zstack.sdk.DahoConnectionInventory");
@@ -356,6 +357,9 @@ public class SourceClassMap {
 			put("org.zstack.policyRoute.PolicyRouteTableVRouterRefInventory", "org.zstack.sdk.PolicyRouteTableVRouterRefInventory");
 			put("org.zstack.resourceconfig.APIGetResourceBindableConfigReply$ResourceBindableConfigStruct", "org.zstack.sdk.ResourceBindableConfigStruct");
 			put("org.zstack.resourceconfig.ResourceConfigInventory", "org.zstack.sdk.ResourceConfigInventory");
+			put("org.zstack.sdnController.header.HardwareL2VxlanNetworkPoolInventory", "org.zstack.sdk.HardwareL2VxlanNetworkPoolInventory");
+			put("org.zstack.sdnController.header.SdnControllerInventory", "org.zstack.sdk.SdnControllerInventory");
+			put("org.zstack.sdnController.header.SdnVniRange", "org.zstack.sdk.SdnVniRange");
 			put("org.zstack.sns.SNSApplicationEndpointInventory", "org.zstack.sdk.sns.SNSApplicationEndpointInventory");
 			put("org.zstack.sns.SNSApplicationPlatformInventory", "org.zstack.sdk.sns.SNSApplicationPlatformInventory");
 			put("org.zstack.sns.SNSSubscriberInventory", "org.zstack.sdk.sns.SNSSubscriberInventory");
@@ -589,6 +593,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.GarbageCollectorInventory", "org.zstack.core.gc.GarbageCollectorInventory");
 			put("org.zstack.sdk.GlobalConfigInventory", "org.zstack.core.config.GlobalConfigInventory");
 			put("org.zstack.sdk.GlobalConfigTemplateInventory", "org.zstack.templateConfig.GlobalConfigTemplateInventory");
+			put("org.zstack.sdk.HardwareL2VxlanNetworkPoolInventory", "org.zstack.sdnController.header.HardwareL2VxlanNetworkPoolInventory");
 			put("org.zstack.sdk.HostDiskCapacity", "org.zstack.storage.primary.local.APIGetLocalStorageHostDiskCapacityReply$HostDiskCapacity");
 			put("org.zstack.sdk.HostInventory", "org.zstack.header.host.HostInventory");
 			put("org.zstack.sdk.HostIommuStateType", "org.zstack.pciDevice.HostIommuStateType");
@@ -613,6 +618,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.ImageStoreBackupStorageInventory", "org.zstack.storage.backup.imagestore.ImageStoreBackupStorageInventory");
 			put("org.zstack.sdk.ImageStoreGcResult", "org.zstack.storage.backup.imagestore.ImageStoreGcResult");
 			put("org.zstack.sdk.ImageStoreImageStruct", "org.zstack.storage.backup.imagestore.ImageStoreImageStruct");
+			put("org.zstack.sdk.InstallPathRecycleInventory", "org.zstack.header.core.trash.InstallPathRecycleInventory");
 			put("org.zstack.sdk.InstanceOfferingInventory", "org.zstack.header.configuration.InstanceOfferingInventory");
 			put("org.zstack.sdk.IpRangeInventory", "org.zstack.header.network.l3.IpRangeInventory");
 			put("org.zstack.sdk.IscsiLunInventory", "org.zstack.storage.device.iscsi.IscsiLunInventory");
@@ -754,6 +760,8 @@ public class SourceClassMap {
 			put("org.zstack.sdk.ScsiLunHostRefInventory", "org.zstack.header.storageDevice.ScsiLunHostRefInventory");
 			put("org.zstack.sdk.ScsiLunInventory", "org.zstack.header.storageDevice.ScsiLunInventory");
 			put("org.zstack.sdk.ScsiLunVmInstanceRefInventory", "org.zstack.header.storageDevice.ScsiLunVmInstanceRefInventory");
+			put("org.zstack.sdk.SdnControllerInventory", "org.zstack.sdnController.header.SdnControllerInventory");
+			put("org.zstack.sdk.SdnVniRange", "org.zstack.sdnController.header.SdnVniRange");
 			put("org.zstack.sdk.SecurityGroupIngressRuleTO", "org.zstack.network.securitygroup.SecurityGroupIngressRuleTO");
 			put("org.zstack.sdk.SecurityGroupInventory", "org.zstack.network.securitygroup.SecurityGroupInventory");
 			put("org.zstack.sdk.SecurityGroupRuleInventory", "org.zstack.network.securitygroup.SecurityGroupRuleInventory");

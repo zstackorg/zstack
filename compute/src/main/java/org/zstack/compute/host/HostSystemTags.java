@@ -29,6 +29,9 @@ public class HostSystemTags {
     public static String EXTRA_IPS_TOKEN = "extraips";
     public static PatternedSystemTag EXTRA_IPS = new PatternedSystemTag(String.format("extraips::{%s}", EXTRA_IPS_TOKEN), HostVO.class);
 
+    public static final String HOST_CPU_ARCHITECTURE_TOKEN = "hostCpuArchitecture";
+    public static PatternedSystemTag HOST_CPU_ARCHITECTURE = new PatternedSystemTag(String.format("hostCpuArchitecture::{%s}", HOST_CPU_ARCHITECTURE_TOKEN), HostVO.class);
+
     public static final String HOST_CPU_MODEL_NAME_TOKEN = "hostCpuModelName";
     public static PatternedSystemTag HOST_CPU_MODEL_NAME = new PatternedSystemTag(String.format("hostCpuModelName::{%s}", HOST_CPU_MODEL_NAME_TOKEN), HostVO.class);
 

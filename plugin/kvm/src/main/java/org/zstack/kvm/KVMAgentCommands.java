@@ -301,6 +301,7 @@ public class KVMAgentCommands {
         private String eptFlag;
         private String cpuModelName;
         private String cpuGHz;
+        private String hostCpuArchitecture;
         private String hostCpuModelName;
         private String systemProductName;
         private String systemSerialNumber;
@@ -376,6 +377,10 @@ public class KVMAgentCommands {
 
         public String getCpuGHz() {
             return cpuGHz;
+        }
+
+        public String getHostCpuArchitecture() {
+            return hostCpuArchitecture;
         }
 
         public String getHostCpuModelName() {

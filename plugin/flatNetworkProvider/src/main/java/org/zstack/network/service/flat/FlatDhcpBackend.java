@@ -511,12 +511,15 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 [and a.accountUuid = '{accUuid}']
                 [and ip like '{ip}']
             order by {sortBy} {direction}
-            limit {limit} offset {start}) nic
+            [limit {limit} offset {start}]
+            ) nic
                 left join (select uuid, name from AccountVO) ac on ac.uuid = nic.accountUuid
                 left join (select uuid, name, state, type, createDate from VmInstanceVO) vm on nic.vmInstanceUuid = vm.uuid
-            order by {sortBy} {direction};
+            order by {sortBy} {direction}
+            [limit {limit} offset {start}];
          */
 
+        boolean byIp = SortBy.IP.equals(msg.getSortBy());
         String accUuid = msg.getSession().getAccountUuid();
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate, ac.name as ownerName ")
@@ -529,14 +532,20 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         if (!acntMgr.isAdmin(msg.getSession())) {
             sqlBuilder.append(" and a.accountUuid = '").append(accUuid).append('\'');
         }
-        sqlBuilder.append(" and n.uuid = a.resourceUuid")
-                .append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection())
-                .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart())
-                .append(") nic ")
+        sqlBuilder.append(" and n.uuid = a.resourceUuid");
+        if (byIp) {
+            sqlBuilder.append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection())
+                    .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart());
+        }
+
+        sqlBuilder.append(") nic ")
                 .append("left join (select uuid, name from AccountVO) ac on ac.uuid = nic.accountUuid ")
                 .append("left join (select uuid, name, createDate, state, type from VmInstanceVO) vm ")
                 .append("on vm.uuid = nic.vmInstanceUuid")
                 .append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection());
+        if (!byIp) {
+            sqlBuilder.append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart());
+        }
 
         Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
         List<Object[]> results = q.getResultList();

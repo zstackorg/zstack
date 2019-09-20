@@ -40,6 +40,7 @@ import org.zstack.kvm.KvmCommandSender.SteppingSendCallback;
 import org.zstack.network.service.MtuGetter;
 import org.zstack.network.service.NetworkProviderFinder;
 import org.zstack.network.service.NetworkServiceProviderLookup;
+import org.zstack.network.service.flat.IpStatisticConstants.VmType;
 import org.zstack.network.service.vip.VipVO;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.CollectionUtils;
@@ -551,15 +552,27 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
         List<String> vmUuids = new ArrayList<>();
+        List<String> vrUuids = new ArrayList<>();
 
         for (Object[] result : results) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
             element.setIp((String) result[0]);
-            element.setVmInstanceUuid((String) result[1]);
-            vmUuids.add((String) result[1]);
+
+            String uuid = (String) result[1];
+            element.setVmInstanceUuid(uuid);
+            if (StringUtils.isNotEmpty(uuid)) {
+                vmUuids.add(element.getVmInstanceUuid());
+            }
+
             element.setVmInstanceName((String) result[2]);
-            element.setVmInstanceType((String) result[3]);
+
+            String type = (String) result[3];
+            element.setVmInstanceType(type);
+            if (StringUtils.isNotEmpty(type) && type.equals(VmType.APP_VM) && StringUtils.isNotEmpty(uuid)) {
+                vrUuids.add(uuid);
+            }
+
             element.setState((String) result[4]);
             element.setCreateDate((Timestamp) result[5]);
             element.setOwnerName((String) result[6]);
@@ -571,16 +584,44 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         }
 
         List<VmInstanceVO> vms = Q.New(VmInstanceVO.class).in(VmInstanceVO_.uuid, vmUuids).list();
+        List<Tuple> vrs =
+                SQL.New("select uuid, applianceVmType, defaultRouteL3NetworkUuid from ApplianceVmVO where uuid in (:vrUuids)",
+                        Tuple.class)
+                        .param("vrUuids", vrUuids)
+                        .list();
+
         Map<String, VmInstanceVO> vmvos = vms.stream()
                 .collect(Collectors.toMap(VmInstanceVO::getUuid, inv -> inv));
+
+        Map<String, Tuple> vrInfos = new HashMap<>();
+        for (Tuple t : vrs) {
+            vrInfos.put(t.get(0, String.class), t);
+        }
+
         for (IpStatisticData element : ipStatistics) {
             VmInstanceVO vmvo = vmvos.get(element.getVmInstanceUuid());
             if (vmvo == null) {
                 continue;
             }
-            List<VmNicVO> nics = vmvo.getVmNics().stream()
-                    .filter(vmNic -> vmNic.getL3NetworkUuid().equals(vmvo.getDefaultL3NetworkUuid()))
-                    .collect(Collectors.toList());
+
+            List<VmNicVO> nics;
+            if (!vmvo.getType().equals(VmType.APP_VM)) {
+                nics = vmvo.getVmNics().stream()
+                        .filter(vmNic -> vmNic.getL3NetworkUuid().equals(vmvo.getDefaultL3NetworkUuid()))
+                        .collect(Collectors.toList());
+            } else {
+                Tuple vrInfo = vrInfos.get(vmvo.getUuid());
+                if (vrInfo == null) {
+                    continue;
+                }
+                String routeL3Uuid = vrInfo.get(2, String.class);
+                nics = vmvo.getVmNics().stream()
+                        .filter(nic -> nic.getL3NetworkUuid().equals(routeL3Uuid))
+                        .collect(Collectors.toList());
+                element.setVmInstanceType(vrInfo.get(1, String.class));
+            }
+
+
             VmNicVO nic;
 
             if (nics.size() == 1) {

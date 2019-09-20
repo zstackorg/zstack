@@ -20,4 +20,11 @@ public interface IpStatisticConstants {
         String ASC = "asc";
         String DESC = "desc";
     }
+
+    interface VmType {
+        String USER_VM = "UserVm";
+        String APP_VM = "ApplianceVm";
+        String VR = "vrouter";
+        String VPCR = "vpcvrouter";
+    }
 }

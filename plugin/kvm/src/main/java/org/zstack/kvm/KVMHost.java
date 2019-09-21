@@ -2509,6 +2509,9 @@ public class KVMHost extends HostBase implements Host {
                 if (null == KVMSystemTags.EPT_CPU_FLAG.getTokenByResourceUuid(self.getUuid(), KVMSystemTags.EPT_CPU_FLAG_TOKEN)) {
                     createTagWithoutNonValue(KVMSystemTags.EPT_CPU_FLAG, KVMSystemTags.EPT_CPU_FLAG_TOKEN, "ept", false);
                 }
+                if (null == HostSystemTags.HOST_CPU_ARCHITECTURE.getTokenByResourceUuid(self.getUuid(), HostSystemTags.HOST_CPU_ARCHITECTURE_TOKEN)) {
+                    createTagWithoutNonValue(HostSystemTags.HOST_CPU_ARCHITECTURE, HostSystemTags.HOST_CPU_ARCHITECTURE_TOKEN, "x86_64", false);
+                }
 
                 if (!checkQemuLibvirtVersionOfHost()) {
                     complete.fail(operr("host [uuid:%s] cannot be added to cluster [uuid:%s] because qemu/libvirt version does not match",

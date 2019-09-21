@@ -584,11 +584,16 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         }
 
         List<VmInstanceVO> vms = Q.New(VmInstanceVO.class).in(VmInstanceVO_.uuid, vmUuids).list();
-        List<Tuple> vrs =
-                SQL.New("select uuid, applianceVmType, defaultRouteL3NetworkUuid from ApplianceVmVO where uuid in (:vrUuids)",
-                        Tuple.class)
-                        .param("vrUuids", vrUuids)
-                        .list();
+        List<Tuple> vrs;
+        if (vrUuids.size() != 0) {
+            vrs = SQL.New("select uuid, applianceVmType, defaultRouteL3NetworkUuid from ApplianceVmVO where uuid in (:vrUuids)",
+                    Tuple.class)
+                    .param("vrUuids", vrUuids)
+                    .list();
+        } else {
+            vrs = new ArrayList<>();
+        }
+
 
         Map<String, VmInstanceVO> vmvos = vms.stream()
                 .collect(Collectors.toMap(VmInstanceVO::getUuid, inv -> inv));

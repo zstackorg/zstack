@@ -1,0 +1,1 @@
+ALTER TABLE `zstack`.`RoleVO` ADD COLUMN identity VARCHAR(64) DEFAULT NULL;

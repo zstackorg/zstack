@@ -39,7 +39,7 @@ public class APIGetL3NetworkIpStatisticMsg extends APISyncCallMessage implements
     @APIParam(numberRange = {0, Integer.MAX_VALUE}, required = false)
     private Integer start = 0;
 
-    @APIParam(numberRange = {10, 100}, required = false)
+    @APIParam(numberRange = {0, Integer.MAX_VALUE}, required = false)
     private Integer limit = 20;
 
     @APIParam(required = false)

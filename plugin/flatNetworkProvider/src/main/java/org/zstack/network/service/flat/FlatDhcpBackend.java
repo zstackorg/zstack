@@ -40,6 +40,7 @@ import org.zstack.kvm.KvmCommandSender.SteppingSendCallback;
 import org.zstack.network.service.MtuGetter;
 import org.zstack.network.service.NetworkProviderFinder;
 import org.zstack.network.service.NetworkServiceProviderLookup;
+import org.zstack.network.service.flat.IpStatisticConstants.VmType;
 import org.zstack.network.service.vip.VipVO;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.CollectionUtils;
@@ -326,7 +327,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
     private List<IpStatisticData> ipStatisticAll(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
-        select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, uip.createDate
+        select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, it.type, uip.createDate
         from (select uuid, ip, IpInLong, createDate
             from UsedIpVO
             where l3NetworkUuid = '{uuid}' [and ip like '{ip}']
@@ -336,12 +337,12 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                     where l3NetworkUuid = '{l3Uuid}') vip on uip.uuid = vip.usedIpUuid
                 left join (select uuid, usedIpUuid, vmInstanceUuid from VmNicVO
                     where l3NetworkUuid = '{l3Uuid}') nic on nic.usedIpUuid = uip.uuid
-                left join (select uuid, name from VmInstanceVO) it on nic.vmInstanceUuid = it.uuid
+                left join (select uuid, name, type from VmInstanceVO) it on nic.vmInstanceUuid = it.uuid
         order by {sortBy} {direction};
          */
 
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, uip.createDate ")
+        sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmUuid, it.name as vmName, it.type, uip.createDate ")
                 .append("from (select uuid, ip, ipInLong, createDate from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append('\'');
 
@@ -360,7 +361,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append("') nic on nic.usedIpUuid = uip.uuid ")
                 .append("left join ")
-                .append("(select uuid, name from VmInstanceVO) it on it.uuid = nic.vmInstanceUuid ")
+                .append("(select uuid, name, type from VmInstanceVO) it on it.uuid = nic.vmInstanceUuid ")
                 .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection());
 
         Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
@@ -385,6 +386,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 element.setVipName((String) result[2]);
                 element.setVmInstanceUuid((String) result[3]);
                 element.setVmInstanceName((String) result[4]);
+                setVmInstanceType(element, (String) result[5]);
             } else {
                 if (result[1] != null && ownedVips.contains(result[1])) {
                     element.setVipUuid((String) result[1]);
@@ -393,6 +395,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 if (result[3] != null && ownedVms.contains(result[3])) {
                     element.setVmInstanceUuid((String) result[3]);
                     element.setVmInstanceName((String) result[4]);
+                    setVmInstanceType(element, (String) result[5]);
                 }
             }
 
@@ -420,6 +423,15 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         return SQL.New(sql, Long.class)
                 .param("l3Uuid", msg.getL3NetworkUuid())
                 .find();
+    }
+
+    private void setVmInstanceType(IpStatisticData data, String type) {
+        if (VmType.USER_VM.equals(type)) {
+            data.setVmInstanceType(VmType.USER_VM);
+        } else if (VmType.APP_VM.equals(type)) {
+            //only vpc vRouter appears in UsedIpVO
+            data.setVmInstanceType(VmType.VPCR);
+        }
     }
 
     private List<IpStatisticData> ipStatisticVip(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
@@ -507,6 +519,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 AccountResourceRefVO a
             where l3NetworkUuid = '{l3Uuid}'
                 and resourceType = 'VmNicVO'
+                and n.ip is not null
                 and n.uuid = a.resourceUuid
                 [and a.accountUuid = '{accUuid}']
                 [and ip like '{ip}']
@@ -532,7 +545,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         if (!acntMgr.isAdmin(msg.getSession())) {
             sqlBuilder.append(" and a.accountUuid = '").append(accUuid).append('\'');
         }
-        sqlBuilder.append(" and n.uuid = a.resourceUuid");
+        sqlBuilder.append(" and n.ip is not null and n.uuid = a.resourceUuid");
         if (byIp) {
             sqlBuilder.append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection())
                     .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart());
@@ -551,15 +564,27 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
         List<String> vmUuids = new ArrayList<>();
+        List<String> vrUuids = new ArrayList<>();
 
         for (Object[] result : results) {
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
             element.setIp((String) result[0]);
-            element.setVmInstanceUuid((String) result[1]);
-            vmUuids.add((String) result[1]);
+
+            String uuid = (String) result[1];
+            element.setVmInstanceUuid(uuid);
+            if (StringUtils.isNotEmpty(uuid)) {
+                vmUuids.add(element.getVmInstanceUuid());
+            }
+
             element.setVmInstanceName((String) result[2]);
-            element.setVmInstanceType((String) result[3]);
+
+            String type = (String) result[3];
+            element.setVmInstanceType(type);
+            if (StringUtils.isNotEmpty(type) && type.equals(VmType.APP_VM) && StringUtils.isNotEmpty(uuid)) {
+                vrUuids.add(uuid);
+            }
+
             element.setState((String) result[4]);
             element.setCreateDate((Timestamp) result[5]);
             element.setOwnerName((String) result[6]);
@@ -571,16 +596,49 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         }
 
         List<VmInstanceVO> vms = Q.New(VmInstanceVO.class).in(VmInstanceVO_.uuid, vmUuids).list();
+        List<Tuple> vrs;
+        if (vrUuids.size() != 0) {
+            vrs = SQL.New("select uuid, applianceVmType, defaultRouteL3NetworkUuid from ApplianceVmVO where uuid in (:vrUuids)",
+                    Tuple.class)
+                    .param("vrUuids", vrUuids)
+                    .list();
+        } else {
+            vrs = new ArrayList<>();
+        }
+
+
         Map<String, VmInstanceVO> vmvos = vms.stream()
                 .collect(Collectors.toMap(VmInstanceVO::getUuid, inv -> inv));
+
+        Map<String, Tuple> vrInfos = new HashMap<>();
+        for (Tuple t : vrs) {
+            vrInfos.put(t.get(0, String.class), t);
+        }
+
         for (IpStatisticData element : ipStatistics) {
             VmInstanceVO vmvo = vmvos.get(element.getVmInstanceUuid());
             if (vmvo == null) {
                 continue;
             }
-            List<VmNicVO> nics = vmvo.getVmNics().stream()
-                    .filter(vmNic -> vmNic.getL3NetworkUuid().equals(vmvo.getDefaultL3NetworkUuid()))
-                    .collect(Collectors.toList());
+
+            List<VmNicVO> nics;
+            if (!vmvo.getType().equals(VmType.APP_VM)) {
+                nics = vmvo.getVmNics().stream()
+                        .filter(vmNic -> vmNic.getL3NetworkUuid().equals(vmvo.getDefaultL3NetworkUuid()))
+                        .collect(Collectors.toList());
+            } else {
+                Tuple vrInfo = vrInfos.get(vmvo.getUuid());
+                if (vrInfo == null) {
+                    continue;
+                }
+                String routeL3Uuid = vrInfo.get(2, String.class);
+                nics = vmvo.getVmNics().stream()
+                        .filter(nic -> nic.getL3NetworkUuid().equals(routeL3Uuid))
+                        .collect(Collectors.toList());
+                element.setVmInstanceType(vrInfo.get(1, String.class));
+            }
+
+
             VmNicVO nic;
 
             if (nics.size() == 1) {

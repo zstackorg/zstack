@@ -327,7 +327,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
     private List<IpStatisticData> ipStatisticAll(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
-        select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, uip.createDate
+        select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, it.type, uip.createDate
         from (select uuid, ip, IpInLong, createDate
             from UsedIpVO
             where l3NetworkUuid = '{uuid}' [and ip like '{ip}']
@@ -337,12 +337,12 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                     where l3NetworkUuid = '{l3Uuid}') vip on uip.uuid = vip.usedIpUuid
                 left join (select uuid, usedIpUuid, vmInstanceUuid from VmNicVO
                     where l3NetworkUuid = '{l3Uuid}') nic on nic.usedIpUuid = uip.uuid
-                left join (select uuid, name from VmInstanceVO) it on nic.vmInstanceUuid = it.uuid
+                left join (select uuid, name, type from VmInstanceVO) it on nic.vmInstanceUuid = it.uuid
         order by {sortBy} {direction};
          */
 
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, uip.createDate ")
+        sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmUuid, it.name as vmName, it.type, uip.createDate ")
                 .append("from (select uuid, ip, ipInLong, createDate from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append('\'');
 
@@ -361,7 +361,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append("') nic on nic.usedIpUuid = uip.uuid ")
                 .append("left join ")
-                .append("(select uuid, name from VmInstanceVO) it on it.uuid = nic.vmInstanceUuid ")
+                .append("(select uuid, name, type from VmInstanceVO) it on it.uuid = nic.vmInstanceUuid ")
                 .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection());
 
         Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
@@ -386,6 +386,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 element.setVipName((String) result[2]);
                 element.setVmInstanceUuid((String) result[3]);
                 element.setVmInstanceName((String) result[4]);
+                setVmInstanceType(element, (String) result[5]);
             } else {
                 if (result[1] != null && ownedVips.contains(result[1])) {
                     element.setVipUuid((String) result[1]);
@@ -394,6 +395,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 if (result[3] != null && ownedVms.contains(result[3])) {
                     element.setVmInstanceUuid((String) result[3]);
                     element.setVmInstanceName((String) result[4]);
+                    setVmInstanceType(element, (String) result[5]);
                 }
             }
 
@@ -421,6 +423,15 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         return SQL.New(sql, Long.class)
                 .param("l3Uuid", msg.getL3NetworkUuid())
                 .find();
+    }
+
+    private void setVmInstanceType(IpStatisticData data, String type) {
+        if (VmType.USER_VM.equals(type)) {
+            data.setVmInstanceType(VmType.USER_VM);
+        } else if (VmType.APP_VM.equals(type)) {
+            //only vpc vRouter appears in UsedIpVO
+            data.setVmInstanceType(VmType.VPCR);
+        }
     }
 
     private List<IpStatisticData> ipStatisticVip(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {

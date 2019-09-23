@@ -519,6 +519,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 AccountResourceRefVO a
             where l3NetworkUuid = '{l3Uuid}'
                 and resourceType = 'VmNicVO'
+                and n.ip is not null
                 and n.uuid = a.resourceUuid
                 [and a.accountUuid = '{accUuid}']
                 [and ip like '{ip}']
@@ -544,7 +545,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         if (!acntMgr.isAdmin(msg.getSession())) {
             sqlBuilder.append(" and a.accountUuid = '").append(accUuid).append('\'');
         }
-        sqlBuilder.append(" and n.uuid = a.resourceUuid");
+        sqlBuilder.append(" and n.ip is not null and n.uuid = a.resourceUuid");
         if (byIp) {
             sqlBuilder.append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection())
                     .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart());

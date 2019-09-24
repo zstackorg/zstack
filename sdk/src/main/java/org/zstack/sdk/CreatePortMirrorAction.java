@@ -34,6 +34,9 @@ public class CreatePortMirrorAction extends AbstractAction {
     @Param(required = false, maxLength = 1024, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String description;
 
+    @Param(required = false, validValues = {"enable","disable"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String stateEvent;
+
     @Param(required = false)
     public java.lang.String resourceUuid;
 

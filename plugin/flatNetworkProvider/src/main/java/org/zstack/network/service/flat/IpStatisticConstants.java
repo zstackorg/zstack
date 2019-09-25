@@ -9,6 +9,7 @@ public interface IpStatisticConstants {
         String VM = "VM";
         String VIP = "Vip";
         String OTHER = "Other";
+        String VROUTER = "VRouter";
     }
 
     interface SortBy {
@@ -23,8 +24,8 @@ public interface IpStatisticConstants {
 
     interface VmType {
         String USER_VM = "UserVm";
-        String APP_VM = "ApplianceVm";
-        String VR = "vrouter";
-        String VPCR = "vpcvrouter";
+        String APPLIANCE_VM = "ApplianceVm";
+        String VROUTER = "vrouter";
+        String VPC_VROUTER = "vpcvrouter";
     }
 }

@@ -387,6 +387,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 element.setVipName((String) result[2]);
                 element.setVmInstanceUuid((String) result[3]);
                 element.setVmInstanceName((String) result[4]);
+                element.setVmInstanceType((String) result[5]);
                 if (result[3] != null) {
                     vmUuids.add((String) result[3]);
                 }
@@ -399,6 +400,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 if (result[3] != null && ownedVms.contains(result[3])) {
                     element.setVmInstanceUuid((String) result[3]);
                     element.setVmInstanceName((String) result[4]);
+                    element.setVmInstanceType((String) result[5]);
                     vmUuids.add((String) result[3]);
                 }
             }

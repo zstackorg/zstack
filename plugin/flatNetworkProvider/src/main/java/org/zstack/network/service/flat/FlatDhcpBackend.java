@@ -523,15 +523,17 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     private List<IpStatisticData> ipStatisticVm(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
         select ip, vm.uuid, vm.name, vm.type, vm.state, vm.type, vm.createDate, ac.name as ownerName
-        from (select n.vmInstanceUuid, ip, accountUuid
-            from VmNicVO n,
-                AccountResourceRefVO a
-            where l3NetworkUuid = '{l3Uuid}'
+        from (select n.vmInstanceUuid, u.ip, accountUuid
+            from UsedIpVO u,
+                 VmNicVO n,
+                 AccountResourceRefVO a
+            where u.l3NetworkUuid = '{l3Uuid}'
                 and resourceType = 'VmNicVO'
                 and n.ip is not null
+                and u.vmNicUuid = n.uuid
                 and n.uuid = a.resourceUuid
                 [and a.accountUuid = '{accUuid}']
-                [and ip like '{ip}']
+                [and u.ip like '{ip}']
             order by {sortBy} {direction}
             [limit {limit} offset {start}]
             ) nic
@@ -545,18 +547,24 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         String accUuid = msg.getSession().getAccountUuid();
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate, ac.name as ownerName ")
-                .append("from (select n.vmInstanceUuid, ip, accountUuid from VmNicVO n, AccountResourceRefVO a ")
-                .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+                .append("from (select n.vmInstanceUuid, u.ip, accountUuid from UsedIpVO u, VmNicVO n, AccountResourceRefVO a ")
+                .append("where u.l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append('\'');
         if (StringUtils.isNotEmpty(msg.getIp())) {
-            sqlBuilder.append(" and ip like '").append(msg.getIp()).append('\'');
+            sqlBuilder.append(" and u.ip like '").append(msg.getIp()).append('\'');
         }
         if (!acntMgr.isAdmin(msg.getSession())) {
             sqlBuilder.append(" and a.accountUuid = '").append(accUuid).append('\'');
         }
-        sqlBuilder.append(" and n.ip is not null and n.uuid = a.resourceUuid");
+        sqlBuilder.append(" and resourceType = 'VmNicVO' and n.ip is not null and u.vmNicUuid = n.uuid and n.uuid = a.resourceUuid");
         if (byIp) {
-            sqlBuilder.append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection())
+            String sortByExpression;
+            if ("INET_ATON(ip)".equals(sortBy)) {
+                sortByExpression = "INET_ATON(u.ip)";
+            } else {
+                sortByExpression = sortBy;
+            }
+            sqlBuilder.append(" order by ").append(sortByExpression).append(' ').append(msg.getSortDirection())
                     .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart());
         }
 

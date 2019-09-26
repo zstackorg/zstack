@@ -600,12 +600,14 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             element.setVmInstanceType(type);
             if (StringUtils.isNotEmpty(type) && type.equals(VmType.APPLIANCE_VM) && StringUtils.isNotEmpty(uuid)) {
                 vrUuids.add(uuid);
+                element.setResourceTypes(Collections.singletonList(ResourceType.VROUTER));
+            } else {
+                element.setResourceTypes(Collections.singletonList(ResourceType.VM));
             }
 
             element.setState((String) result[4]);
             element.setCreateDate((Timestamp) result[5]);
             element.setOwnerName((String) result[6]);
-            element.setResourceTypes(Collections.singletonList(ResourceType.VM));
         }
 
         if (vmUuids.size() == 0) {

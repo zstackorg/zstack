@@ -328,22 +328,21 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     private List<IpStatisticData> ipStatisticAll(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
         select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, it.type, uip.createDate
-        from (select uuid, ip, IpInLong, createDate
+        from (select uuid, ip, IpInLong, createDate, vmNicUuid
             from UsedIpVO
             where l3NetworkUuid = '{uuid}' [and ip like '{ip}']
             order by {sortBy} {direction}
             limit {limit} offset {start}) uip
                 left join (select uuid, name, usedIpUuid from VipVO
                     where l3NetworkUuid = '{l3Uuid}') vip on uip.uuid = vip.usedIpUuid
-                left join (select uuid, usedIpUuid, vmInstanceUuid from VmNicVO
-                    where l3NetworkUuid = '{l3Uuid}') nic on nic.usedIpUuid = uip.uuid
+                left join (select uuid, vmInstanceUuid from VmNicVO) nic on uip.vmNicUuid = nic.uuid
                 left join (select uuid, name, type from VmInstanceVO) it on nic.vmInstanceUuid = it.uuid
         order by {sortBy} {direction};
          */
 
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmUuid, it.name as vmName, it.type, uip.createDate ")
-                .append("from (select uuid, ip, ipInLong, createDate from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+                .append("from (select uuid, ip, ipInLong, createDate, vmNicUuid from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append('\'');
 
         if (StringUtils.isNotEmpty(msg.getIp())) {
@@ -357,9 +356,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append("') vip on uip.uuid = vip.usedIpUuid ")
                 .append("left join ")
-                .append("(select uuid, usedIpUuid, vmInstanceUuid from VmNicVO ")
-                .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
-                .append("') nic on nic.usedIpUuid = uip.uuid ")
+                .append("(select uuid, vmInstanceUuid from VmNicVO) nic on uip.vmNicUuid = nic.uuid ")
                 .append("left join ")
                 .append("(select uuid, name, type from VmInstanceVO) it on it.uuid = nic.vmInstanceUuid ")
                 .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection());

@@ -1,17 +1,18 @@
 package org.zstack.kvm;
 
 import org.zstack.header.host.HostMessage;
+import org.zstack.header.log.HasSensitiveInfo;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.CarrierMessage;
 import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.utils.gson.JSONObjectUtil;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  */
-public class KVMHostAsyncHttpCallMsg extends NeedReplyMessage implements HostMessage, CarrierMessage {
+public class KVMHostAsyncHttpCallMsg extends NeedReplyMessage implements HostMessage, CarrierMessage, HasSensitiveInfo {
     private String path;
-    private String command;
+    @NoLogging(type = NoLogging.Type.Auto)
+    private Object command;
     private String hostUuid;
     private boolean noStatusCheck;
     private String commandClassName;
@@ -36,12 +37,16 @@ public class KVMHostAsyncHttpCallMsg extends NeedReplyMessage implements HostMes
         this.path = path;
     }
 
-    public String getCommand() {
+    public Object getCommand() {
         return command;
     }
 
+    public String getCommandToJson() {
+        return JSONObjectUtil.toJsonString(command);
+    }
+
     public void setCommand(Object command) {
-        this.command = JSONObjectUtil.toJsonString(command);
+        this.command = JSONObjectUtil.rehashObject(command, command.getClass());
         commandClassName = command.getClass().getName();
     }
 
@@ -53,4 +58,5 @@ public class KVMHostAsyncHttpCallMsg extends NeedReplyMessage implements HostMes
     public void setHostUuid(String hostUuid) {
         this.hostUuid = hostUuid;
     }
+
 }

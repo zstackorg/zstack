@@ -1,8 +1,10 @@
 package org.zstack.kvm;
 
+import org.zstack.header.log.HasSensitiveInfo;
 import org.zstack.core.validation.ConditionalValidation;
 import org.zstack.header.HasThreadContext;
 import org.zstack.header.core.validation.Validation;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.vm.VmBootDevice;
 import org.zstack.network.securitygroup.SecurityGroupMembersTO;
 import org.zstack.network.securitygroup.SecurityGroupRuleTO;
@@ -10,6 +12,7 @@ import org.zstack.network.securitygroup.SecurityGroupRuleTO;
 import java.util.*;
 
 public class KVMAgentCommands {
+
     public enum BootDev {
         hd(VmBootDevice.HardDisk),
         cdrom(VmBootDevice.CdRom);
@@ -853,7 +856,7 @@ public class KVMAgentCommands {
         String getVmInstanceUuid();
     }
 
-    public static class StartVmCmd extends AgentCommand implements VmAddOnsCmd {
+    public static class StartVmCmd extends AgentCommand implements VmAddOnsCmd, HasSensitiveInfo {
         private String vmInstanceUuid;
         private long vmInternalId;
         private String vmName;
@@ -864,6 +867,7 @@ public class KVMAgentCommands {
         private long cpuSpeed;
         private int socketNum;
         private int cpuOnSocket;
+        @NoLogging
         private String consolePassword;
         private List<String> bootDev;
         private VolumeTO rootVolume;
@@ -1897,11 +1901,12 @@ public class KVMAgentCommands {
     public static class LogoutIscsiTargetRsp extends AgentResponse {
     }
 
-    public static class LoginIscsiTargetCmd extends AgentCommand {
+    public static class LoginIscsiTargetCmd extends AgentCommand implements HasSensitiveInfo {
         private String hostname;
         private int port;
         private String target;
         private String chapUsername;
+        @NoLogging
         private String chapPassword;
 
         public String getChapUsername() {

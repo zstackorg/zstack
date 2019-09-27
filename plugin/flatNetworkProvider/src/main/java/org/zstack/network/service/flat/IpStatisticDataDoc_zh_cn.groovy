@@ -4,78 +4,78 @@ import java.sql.Timestamp
 
 doc {
 
-	title "在这里输入结构的名称"
+	title "IP使用情况结构"
 
 	field {
 		name "ip"
-		desc ""
+		desc "IP地址"
 		type "String"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "vipUuid"
-		desc "VIP UUID"
+		desc "虚拟IP的UUID"
 		type "String"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "vipName"
-		desc ""
+		desc "虚拟IP名字"
 		type "String"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "vmInstanceUuid"
-		desc "云主机UUID"
+		desc "虚拟机实例UUID"
 		type "String"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "vmInstanceName"
-		desc ""
+		desc "虚拟机实例名字"
 		type "String"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "vmInstanceType"
-		desc ""
+		desc "虚拟机实例类型"
 		type "String"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "vmDefaultIp"
-		desc ""
+		desc "虚拟机实例默认IP"
 		type "String"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "resourceTypes"
-		desc ""
+		desc "绑定到IP地址的资源类型列表"
 		type "List"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "state"
-		desc ""
+		desc "资源状态"
 		type "String"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "useFor"
-		desc ""
+		desc "虚拟IP绑定的网络服务"
 		type "String"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "0.6"
+		since "3.7.0"
 	}
 	field {
 		name "ownerName"
-		desc ""
+		desc "资源所有者名字"
 		type "String"
-		since "0.6"
+		since "3.7.0"
 	}
 }

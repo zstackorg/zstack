@@ -1,10 +1,7 @@
 package org.zstack.test.integration.network.l3network
 
-import org.zstack.sdk.ImageInventory
-import org.zstack.sdk.InstanceOfferingInventory
-import org.zstack.sdk.IpStatisticData
-import org.zstack.sdk.L3NetworkInventory
-import org.zstack.sdk.VmInstanceInventory
+import org.zstack.header.apimediator.ApiMessageInterceptionException
+import org.zstack.sdk.*
 import org.zstack.test.integration.kvm.KvmTest
 import org.zstack.test.integration.network.NetworkTest
 import org.zstack.testlib.EnvSpec
@@ -37,6 +34,7 @@ class GetL3IpStatisticCase extends SubCase {
     void test() {
         env.create {
             testGetIpStatistics()
+            testAccountPermission()
         }
     }
 
@@ -131,5 +129,40 @@ class GetL3IpStatisticCase extends SubCase {
         assert IpData.first().ownerName == "admin"
         assert IpData.get(1).vipName == "vip-2"
         assert IpData.get(1).ownerName == "admin"
+    }
+
+    void testAccountPermission() {
+        L3NetworkInventory l3Net = env.inventoryByName("pubL3")
+
+        createAccount {
+            name = "guest"
+            password = "password"
+        }
+
+        SessionInventory normalSession = logInByAccount {
+            accountName = "guest"
+            password = "password"
+        } as SessionInventory
+
+        expect(AssertionError.class) {
+            getL3NetworkIpStatistic {
+                l3NetworkUuid = l3Net.uuid
+                replyWithCount = true
+                sessionId = normalSession.uuid
+            }
+        }
+
+        shareResource {
+            resourceUuids = [l3Net.uuid]
+            toPublic = true
+        }
+
+        def res = getL3NetworkIpStatistic {
+            l3NetworkUuid = l3Net.uuid
+            replyWithCount = true
+            sessionId = normalSession.uuid
+        }
+
+        assert res.total == 4
     }
 }

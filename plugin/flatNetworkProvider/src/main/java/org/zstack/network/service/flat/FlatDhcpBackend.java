@@ -342,8 +342,8 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmUuid, it.name as vmName, it.type, uip.createDate ")
-                .append("from (select uuid, ip, ipInLong, createDate, vmNicUuid from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
-                .append('\'');
+                .append("from (select uuid, ip, ipInLong, createDate, vmNicUuid from UsedIpVO where l3NetworkUuid = '")
+                .append(msg.getL3NetworkUuid()).append('\'');
 
         if (StringUtils.isNotEmpty(msg.getIp())) {
             sqlBuilder.append(" and ip like '").append(msg.getIp()).append('\'');
@@ -379,6 +379,8 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             IpStatisticData element = new IpStatisticData();
             ipStatistics.add(element);
             element.setIp((String) result[0]);
+            List<String> resourceTypes = new ArrayList<>();
+            element.setResourceTypes(resourceTypes);
             if (isAdmin) {
                 element.setVipUuid((String) result[1]);
                 element.setVipName((String) result[2]);
@@ -387,18 +389,30 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 element.setVmInstanceType((String) result[5]);
                 if (result[3] != null) {
                     vmUuids.add((String) result[3]);
+                } else if (result[1] != null) {
+                    resourceTypes.add(ResourceType.VIP);
+                } else {
+                    resourceTypes.add(ResourceType.OTHER);
                 }
-
             } else {
-                if (result[1] != null && ownedVips.contains(result[1])) {
-                    element.setVipUuid((String) result[1]);
-                    element.setVipName((String) result[2]);
-                }
-                if (result[3] != null && ownedVms.contains(result[3])) {
-                    element.setVmInstanceUuid((String) result[3]);
-                    element.setVmInstanceName((String) result[4]);
-                    element.setVmInstanceType((String) result[5]);
-                    vmUuids.add((String) result[3]);
+                boolean isOther = true;
+                if (result[1] != null)
+                    isOther = false;
+                    if (ownedVips.contains(result[1])) {
+                        element.setVipUuid((String) result[1]);
+                        element.setVipName((String) result[2]);
+                        resourceTypes.add(ResourceType.VIP);
+                    }
+                if (result[3] != null)
+                    isOther = false;
+                    if (ownedVms.contains(result[3])) {
+                        element.setVmInstanceUuid((String) result[3]);
+                        element.setVmInstanceName((String) result[4]);
+                        element.setVmInstanceType((String) result[5]);
+                        vmUuids.add((String) result[3]);
+                    }
+                if (isOther) {
+                    resourceTypes.add(ResourceType.OTHER);
                 }
             }
         }
@@ -413,20 +427,13 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 }
             }
 
-            List<String> resourceTypes = new ArrayList<>();
-            element.setResourceTypes(resourceTypes);
-            if (element.getVipUuid() != null) {
-                resourceTypes.add(ResourceType.VIP);
-            }
+            List<String> resourceTypes = element.getResourceTypes();
             if (element.getVmInstanceUuid() != null) {
                 if (VmType.USER_VM.equals(element.getVmInstanceType())) {
                     resourceTypes.add(ResourceType.VM);
                 } else {
                     resourceTypes.add(ResourceType.VROUTER);
                 }
-            }
-            if (resourceTypes.size() == 0) {
-                resourceTypes.add(ResourceType.OTHER);
             }
         }
 

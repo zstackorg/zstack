@@ -328,22 +328,21 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     private List<IpStatisticData> ipStatisticAll(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
         select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmInstanceUuid, it.name as vmInstanceName, it.type, uip.createDate
-        from (select uuid, ip, IpInLong, createDate
+        from (select uuid, ip, IpInLong, createDate, vmNicUuid
             from UsedIpVO
             where l3NetworkUuid = '{uuid}' [and ip like '{ip}']
             order by {sortBy} {direction}
             limit {limit} offset {start}) uip
                 left join (select uuid, name, usedIpUuid from VipVO
                     where l3NetworkUuid = '{l3Uuid}') vip on uip.uuid = vip.usedIpUuid
-                left join (select uuid, usedIpUuid, vmInstanceUuid from VmNicVO
-                    where l3NetworkUuid = '{l3Uuid}') nic on nic.usedIpUuid = uip.uuid
+                left join (select uuid, vmInstanceUuid from VmNicVO) nic on uip.vmNicUuid = nic.uuid
                 left join (select uuid, name, type from VmInstanceVO) it on nic.vmInstanceUuid = it.uuid
         order by {sortBy} {direction};
          */
 
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmUuid, it.name as vmName, it.type, uip.createDate ")
-                .append("from (select uuid, ip, ipInLong, createDate from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+                .append("from (select uuid, ip, ipInLong, createDate, vmNicUuid from UsedIpVO where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append('\'');
 
         if (StringUtils.isNotEmpty(msg.getIp())) {
@@ -357,9 +356,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append("') vip on uip.uuid = vip.usedIpUuid ")
                 .append("left join ")
-                .append("(select uuid, usedIpUuid, vmInstanceUuid from VmNicVO ")
-                .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
-                .append("') nic on nic.usedIpUuid = uip.uuid ")
+                .append("(select uuid, vmInstanceUuid from VmNicVO) nic on uip.vmNicUuid = nic.uuid ")
                 .append("left join ")
                 .append("(select uuid, name, type from VmInstanceVO) it on it.uuid = nic.vmInstanceUuid ")
                 .append("order by ").append(sortBy).append(' ').append(msg.getSortDirection());
@@ -526,15 +523,17 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     private List<IpStatisticData> ipStatisticVm(APIGetL3NetworkIpStatisticMsg msg, String sortBy) {
         /*
         select ip, vm.uuid, vm.name, vm.type, vm.state, vm.type, vm.createDate, ac.name as ownerName
-        from (select n.vmInstanceUuid, ip, accountUuid
-            from VmNicVO n,
-                AccountResourceRefVO a
-            where l3NetworkUuid = '{l3Uuid}'
+        from (select n.vmInstanceUuid, u.ip, accountUuid
+            from UsedIpVO u,
+                 VmNicVO n,
+                 AccountResourceRefVO a
+            where u.l3NetworkUuid = '{l3Uuid}'
                 and resourceType = 'VmNicVO'
                 and n.ip is not null
+                and u.vmNicUuid = n.uuid
                 and n.uuid = a.resourceUuid
                 [and a.accountUuid = '{accUuid}']
-                [and ip like '{ip}']
+                [and u.ip like '{ip}']
             order by {sortBy} {direction}
             [limit {limit} offset {start}]
             ) nic
@@ -548,18 +547,24 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         String accUuid = msg.getSession().getAccountUuid();
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select ip, vm.uuid, vm.name, vm.type, vm.state, vm.createDate, ac.name as ownerName ")
-                .append("from (select n.vmInstanceUuid, ip, accountUuid from VmNicVO n, AccountResourceRefVO a ")
-                .append("where l3NetworkUuid = '").append(msg.getL3NetworkUuid())
+                .append("from (select n.vmInstanceUuid, u.ip, accountUuid from UsedIpVO u, VmNicVO n, AccountResourceRefVO a ")
+                .append("where u.l3NetworkUuid = '").append(msg.getL3NetworkUuid())
                 .append('\'');
         if (StringUtils.isNotEmpty(msg.getIp())) {
-            sqlBuilder.append(" and ip like '").append(msg.getIp()).append('\'');
+            sqlBuilder.append(" and u.ip like '").append(msg.getIp()).append('\'');
         }
         if (!acntMgr.isAdmin(msg.getSession())) {
             sqlBuilder.append(" and a.accountUuid = '").append(accUuid).append('\'');
         }
-        sqlBuilder.append(" and n.ip is not null and n.uuid = a.resourceUuid");
+        sqlBuilder.append(" and resourceType = 'VmNicVO' and n.ip is not null and u.vmNicUuid = n.uuid and n.uuid = a.resourceUuid");
         if (byIp) {
-            sqlBuilder.append(" order by ").append(sortBy).append(' ').append(msg.getSortDirection())
+            String sortByExpression;
+            if ("INET_ATON(ip)".equals(sortBy)) {
+                sortByExpression = "INET_ATON(u.ip)";
+            } else {
+                sortByExpression = sortBy;
+            }
+            sqlBuilder.append(" order by ").append(sortByExpression).append(' ').append(msg.getSortDirection())
                     .append(" limit ").append(msg.getLimit()).append(" offset ").append(msg.getStart());
         }
 
@@ -595,12 +600,14 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             element.setVmInstanceType(type);
             if (StringUtils.isNotEmpty(type) && type.equals(VmType.APPLIANCE_VM) && StringUtils.isNotEmpty(uuid)) {
                 vrUuids.add(uuid);
+                element.setResourceTypes(Collections.singletonList(ResourceType.VROUTER));
+            } else {
+                element.setResourceTypes(Collections.singletonList(ResourceType.VM));
             }
 
             element.setState((String) result[4]);
             element.setCreateDate((Timestamp) result[5]);
             element.setOwnerName((String) result[6]);
-            element.setResourceTypes(Collections.singletonList(ResourceType.VM));
         }
 
         if (vmUuids.size() == 0) {

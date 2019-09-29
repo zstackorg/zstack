@@ -10,6 +10,7 @@ public interface IpStatisticConstants {
         String VIP = "Vip";
         String OTHER = "Other";
         String VROUTER = "VRouter";
+        String DHCP = "DHCP";
     }
 
     interface SortBy {

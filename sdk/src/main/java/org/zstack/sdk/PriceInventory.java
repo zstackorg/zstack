@@ -68,6 +68,14 @@ public class PriceInventory  {
         return this.lastOpDate;
     }
 
+    public java.lang.String tableUuid;
+    public void setTableUuid(java.lang.String tableUuid) {
+        this.tableUuid = tableUuid;
+    }
+    public java.lang.String getTableUuid() {
+        return this.tableUuid;
+    }
+
     public java.util.List pciDeviceOfferings;
     public void setPciDeviceOfferings(java.util.List pciDeviceOfferings) {
         this.pciDeviceOfferings = pciDeviceOfferings;

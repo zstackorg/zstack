@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class CreateResourcePriceAction extends AbstractAction {
+public class ChangeAccountPriceTableBindingAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class CreateResourcePriceAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.CreateResourcePriceResult value;
+        public org.zstack.sdk.ChangeAccountPriceTableBindingResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,25 +25,10 @@ public class CreateResourcePriceAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, validValues = {"cpu","memory","rootVolume","dataVolume","snapShot","gpu","pubIpVmNicBandwidthOut","pubIpVmNicBandwidthIn","pubIpVipBandwidthOut","pubIpVipBandwidthIn"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String resourceName;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String resourceUnit;
-
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String timeUnit;
-
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,9223372036854775807L}, noTrim = false)
-    public double price = 0.0;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String accountUuid;
 
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,9223372036854775807L}, noTrim = false)
-    public java.lang.Long dateInLong;
-
-    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String tableUuid;
 
     @Param(required = false)
@@ -84,8 +69,8 @@ public class CreateResourcePriceAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.CreateResourcePriceResult value = res.getResult(org.zstack.sdk.CreateResourcePriceResult.class);
-        ret.value = value == null ? new org.zstack.sdk.CreateResourcePriceResult() : value; 
+        org.zstack.sdk.ChangeAccountPriceTableBindingResult value = res.getResult(org.zstack.sdk.ChangeAccountPriceTableBindingResult.class);
+        ret.value = value == null ? new org.zstack.sdk.ChangeAccountPriceTableBindingResult() : value; 
 
         return ret;
     }
@@ -114,11 +99,11 @@ public class CreateResourcePriceAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "POST";
-        info.path = "/billings/prices";
+        info.httpMethod = "PUT";
+        info.path = "/billings/price-tables/{tableUuid}/accounts/{accountUuid}";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "params";
+        info.parameterName = "changeAccountPriceTableBinding";
         return info;
     }
 

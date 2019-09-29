@@ -40,6 +40,13 @@ ALTER TABLE SNSSmsReceiverVO
 
 ALTER TABLE AliyunSmsSNSTextTemplateVO
     ADD CONSTRAINT fkAliyunSmsSNSTextTemplateVOSNSTextTemplateVO FOREIGN KEY (uuid) REFERENCES SNSTextTemplateVO (uuid) ON UPDATE RESTRICT ON DELETE CASCADE;
+
+# Remove the unique constrain of name in HybridAccountVO
+ALTER TABLE HybridAccountVO
+    DROP INDEX name;
+ALTER TABLE HybridAccountVO
+    DROP INDEX name_2;
+
 CREATE TABLE IF NOT EXISTS `InstallPathRecycleVO` (
     `trashId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
     `resourceUuid` varchar(32) NOT NULL,

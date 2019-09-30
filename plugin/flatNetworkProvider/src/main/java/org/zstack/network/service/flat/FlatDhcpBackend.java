@@ -392,7 +392,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 } else if (result[1] != null) {
                     resourceTypes.add(ResourceType.VIP);
                 } else {
-                    resourceTypes.add(ResourceType.OTHER);
+                    resourceTypes.add(ResourceType.DHCP);
                 }
             } else {
                 boolean isOther = true;
@@ -412,7 +412,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                         vmUuids.add((String) result[3]);
                     }
                 if (isOther) {
-                    resourceTypes.add(ResourceType.OTHER);
+                    resourceTypes.add(ResourceType.DHCP);
                 }
             }
         }
@@ -537,6 +537,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             where u.l3NetworkUuid = '{l3Uuid}'
                 and resourceType = 'VmNicVO'
                 and n.ip is not null
+                and n.metadata is null
                 and u.vmNicUuid = n.uuid
                 and n.uuid = a.resourceUuid
                 [and a.accountUuid = '{accUuid}']
@@ -563,7 +564,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         if (!acntMgr.isAdmin(msg.getSession())) {
             sqlBuilder.append(" and a.accountUuid = '").append(accUuid).append('\'');
         }
-        sqlBuilder.append(" and resourceType = 'VmNicVO' and n.ip is not null and u.vmNicUuid = n.uuid and n.uuid = a.resourceUuid");
+        sqlBuilder.append(" and resourceType = 'VmNicVO' and n.metadata is null and n.ip is not null and u.vmNicUuid = n.uuid and n.uuid = a.resourceUuid");
         if (byIp) {
             String sortByExpression;
             if ("INET_ATON(ip)".equals(sortBy)) {
@@ -588,7 +589,6 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
         List<String> vmUuids = new ArrayList<>();
-        List<String> vrUuids = new ArrayList<>();
 
         for (Object[] result : results) {
             IpStatisticData element = new IpStatisticData();
@@ -605,12 +605,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
             String type = (String) result[3];
             element.setVmInstanceType(type);
-            if (StringUtils.isNotEmpty(type) && type.equals(VmType.APPLIANCE_VM) && StringUtils.isNotEmpty(uuid)) {
-                vrUuids.add(uuid);
-                element.setResourceTypes(Collections.singletonList(ResourceType.VROUTER));
-            } else {
-                element.setResourceTypes(Collections.singletonList(ResourceType.VM));
-            }
+            element.setResourceTypes(Collections.singletonList(ResourceType.VM));
 
             element.setState((String) result[4]);
             element.setCreateDate((Timestamp) result[5]);
@@ -623,8 +618,6 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
         List<VmInstanceVO> vms = Q.New(VmInstanceVO.class).in(VmInstanceVO_.uuid, vmUuids).list();
 
-        Map<String, Tuple> vrInfos = getApplianceVmInfo(vrUuids);
-
         Map<String, VmInstanceVO> vmvos = vms.stream()
                 .collect(Collectors.toMap(VmInstanceVO::getUuid, inv -> inv));
 
@@ -635,22 +628,9 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
             }
 
             List<VmNicVO> nics;
-            if (!vmvo.getType().equals(VmType.APPLIANCE_VM)) {
-                nics = vmvo.getVmNics().stream()
+            nics = vmvo.getVmNics().stream()
                         .filter(vmNic -> vmNic.getL3NetworkUuid().equals(vmvo.getDefaultL3NetworkUuid()))
                         .collect(Collectors.toList());
-            } else {
-                Tuple vrInfo = vrInfos.get(vmvo.getUuid());
-                if (vrInfo == null) {
-                    continue;
-                }
-                String routeL3Uuid = vrInfo.get(2, String.class);
-                nics = vmvo.getVmNics().stream()
-                        .filter(nic -> nic.getL3NetworkUuid().equals(routeL3Uuid))
-                        .collect(Collectors.toList());
-                element.setVmInstanceType(vrInfo.get(1, String.class));
-            }
-
 
             VmNicVO nic;
 
@@ -685,16 +665,18 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
     private Long countVMNicIp(APIGetL3NetworkIpStatisticMsg msg) {
         if (acntMgr.isAdmin(msg.getSession())) {
-            String sql = "select count(*) from VmNicVO where l3NetworkUuid = :l3Uuid";
+            String sql = "select count(*) from UsedIpVO u, VmNicVO n " +
+                    "where u.l3NetworkUuid = :l3Uuid and u.vmNicUuid = n.uuid";
             if (StringUtils.isNotEmpty(msg.getIp())) {
-                sql += " and ip like '" + msg.getIp() + '\'';
+                sql += " and u.ip like '" + msg.getIp() + '\'';
             }
             return SQL.New(sql, Long.class)
                     .param("l3Uuid", msg.getL3NetworkUuid())
                     .find();
         } else {
-            String sql = "select count(*) from VmNicVO n, AccountResourceRefVO a " +
-                    "where a.accountUuid = :accUuid and n.l3NetworkUuid = :l3Uuid and n.uuid = a.resourceUuid";
+            String sql = "select count(*) from UsedIpVO u, VmNicVO n, AccountResourceRefVO a " +
+                    "where a.accountUuid = :accUuid and u.l3NetworkUuid = :l3Uuid " +
+                    "and u.vmNicUuid = n.uuid and n.uuid = a.resourceUuid";
             if (StringUtils.isNotEmpty(msg.getIp())) {
                 sql += " and ip like '" + msg.getIp() + '\'';
             }

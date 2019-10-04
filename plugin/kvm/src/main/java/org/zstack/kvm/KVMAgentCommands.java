@@ -1530,6 +1530,29 @@ public class KVMAgentCommands {
     public static class DestroyVmResponse extends AgentResponse {
     }
 
+    public static class GetVmFirstBootDeviceCmd extends AgentCommand {
+        private String uuid;
+
+        public String getUuid() {
+            return uuid;
+        }
+
+        public void setUuid(String uuid) {
+            this.uuid = uuid;
+        }
+    }
+
+    public static class GetVmFirstBootDeviceResponse extends AgentResponse {
+        private String firstBootDevice;
+
+        public String getFirstBootDevice() {
+            return firstBootDevice;
+        }
+
+        public void setFirstBootDevice(String firstBootDevice) {
+            this.firstBootDevice = firstBootDevice;
+        }
+    }
 
     public static class VmSyncCmd extends AgentCommand {
     }

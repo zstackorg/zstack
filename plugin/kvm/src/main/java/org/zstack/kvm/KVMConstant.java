@@ -49,6 +49,7 @@ public interface KVMConstant {
     String KVM_UPDATE_HOST_OS_PATH = "/host/updateos";
     String KVM_HOST_UPDATE_DEPENDENCY_PATH = "/host/updatedependency";
     String HOST_SHUTDOWN = "/host/shutdown";
+    String KVM_GET_VM_FIRST_BOOT_DEVICE_PATH = "/vm/getfirstbootdevice";
 
     String ISO_TO = "kvm.isoto";
     String ANSIBLE_PLAYBOOK_NAME = "kvm.py";

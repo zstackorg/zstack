@@ -46,4 +46,8 @@ public class HostSystemTags {
 
     public static final String PAGE_TABLE_EXTENSION_DISABLED_TOKEN = "pageTableExtensionDisabled";
     public static PatternedSystemTag PAGE_TABLE_EXTENSION_DISABLED = new PatternedSystemTag(PAGE_TABLE_EXTENSION_DISABLED_TOKEN, HostVO.class);
+
+    public static String HOST_GUEST_TOOLS_VERSION_TOKEN = "guestToolsVersion";
+    public static PatternedSystemTag HOST_GUEST_TOOLS =
+            new PatternedSystemTag(String.format("GuestTools::{%s}", HOST_GUEST_TOOLS_VERSION_TOKEN), HostVO.class);
 }

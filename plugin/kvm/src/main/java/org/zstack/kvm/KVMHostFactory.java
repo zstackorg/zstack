@@ -22,6 +22,7 @@ import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.*;
 import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
+import org.zstack.header.message.AbstractBeforeDeliveryMessageInterceptor;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.message.NeedReplyMessage;
@@ -40,13 +41,11 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.form.Form;
 import org.zstack.utils.function.Function;
 import org.zstack.utils.function.ValidateFunction;
+import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.operr;
@@ -231,6 +230,7 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
     public boolean start() {
         deployAnsibleModule();
         populateExtensions();
+        installCommandRehasher();
 
         maxDataVolumeNum = KVMGlobalConfig.MAX_DATA_VOLUME_NUM.value(int.class);
         KVMGlobalConfig.MAX_DATA_VOLUME_NUM.installUpdateExtension(new GlobalConfigUpdateExtensionPoint() {
@@ -296,6 +296,26 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         }));
 
         return true;
+    }
+
+    private void installCommandRehasher() {
+        bus.installBeforeDeliveryMessageInterceptor(new AbstractBeforeDeliveryMessageInterceptor() {
+            @Override
+            public void beforeDeliveryMessage(Message msg) {
+                KVMHostHttpCallMsg kmsg = (KVMHostHttpCallMsg) msg;
+                Class<?> cmdClass;
+                try {
+                    cmdClass = Class.forName(kmsg.getCommandClassName());
+                } catch (ClassNotFoundException e) {
+                    logger.warn("get class failed", e);
+                    return;
+                }
+
+                if (cmdClass != kmsg.getCommand().getClass()) {
+                    kmsg.setCommand(JSONObjectUtil.rehashObject(kmsg.getCommand(), cmdClass));
+                }
+            }
+        }, Arrays.asList(KVMHostAsyncHttpCallMsg.class, KVMHostSyncHttpCallMsg.class));
     }
 
     private Map<String, String> getHostsWithDiffModel(String clusterUuid) {

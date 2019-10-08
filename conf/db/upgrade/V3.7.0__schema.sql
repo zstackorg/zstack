@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS `zstack`.`PortMirrorSessionMirrorNetworkRefVO` (
   `srcTunnelUuid` VARCHAR(32) NOT NULL,
   `dstTunnelUuid` VARCHAR(32),
   `internalId` int unsigned NOT NULL,
+  `internalSeq` int unsigned DEFAULT 0,
   `type` VARCHAR(32) DEFAULT 'GRE',
   `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
   `createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -72,3 +73,4 @@ CREATE TABLE IF NOT EXISTS `zstack`.`PortMirrorSessionMirrorNetworkRefVO` (
   CONSTRAINT `fkMirrorRefVOMirrorNetworkUsedIpVOSrc` FOREIGN KEY (`srcTunnelUuid`) REFERENCES `MirrorNetworkUsedIpVO` (`uuid`) ON DELETE CASCADE,
   CONSTRAINT `fkMirrorRefVOMirrorNetworkUsedIpVODst` FOREIGN KEY (`dstTunnelUuid`) REFERENCES `MirrorNetworkUsedIpVO` (`uuid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

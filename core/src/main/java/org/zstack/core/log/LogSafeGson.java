@@ -37,6 +37,7 @@ public class LogSafeGson {
             List<Field> siFs = FieldUtils.getDeclaringClassFields(HasSensitiveInfo.class, si);
             for (Field f : siFs) {
                 if (!f.isAnnotationPresent(NoLogging.class)) {
+                    f.setAccessible(true);
                     autoFields.computeIfAbsent(si, k -> new HashSet<>()).add(f);
                 }
             }

@@ -122,4 +122,8 @@ public class VmSystemTags {
             String.format("vmMachineType::{%s}", MACHINE_TYPE_TOKEN),
             VmInstanceVO.class
     );
+
+    public static String VM_GUEST_TOOLS_VERSION_TOKEN = "guestToolsVersion";
+    public static PatternedSystemTag VM_GUEST_TOOLS =
+            new PatternedSystemTag(String.format("GuestTools::{%s}", VM_GUEST_TOOLS_VERSION_TOKEN), VmInstanceVO.class);
 }

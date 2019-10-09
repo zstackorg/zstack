@@ -29,6 +29,7 @@ public class APIUpdateUserMsg extends APIMessage implements AccountMessage, HasS
     @APIParam(maxLength = 2048, required = false)
     private String description;
     @APIParam(maxLength = 255, required = false)
+    @NoLogging
     private String oldPassword;
 
     public String getUuid() {

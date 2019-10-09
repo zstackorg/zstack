@@ -27,7 +27,6 @@ public class KVMHostInventory extends HostInventory implements HasSensitiveInfo 
      */
     @GsonTransient
     @APINoSee
-    @NoJsonSchema
     private String password;
 
     private Integer sshPort;

@@ -26,6 +26,7 @@ public class APIUpdateAccountMsg extends APIMessage implements AccountMessage, H
     @APIParam(maxLength = 2048, required = false)
     private String description;
     @APIParam(maxLength = 255, required = false)
+    @NoLogging
     private String oldPassword;
 
     public String getPassword() {

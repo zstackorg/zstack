@@ -37,6 +37,14 @@ public class PortMirrorSessionInventory  {
         return this.status;
     }
 
+    public java.lang.Long internalId;
+    public void setInternalId(java.lang.Long internalId) {
+        this.internalId = internalId;
+    }
+    public java.lang.Long getInternalId() {
+        return this.internalId;
+    }
+
     public java.lang.String srcEndPoint;
     public void setSrcEndPoint(java.lang.String srcEndPoint) {
         this.srcEndPoint = srcEndPoint;

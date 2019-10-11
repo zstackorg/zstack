@@ -2039,4 +2039,9 @@ public class KVMAgentCommands {
 
     public static class ShutdownHostResponse extends AgentResponse {
     }
+
+    public static class TransmitVmOperationToMnCmd {
+        public String uuid;
+        public String operation;
+    }
 }

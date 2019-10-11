@@ -84,4 +84,12 @@ public class SdnControllerInventory  {
         return this.vniRanges;
     }
 
+    public java.util.List vxlanPools;
+    public void setVxlanPools(java.util.List vxlanPools) {
+        this.vxlanPools = vxlanPools;
+    }
+    public java.util.List getVxlanPools() {
+        return this.vxlanPools;
+    }
+
 }

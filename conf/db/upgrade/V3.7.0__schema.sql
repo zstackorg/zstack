@@ -33,7 +33,7 @@ ALTER TABLE PriceVO modify column tableUuid VARCHAR(32) NOT NULL;
 
 CREATE TABLE IF NOT EXISTS `zstack`.`AccountPriceTableRefVO` (
 `tableUuid` varchar(32) NOT NULL,
-`accountUuid` varchar(32) NOT NULL,
+`accountUuid` varchar(32) NOT NULL UNIQUE,
 `lastOpDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
 `createDate` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
 PRIMARY KEY (`tableUuid`,`accountUuid`),

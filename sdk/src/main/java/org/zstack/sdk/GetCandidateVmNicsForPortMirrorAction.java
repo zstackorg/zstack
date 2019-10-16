@@ -88,7 +88,7 @@ public class GetCandidateVmNicsForPortMirrorAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/port-mirrors/{portMirrorUuid}/vm-instances/candidate-nics/{SessionType}";
+        info.path = "/port-mirrors/{portMirrorUuid}/vm-instances/candidate-nics/{type}";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

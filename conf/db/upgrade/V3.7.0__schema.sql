@@ -31,6 +31,8 @@ ALTER TABLE PriceVO ADD CONSTRAINT fkPriceVOPriceTableVO FOREIGN KEY (tableUuid)
 UPDATE PriceVO set tableUuid = "12a087c058cc45d5bf80a605f17c0083";
 ALTER TABLE PriceVO modify column tableUuid VARCHAR(32) NOT NULL;
 
+ALTER TABLE PriceVO add column endDateInLong bigint unsigned DEFAULT NULL;
+
 CREATE TABLE IF NOT EXISTS `zstack`.`AccountPriceTableRefVO` (
 `tableUuid` varchar(32) NOT NULL,
 `accountUuid` varchar(32) NOT NULL UNIQUE,

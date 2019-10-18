@@ -52,6 +52,14 @@ public class PriceInventory  {
         return this.dateInLong;
     }
 
+    public java.lang.Long endDateInLong;
+    public void setEndDateInLong(java.lang.Long endDateInLong) {
+        this.endDateInLong = endDateInLong;
+    }
+    public java.lang.Long getEndDateInLong() {
+        return this.endDateInLong;
+    }
+
     public java.sql.Timestamp createDate;
     public void setCreateDate(java.sql.Timestamp createDate) {
         this.createDate = createDate;

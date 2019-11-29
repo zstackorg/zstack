@@ -5095,8 +5095,12 @@ public class VmInstanceBase extends AbstractVmInstance {
 
         if (msg instanceof HaStartVmInstanceMsg) {
             spec.setSoftAvoidHostUuids(((HaStartVmInstanceMsg) msg).getSoftAvoidHostUuids());
+            spec.setAllocationScene(AllocationScene.HA);
         } else if (msg instanceof StartVmInstanceMsg) {
             spec.setSoftAvoidHostUuids(((StartVmInstanceMsg) msg).getSoftAvoidHostUuids());
+            if (((StartVmInstanceMsg) msg).getAllocationScene() != null) {
+                spec.setAllocationScene(((StartVmInstanceMsg) msg).getAllocationScene());
+            }
         }
 
         if (spec.getDestNics().isEmpty()) {

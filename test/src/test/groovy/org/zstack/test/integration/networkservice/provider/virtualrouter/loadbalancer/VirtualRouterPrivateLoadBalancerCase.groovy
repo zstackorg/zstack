@@ -110,6 +110,27 @@ class VirtualRouterPrivateLoadBalancerCase extends SubCase{
                     }
 
                     l3Network {
+                        name = "l3-2"
+
+                        service {
+                            provider = VyosConstants.VYOS_ROUTER_PROVIDER_TYPE
+                            types = [NetworkServiceType.DHCP.toString(),
+                                     NetworkServiceType.DNS.toString(),
+                                     NetworkServiceType.SNAT.toString(),
+                                     PortForwardingConstant.PORTFORWARDING_NETWORK_SERVICE_TYPE,
+                                     LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING,
+                                     EipConstant.EIP_NETWORK_SERVICE_TYPE]
+                        }
+
+                        ip {
+                            startIp = "192.168.200.10"
+                            endIp = "192.168.200.100"
+                            netmask = "255.255.255.0"
+                            gateway = "192.168.200.1"
+                        }
+                    }
+
+                    l3Network {
                         name = "pubL3"
 
                         ip {
@@ -148,6 +169,12 @@ class VirtualRouterPrivateLoadBalancerCase extends SubCase{
                 name = "vm2"
                 useImage("image")
                 useL3Networks("l3")
+                useInstanceOffering("instanceOffering")
+            }
+            vm {
+                name = "vm3"
+                useImage("image")
+                useL3Networks("l3-2")
                 useInstanceOffering("instanceOffering")
             }
         }

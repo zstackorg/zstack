@@ -1499,14 +1499,23 @@ public class VirtualRouterManagerImpl extends AbstractService implements Virtual
                     managements.add((String) tuple.get(0));
                 }
 
-                List<String> peerL3Uuids = sql("select l3NetworkUuid from VmNicVO"  +
-                        " where vmInstanceUuid in (select uuid from ApplianceVmVO where defaultRouteL3NetworkUuid in (:publics))" +
-                        " and l3NetworkUuid not in (:publics)" +
-                        " and l3NetworkUuid not in (:managements)")
-                        .param("publics",publics)
-                        .param("managements",managements).list();
-
-
+                List<String> peerL3Uuids;
+                if (L3NetworkCategory.Public.equals(vipNetwork.getCategory())) {
+                    peerL3Uuids = sql("select l3NetworkUuid from VmNicVO" +
+                            " where vmInstanceUuid in (select uuid from ApplianceVmVO where defaultRouteL3NetworkUuid in (:publics))" +
+                            " and l3NetworkUuid not in (:publics)" +
+                            " and l3NetworkUuid not in (:managements)")
+                            .param("publics", publics)
+                            .param("managements", managements).list();
+                } else {
+                    peerL3Uuids = sql("select l3NetworkUuid from VmNicVO" +
+                            " where vmInstanceUuid in (select vm.uuid from ApplianceVmVO vm, VmNicVO nic where vm.defaultRouteL3NetworkUuid in (:publics) and nic.vmInstanceUuid = vm.uuid and nic.l3NetworkUuid = (:vipNetwork))" +
+                            " and l3NetworkUuid not in (:publics)" +
+                            " and l3NetworkUuid not in (:managements)")
+                            .param("publics", publics)
+                            .param("vipNetwork", vipNetwork.getUuid())
+                            .param("managements", managements).list();
+                }
                 return ret.stream().filter(nic -> peerL3Uuids.contains(nic.getL3NetworkUuid())).collect(Collectors.toList());
 
             }

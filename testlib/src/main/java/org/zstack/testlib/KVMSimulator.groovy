@@ -2,7 +2,6 @@ package org.zstack.testlib
 
 import org.springframework.http.HttpEntity
 import org.zstack.core.db.Q
-import org.zstack.core.db.SQL
 import org.zstack.header.Constants
 import org.zstack.header.storage.primary.PrimaryStorageVO
 import org.zstack.header.storage.primary.PrimaryStorageVO_
@@ -20,7 +19,6 @@ import org.zstack.utils.data.SizeUnit
 import org.zstack.utils.gson.JSONObjectUtil
 
 import javax.persistence.Tuple
-
 /**
  * Created by xing5 on 2017/6/6.
  */
@@ -267,6 +265,10 @@ class KVMSimulator implements Simulator {
 
         spec.simulator(KVMConstant.HOST_UPDATE_SPICE_CHANNEL_CONFIG_PATH) {
             return new KVMAgentCommands.UpdateSpiceChannelConfigResponse()
+        }
+
+        spec.simulator(KVMConstant.KVM_SCAN_VM_PORT_STATUS) {
+            return new KVMAgentCommands.ScanVmPortResponse()
         }
     }
 }

@@ -4977,6 +4977,7 @@ public class VmInstanceBase extends AbstractVmInstance {
         final VmInstanceState originState = self.getState();
         changeVmStateInDb(VmInstanceStateEvent.migrating);
         spec.setMessage((Message) msg);
+        spec.setAllocationScene(msg.getAllocationScene());
         FlowChain chain = getMigrateVmWorkFlowChain(inv);
 
         setFlowMarshaller(chain);
@@ -5095,7 +5096,7 @@ public class VmInstanceBase extends AbstractVmInstance {
 
         if (msg instanceof HaStartVmInstanceMsg) {
             spec.setSoftAvoidHostUuids(((HaStartVmInstanceMsg) msg).getSoftAvoidHostUuids());
-            spec.setAllocationScene(AllocationScene.HA);
+            spec.setAllocationScene(AllocationScene.Auto);
         } else if (msg instanceof StartVmInstanceMsg) {
             spec.setSoftAvoidHostUuids(((StartVmInstanceMsg) msg).getSoftAvoidHostUuids());
             if (((StartVmInstanceMsg) msg).getAllocationScene() != null) {

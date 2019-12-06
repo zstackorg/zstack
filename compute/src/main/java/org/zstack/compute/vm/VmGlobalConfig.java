@@ -60,7 +60,7 @@ public class VmGlobalConfig {
     @BindResourceConfig({VmInstanceVO.class})
     public static GlobalConfig RESOURCE_BINDING_STRATEGY = new GlobalConfig(CATEGORY, "resourceBinding.strategy");
 
-    @GlobalConfigValidation(validValues = {"HA", "All"})
+    @GlobalConfigValidation(validValues = {"Auto", "All"})
     @BindResourceConfig({VmInstanceVO.class})
     public static GlobalConfig RESOURCE_BINDING_SCENE = new GlobalConfig(CATEGORY, "resourceBinding.Scene");
 }

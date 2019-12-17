@@ -668,7 +668,7 @@ public class VirtualRouter extends ApplianceVmBase {
             * this will result the vip delete action will not done in agent before detach nic and
             * not delete some configure such as vip QoS, ifbx.
             */
-            List<VipVO> vips = SQL.New("select vip from VipVO vip, VipPeerL3NetworkRefVO ref " +
+            List<VipVO> vips = SQL.New("select distinct vip from VipVO vip, VipPeerL3NetworkRefVO ref " +
                     "where ref.vipUuid = vip.uuid and ref.l3NetworkUuid in (:routerNetworks) " +
                     "and vip.l3NetworkUuid = :l3Uuid")
                                   .param("l3Uuid", nic.getL3NetworkUuid())

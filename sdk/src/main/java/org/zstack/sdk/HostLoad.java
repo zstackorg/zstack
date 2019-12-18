@@ -12,19 +12,19 @@ public class HostLoad  {
         return this.hostUuid;
     }
 
-    public java.lang.Integer usedCPUPercent;
-    public void setUsedCPUPercent(java.lang.Integer usedCPUPercent) {
+    public java.lang.Float usedCPUPercent;
+    public void setUsedCPUPercent(java.lang.Float usedCPUPercent) {
         this.usedCPUPercent = usedCPUPercent;
     }
-    public java.lang.Integer getUsedCPUPercent() {
+    public java.lang.Float getUsedCPUPercent() {
         return this.usedCPUPercent;
     }
 
-    public java.lang.Integer usedMemoryPercent;
-    public void setUsedMemoryPercent(java.lang.Integer usedMemoryPercent) {
+    public java.lang.Float usedMemoryPercent;
+    public void setUsedMemoryPercent(java.lang.Float usedMemoryPercent) {
         this.usedMemoryPercent = usedMemoryPercent;
     }
-    public java.lang.Integer getUsedMemoryPercent() {
+    public java.lang.Float getUsedMemoryPercent() {
         return this.usedMemoryPercent;
     }
 

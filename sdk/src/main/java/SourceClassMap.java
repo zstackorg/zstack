@@ -74,11 +74,11 @@ public class SourceClassMap {
 			put("org.zstack.core.errorcode.ElaborationContent", "org.zstack.sdk.ElaborationContent");
 			put("org.zstack.core.gc.GarbageCollectorInventory", "org.zstack.sdk.GarbageCollectorInventory");
 			put("org.zstack.core.jsonlabel.JsonLabelInventory", "org.zstack.sdk.JsonLabelInventory");
-			put("org.zstack.drs.DRSAutomationLevel", "org.zstack.sdk.DRSAutomationLevel");
-			put("org.zstack.drs.DRSState", "org.zstack.sdk.DRSState");
-			put("org.zstack.drs.DRSVmMigrationStatus", "org.zstack.sdk.DRSVmMigrationStatus");
 			put("org.zstack.drs.api.HostLoad", "org.zstack.sdk.HostLoad");
 			put("org.zstack.drs.api.Threshold", "org.zstack.sdk.Threshold");
+			put("org.zstack.drs.data.DRSAutomationLevel", "org.zstack.sdk.DRSAutomationLevel");
+			put("org.zstack.drs.data.DRSState", "org.zstack.sdk.DRSState");
+			put("org.zstack.drs.data.DRSVmMigrationStatus", "org.zstack.sdk.DRSVmMigrationStatus");
 			put("org.zstack.drs.entity.ClusterDRSInventory", "org.zstack.sdk.ClusterDRSInventory");
 			put("org.zstack.drs.entity.DRSAdviceInventory", "org.zstack.sdk.DRSAdviceInventory");
 			put("org.zstack.drs.entity.DRSVmMigrationActivityInventory", "org.zstack.sdk.DRSVmMigrationActivityInventory");
@@ -587,10 +587,10 @@ public class SourceClassMap {
 			put("org.zstack.sdk.CreateDataVolumeTemplateFromVolumeSnapshotFailure", "org.zstack.header.image.APICreateDataVolumeTemplateFromVolumeSnapshotEvent$Failure");
 			put("org.zstack.sdk.CreateRootVolumeTemplateFromVolumeSnapshotFailure", "org.zstack.header.image.APICreateRootVolumeTemplateFromVolumeSnapshotEvent$Failure");
 			put("org.zstack.sdk.DRSAdviceInventory", "org.zstack.drs.entity.DRSAdviceInventory");
-			put("org.zstack.sdk.DRSAutomationLevel", "org.zstack.drs.DRSAutomationLevel");
-			put("org.zstack.sdk.DRSState", "org.zstack.drs.DRSState");
+			put("org.zstack.sdk.DRSAutomationLevel", "org.zstack.drs.data.DRSAutomationLevel");
+			put("org.zstack.sdk.DRSState", "org.zstack.drs.data.DRSState");
 			put("org.zstack.sdk.DRSVmMigrationActivityInventory", "org.zstack.drs.entity.DRSVmMigrationActivityInventory");
-			put("org.zstack.sdk.DRSVmMigrationStatus", "org.zstack.drs.DRSVmMigrationStatus");
+			put("org.zstack.sdk.DRSVmMigrationStatus", "org.zstack.drs.data.DRSVmMigrationStatus");
 			put("org.zstack.sdk.DahoCloudConnectionInventory", "org.zstack.header.daho.process.DahoCloudConnectionInventory");
 			put("org.zstack.sdk.DahoConnectionInventory", "org.zstack.header.daho.process.DahoConnectionInventory");
 			put("org.zstack.sdk.DahoVllVbrRefInventory", "org.zstack.header.daho.process.DahoVllVbrRefInventory");

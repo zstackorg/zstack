@@ -4340,6 +4340,11 @@ public class VmInstanceBase extends AbstractVmInstance {
                     update = true;
                 }
 
+                if (msg.getAllocatorStrategy() != null) {
+                    self.setAllocatorStrategy(msg.getAllocatorStrategy());
+                    update = true;
+                }
+
                 if (update) {
                     dbf.update(self);
                 }

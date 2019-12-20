@@ -3038,12 +3038,11 @@ public class KVMHost extends HostBase implements Host {
                                     createTagWithoutNonValue(HostSystemTags.CPU_GHZ, HostSystemTags.CPU_GHZ_TOKEN, ret.getCpuGHz(), true);
                                     createTagWithoutNonValue(HostSystemTags.SYSTEM_PRODUCT_NAME, HostSystemTags.SYSTEM_PRODUCT_NAME_TOKEN, ret.getSystemProductName(), true);
                                     createTagWithoutNonValue(HostSystemTags.SYSTEM_SERIAL_NUMBER, HostSystemTags.SYSTEM_SERIAL_NUMBER_TOKEN, ret.getSystemSerialNumber(), true);
+                                    createTagWithoutNonValue(HostSystemTags.HOSTNAME, HostSystemTags.HOSTNAME_TOKEN, ret.getHostname(), true);
 
                                     if (ret.getLibvirtVersion().compareTo(KVMConstant.MIN_LIBVIRT_VIRTIO_SCSI_VERSION) >= 0) {
                                         recreateNonInherentTag(KVMSystemTags.VIRTIO_SCSI);
                                     }
-
-
 
                                     List<String> ips = ret.getIpAddresses();
                                     if (ips != null) {

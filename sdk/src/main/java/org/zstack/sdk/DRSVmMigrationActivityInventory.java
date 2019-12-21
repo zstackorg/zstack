@@ -1,6 +1,6 @@
 package org.zstack.sdk;
 
-import org.zstack.sdk.DRSVmMigrationStatus;
+
 
 public class DRSVmMigrationActivityInventory  {
 
@@ -44,11 +44,11 @@ public class DRSVmMigrationActivityInventory  {
         return this.vmTargetHostUuid;
     }
 
-    public DRSVmMigrationStatus status;
-    public void setStatus(DRSVmMigrationStatus status) {
+    public java.lang.String status;
+    public void setStatus(java.lang.String status) {
         this.status = status;
     }
-    public DRSVmMigrationStatus getStatus() {
+    public java.lang.String getStatus() {
         return this.status;
     }
 

@@ -78,7 +78,6 @@ public class SourceClassMap {
 			put("org.zstack.drs.api.Threshold", "org.zstack.sdk.Threshold");
 			put("org.zstack.drs.data.DRSAutomationLevel", "org.zstack.sdk.DRSAutomationLevel");
 			put("org.zstack.drs.data.DRSState", "org.zstack.sdk.DRSState");
-			put("org.zstack.drs.data.DRSVmMigrationStatus", "org.zstack.sdk.DRSVmMigrationStatus");
 			put("org.zstack.drs.entity.ClusterDRSInventory", "org.zstack.sdk.ClusterDRSInventory");
 			put("org.zstack.drs.entity.DRSAdviceInventory", "org.zstack.sdk.DRSAdviceInventory");
 			put("org.zstack.drs.entity.DRSVmMigrationActivityInventory", "org.zstack.sdk.DRSVmMigrationActivityInventory");
@@ -590,7 +589,6 @@ public class SourceClassMap {
 			put("org.zstack.sdk.DRSAutomationLevel", "org.zstack.drs.data.DRSAutomationLevel");
 			put("org.zstack.sdk.DRSState", "org.zstack.drs.data.DRSState");
 			put("org.zstack.sdk.DRSVmMigrationActivityInventory", "org.zstack.drs.entity.DRSVmMigrationActivityInventory");
-			put("org.zstack.sdk.DRSVmMigrationStatus", "org.zstack.drs.data.DRSVmMigrationStatus");
 			put("org.zstack.sdk.DahoCloudConnectionInventory", "org.zstack.header.daho.process.DahoCloudConnectionInventory");
 			put("org.zstack.sdk.DahoConnectionInventory", "org.zstack.header.daho.process.DahoConnectionInventory");
 			put("org.zstack.sdk.DahoVllVbrRefInventory", "org.zstack.header.daho.process.DahoVllVbrRefInventory");

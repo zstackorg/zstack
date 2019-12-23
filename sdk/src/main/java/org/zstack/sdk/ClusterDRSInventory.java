@@ -29,11 +29,11 @@ public class ClusterDRSInventory  {
         return this.automationLevel;
     }
 
-    public java.lang.String thresholds;
-    public void setThresholds(java.lang.String thresholds) {
+    public java.util.List thresholds;
+    public void setThresholds(java.util.List thresholds) {
         this.thresholds = thresholds;
     }
-    public java.lang.String getThresholds() {
+    public java.util.List getThresholds() {
         return this.thresholds;
     }
 

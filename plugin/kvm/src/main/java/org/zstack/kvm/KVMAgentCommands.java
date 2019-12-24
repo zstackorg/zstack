@@ -1814,6 +1814,7 @@ public class KVMAgentCommands {
         private String storageMigrationPolicy;
         private String srcHostIp;
         private boolean useNuma;
+        private boolean useTls;
         private boolean migrateFromDestination;
         private boolean autoConverge;
         private Long timeout; // in seconds
@@ -1872,6 +1873,14 @@ public class KVMAgentCommands {
 
         public void setMigrateFromDestination(boolean migrateFromDestination) {
             this.migrateFromDestination = migrateFromDestination;
+        }
+
+        public boolean isUseTls() {
+            return useTls;
+        }
+
+        public void setUseTls(boolean useTls) {
+            this.useTls = useTls;
         }
 
         public Long getTimeout() {

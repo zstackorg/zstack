@@ -1286,6 +1286,7 @@ public class KVMHost extends HostBase implements Host {
                         cmd.setVmUuid(vmUuid);
                         cmd.setAutoConverge(autoConverage);
                         cmd.setUseNuma(rcf.getResourceConfigValue(VmGlobalConfig.NUMA, vmUuid, Boolean.class));
+                        cmd.setUseTls(KVMGlobalConfig.ENABLE_QEMU_NATIVE_TLS.value(Boolean.class));
                         cmd.setTimeout(timeoutManager.getTimeout());
 
                         UriComponentsBuilder ub = UriComponentsBuilder.fromHttpUrl(migrateVmPath);

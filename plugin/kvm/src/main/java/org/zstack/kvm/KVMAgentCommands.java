@@ -316,6 +316,7 @@ public class KVMAgentCommands {
         private String cpuModelName;
         private String cpuGHz;
         private String hostCpuModelName;
+        private String hostname;
         private String systemProductName;
         private String systemSerialNumber;
         private List<String> ipAddresses;
@@ -398,6 +399,14 @@ public class KVMAgentCommands {
 
         public String getHostCpuModelName() {
             return hostCpuModelName;
+        }
+
+        public String getHostname() {
+            return hostname;
+        }
+
+        public void setHostname(String hostname) {
+            this.hostname = hostname;
         }
 
         public String getSystemProductName() {

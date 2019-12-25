@@ -14,10 +14,10 @@ destdir="$2"
 nodename="$3"
 nodeip="$4"
 
-serverkey="$destdir/$nodename_serverkey.pem"
-clientkey="$destdir/$nodename_clientkey.pem"
-servercert="$destdir/$nodename_servercert.pem"
-clientcert="$destdir/$nodename_clientcert.pem"
+serverkey="$destdir/${nodename}_serverkey.pem"
+clientkey="$destdir/${nodename}_clientkey.pem"
+servercert="$destdir/${nodename}_servercert.pem"
+clientcert="$destdir/${nodename}_clientcert.pem"
 
 test -s "$serverkey" && test -s "$servercert" && \
     { echo "Server key already generated"; exit 0; }

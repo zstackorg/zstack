@@ -2559,14 +2559,6 @@ public class VmInstanceBase extends AbstractVmInstance {
                 spec.setBootOrders(list(VmBootDevice.HardDisk.toString()));
             } else {
                 spec.setBootOrders(list(order.split(",")));
-                if (VmSystemTags.BOOT_ORDER_ONCE.hasTag(self.getUuid(), VmInstanceVO.class)) {
-                    VmSystemTags.BOOT_ORDER.deleteInherentTag(self.getUuid());
-                    VmSystemTags.BOOT_ORDER_ONCE.deleteInherentTag(self.getUuid());
-                }
-                if (VmSystemTags.CDROM_BOOT_ONCE.hasTag(self.getUuid(), VmInstanceVO.class)) {
-                    VmSystemTags.BOOT_ORDER.deleteInherentTag(self.getUuid());
-                    VmSystemTags.CDROM_BOOT_ONCE.deleteInherentTag(self.getUuid());
-                }
             }
         }
     }

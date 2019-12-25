@@ -350,6 +350,42 @@ class SetVmBootOrderCase extends SubCase {
             assert nic.getBootOrder() == 0
         })
 
+        setVmBootOrder {
+            uuid = vm.uuid
+            bootOrder = asList(VmBootDevice.CdRom.toString(), VmBootDevice.HardDisk.toString())
+            systemTags = ["bootOrderOnce::true"]
+        }
+
+        stopVmInstance {
+            uuid = vm.uuid
+            type = "cold"
+        }
+
+        res = getVmBootOrder {
+            uuid = vm.uuid
+        }
+
+        assert res.orders.size() == 2
+        assert res.orders.get(0) == VmBootDevice.CdRom.toString()
+        assert res.orders.get(1) == VmBootDevice.HardDisk.toString()
+        assert "true" == VmSystemTags.BOOT_ORDER_ONCE.getTokenByResourceUuid(vm.uuid, VmSystemTags.BOOT_ORDER_ONCE_TOKEN)
+        assert "CdRom,HardDisk" == VmSystemTags.BOOT_ORDER.getTokenByResourceUuid(vm.uuid, VmSystemTags.BOOT_ORDER_TOKEN)
+
+        startVmInstance {
+            uuid = vm.uuid
+        }
+
+        res = getVmBootOrder {
+            uuid = vm.uuid
+        }
+
+        assert res.orders.size() == 3
+        assert res.orders.get(0) == VmBootDevice.HardDisk.toString()
+        assert res.orders.get(1) == VmBootDevice.CdRom.toString()
+        assert res.orders.get(2) == VmBootDevice.Network.toString()
+        assert null == VmSystemTags.BOOT_ORDER_ONCE.getTokenByResourceUuid(vm.uuid, VmSystemTags.BOOT_ORDER_ONCE_TOKEN)
+        assert null == VmSystemTags.BOOT_ORDER.getTokenByResourceUuid(vm.uuid, VmSystemTags.BOOT_ORDER_TOKEN)
+
         //test cdromBootOnce in case of upgrade
         SystemTagInventory tag1 = createSystemTag {
             resourceType = VmInstanceVO.class.simpleName

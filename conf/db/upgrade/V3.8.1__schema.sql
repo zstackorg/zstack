@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS `zstack`.`DRSAdviceVO` (
     `createDate` timestamp not null default '0000-00-00 00:00:00',
     `lastOpDate` timestamp not null default '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`uuid`),
+    KEY `drsUuid` (`drsUuid`),
+    KEY `adviceGroupUuid` (`adviceGroupUuid`),
     CONSTRAINT `fkDRSAdviceVOClusterDRSVO` FOREIGN KEY (`drsUuid`) REFERENCES `ClusterDRSVO` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -38,9 +40,13 @@ CREATE TABLE IF NOT EXISTS `zstack`.`DRSVmMigrationActivityVO` (
     `endDate` datetime default null,
     `adviceUuid` varchar(32) default null,
     `reason`  varchar(255) not null,
+    `cause` varchar(64) not null,
     `result`  varchar(1024) default null,
     `createDate` timestamp not null default '0000-00-00 00:00:00',
     `lastOpDate` timestamp not null default '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`uuid`),
+    KEY `vmUuid` (`vmUuid`),
+    KEY `drsUuid` (`drsUuid`),
+    KEY `adviceUuid` (`adviceUuid`),
     CONSTRAINT `fkDRSVmMigrationActivityVOClusterDRSVO` FOREIGN KEY (`drsUuid`) REFERENCES `ClusterDRSVO` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

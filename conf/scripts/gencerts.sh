@@ -53,7 +53,7 @@ echo "organization = zstack"   > $TMP
 echo "country = CN"           >> $TMP
 echo "state = Shanghai"       >> $TMP
 echo "locality = Shanghai"    >> $TMP
-echo "tls_www_server"         >> $TMP
+echo "tls_www_client"         >> $TMP
 echo "encryption_key"         >> $TMP
 echo "signing_key"            >> $TMP
 echo "expiration_days = 3650" >> $TMP

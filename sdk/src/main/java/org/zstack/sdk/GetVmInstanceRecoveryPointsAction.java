@@ -28,6 +28,12 @@ public class GetVmInstanceRecoveryPointsAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String startTime;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String endTime;
+
     @Param(required = false)
     public java.lang.Integer limit = 1000;
 

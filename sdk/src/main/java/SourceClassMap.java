@@ -258,7 +258,9 @@ public class SourceClassMap {
 			put("org.zstack.header.storage.backup.VolumeBackupStorageRefInventory", "org.zstack.sdk.VolumeBackupStorageRefInventory");
 			put("org.zstack.header.storage.cdp.CdpPolicyInventory", "org.zstack.sdk.CdpPolicyInventory");
 			put("org.zstack.header.storage.cdp.CdpPolicyRefInventory", "org.zstack.sdk.CdpPolicyRefInventory");
+			put("org.zstack.header.storage.cdp.CdpPolicyState", "org.zstack.sdk.CdpPolicyState");
 			put("org.zstack.header.storage.cdp.CdpTaskInventory", "org.zstack.sdk.CdpTaskInventory");
+			put("org.zstack.header.storage.cdp.CdpTaskStatus", "org.zstack.sdk.CdpTaskStatus");
 			put("org.zstack.header.storage.cdp.RecoveryPointInfo", "org.zstack.sdk.RecoveryPointInfo");
 			put("org.zstack.header.storage.database.backup.DatabaseBackupInventory", "org.zstack.sdk.databasebackup.DatabaseBackupInventory");
 			put("org.zstack.header.storage.database.backup.DatabaseBackupStorageRefInventory", "org.zstack.sdk.databasebackup.DatabaseBackupStorageRefInventory");
@@ -686,7 +688,9 @@ public class SourceClassMap {
 			put("org.zstack.sdk.CdpBackupStorageInventory", "org.zstack.storage.cdp.CdpBackupStorageInventory");
 			put("org.zstack.sdk.CdpPolicyInventory", "org.zstack.header.storage.cdp.CdpPolicyInventory");
 			put("org.zstack.sdk.CdpPolicyRefInventory", "org.zstack.header.storage.cdp.CdpPolicyRefInventory");
+			put("org.zstack.sdk.CdpPolicyState", "org.zstack.header.storage.cdp.CdpPolicyState");
 			put("org.zstack.sdk.CdpTaskInventory", "org.zstack.header.storage.cdp.CdpTaskInventory");
+			put("org.zstack.sdk.CdpTaskStatus", "org.zstack.header.storage.cdp.CdpTaskStatus");
 			put("org.zstack.sdk.CephBackupStorageInventory", "org.zstack.storage.ceph.backup.CephBackupStorageInventory");
 			put("org.zstack.sdk.CephBackupStorageMonInventory", "org.zstack.storage.ceph.backup.CephBackupStorageMonInventory");
 			put("org.zstack.sdk.CephPrimaryStorageInventory", "org.zstack.storage.ceph.primary.CephPrimaryStorageInventory");

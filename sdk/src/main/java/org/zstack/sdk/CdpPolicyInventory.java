@@ -1,6 +1,6 @@
 package org.zstack.sdk;
 
-
+import org.zstack.sdk.CdpPolicyState;
 
 public class CdpPolicyInventory  {
 
@@ -18,6 +18,14 @@ public class CdpPolicyInventory  {
     }
     public java.lang.String getName() {
         return this.name;
+    }
+
+    public CdpPolicyState state;
+    public void setState(CdpPolicyState state) {
+        this.state = state;
+    }
+    public CdpPolicyState getState() {
+        return this.state;
     }
 
     public java.lang.String description;
@@ -50,6 +58,22 @@ public class CdpPolicyInventory  {
     }
     public java.lang.Integer getRecoveryPointPerSecond() {
         return this.recoveryPointPerSecond;
+    }
+
+    public java.sql.Timestamp createDate;
+    public void setCreateDate(java.sql.Timestamp createDate) {
+        this.createDate = createDate;
+    }
+    public java.sql.Timestamp getCreateDate() {
+        return this.createDate;
+    }
+
+    public java.sql.Timestamp lastOpDate;
+    public void setLastOpDate(java.sql.Timestamp lastOpDate) {
+        this.lastOpDate = lastOpDate;
+    }
+    public java.sql.Timestamp getLastOpDate() {
+        return this.lastOpDate;
     }
 
 }
